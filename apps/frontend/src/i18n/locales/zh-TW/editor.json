@@ -1,0 +1,115 @@
+{
+  "loading": "載入中…",
+  "notFound": "未找到測驗。",
+  "questionType": {
+    "single_choice": "單選題",
+    "multiple_choice": "多選題",
+    "true_false": "是非題",
+    "text_input": "文字輸入",
+    "numeric": "數字",
+    "ordering": "排序",
+    "poll": "投票"
+  },
+  "header": {
+    "title": "測驗編輯器",
+    "history": "歷史",
+    "deleteQuiz": "刪除測驗",
+    "preview": "預覽"
+  },
+  "settings": {
+    "title": "設定",
+    "titleLabel": "標題",
+    "descriptionLabel": "簡介",
+    "save": "儲存"
+  },
+  "broadcast": {
+    "title": "廣播",
+    "fullCaptureLabel": "完整記錄回答",
+    "fullCaptureHelp": "保留每位玩家的回答詳情（個人追蹤）。請在示範前啟用。",
+    "publish": "發布（就緒）",
+    "presenting": "正在啟動…",
+    "present": "示範",
+    "backToDraft": "退回草稿",
+    "archive": "歸檔",
+    "restore": "恢復",
+    "presentError": "啟動會話失敗。"
+  },
+  "feedback": {
+    "title": "玩家評價",
+    "empty": "暫無評價。玩家可在會話結束時為測驗評分。",
+    "starsAriaLabel": "{{value}} / 5 星",
+    "count_one": "{{count}} 條評價",
+    "count_other": "{{count}} 條評價"
+  },
+  "questions": {
+    "title": "題目（{{count}}）",
+    "add": "新增",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "edit": "編輯",
+    "deleteQuestion": "刪除題目",
+    "empty": "還沒有題目。新增一道吧！"
+  },
+  "deleteConfirm": {
+    "title": "刪除此測驗？",
+    "description": "「{{title}}」及其題目將被永久刪除。此操作不可撤銷。",
+    "confirmLabel": "刪除"
+  },
+  "gameAccess": {
+    "label": "進行中的會話 — PIN",
+    "controlScreen": "控制螢幕",
+    "projectionScreen": "投影螢幕",
+    "invitationScreen": "邀請螢幕"
+  },
+  "questionForm": {
+    "typeLabel": "類型",
+    "promptLabel": "題目",
+    "promptPlaceholder": "您的題目…",
+    "timeLimitLabel": "時間（秒）",
+    "pointsLabel": "分數",
+    "pointsMode": {
+      "standard": "標準",
+      "double": "雙倍"
+    },
+    "optionsLegend": "選項",
+    "optionAriaLabel": "選項 {{index}}",
+    "optionPlaceholder": "選項 {{index}}",
+    "colorAriaLabel": "顏色 {{index}}",
+    "shapeAriaLabel": "形狀 {{index}}",
+    "orderAriaLabel": "位置 {{index}}",
+    "correct": "正確",
+    "removeOption": "移除選項 {{index}}",
+    "addOption": "新增選項",
+    "acceptedAnswersLegend": "可接受的答案",
+    "answerAriaLabel": "答案 {{index}}",
+    "removeAnswer": "移除答案 {{index}}",
+    "addAnswer": "新增答案",
+    "numericValueLabel": "目標值",
+    "numericToleranceLabel": "誤差 ±",
+    "submitUpdate": "儲存",
+    "submitAdd": "新增",
+    "cancel": "取消",
+    "invalidError": "題目無效。"
+  },
+  "preview": {
+    "view": "預覽（玩家視角）",
+    "exitFullscreen": "退出全螢幕",
+    "fullscreen": "全螢幕",
+    "noQuestions": "該測驗還沒有題目。",
+    "previous": "上一題",
+    "next": "下一題",
+    "questionPosition": "第 {{index}} / {{total}} 題",
+    "correctAnswer": "正確答案",
+    "optionFallback": "選項 {{index}}",
+    "acceptedAnswers": "可接受的答案：{{answers}}",
+    "numericTarget": "目標：{{value}}（± {{tolerance}}）"
+  },
+  "media": {
+    "alt": "題目媒體",
+    "remove": "移除媒體",
+    "uploading": "上傳中…",
+    "add": "新增媒體（圖片/音訊）",
+    "fileInputLabel": "媒體檔案",
+    "uploadError": "上傳失敗。"
+  }
+}
