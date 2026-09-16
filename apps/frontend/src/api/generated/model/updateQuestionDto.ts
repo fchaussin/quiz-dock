@@ -18,6 +18,11 @@ export interface UpdateQuestionDto {
      */
   prompt: string;
   /**
+     * @maxLength 2000
+     * @nullable
+     */
+  answerExplanation?: string | null;
+  /**
      * @minLength 26
      * @maxLength 26
      */

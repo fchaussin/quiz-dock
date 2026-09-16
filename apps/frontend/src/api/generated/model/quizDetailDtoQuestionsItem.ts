@@ -22,6 +22,8 @@ export type QuizDetailDtoQuestionsItem = {
   prompt: string;
   /** @nullable */
   mediaId: string | null;
+  /** @nullable */
+  answerExplanation: string | null;
   /**
      * @minimum -9007199254740991
      * @maximum 9007199254740991

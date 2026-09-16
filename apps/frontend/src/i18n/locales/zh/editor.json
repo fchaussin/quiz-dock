@@ -65,6 +65,8 @@
     "typeLabel": "类型",
     "promptLabel": "题干",
     "promptPlaceholder": "您的题目…",
+    "answerExplanationLabel": "答案解析（揭晓后显示）",
+    "answerExplanationPlaceholder": "为什么这是正确答案…（可选）",
     "timeLimitLabel": "时间（秒）",
     "pointsLabel": "分数",
     "pointsMode": {

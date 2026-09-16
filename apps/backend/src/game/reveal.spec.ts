@@ -20,6 +20,7 @@ const question = (over: Partial<SnapshotQuestion> = {}): SnapshotQuestion => ({
   type: QuestionType.SingleChoice,
   prompt: 'Q ?',
   media: null,
+  answerExplanation: null,
   timeLimitS: 20,
   basePoints: 1000,
   numericValue: null,
@@ -89,5 +90,11 @@ describe('buildRevealCommon', () => {
     expect(r.correctOptionIds).toBeUndefined();
     expect(r.correctValue).toBeUndefined();
     expect(r.distribution).toEqual({ [a.id]: 2, [b.id]: 1 });
+  });
+
+  it('answerExplanation: carried at reveal when set, absent otherwise (#5)', () => {
+    expect(buildRevealCommon(question(), [])).not.toHaveProperty('answerExplanation');
+    const r = buildRevealCommon(question({ answerExplanation: 'Because **Paris**.' }), []);
+    expect(r.answerExplanation).toBe('Because **Paris**.');
   });
 });

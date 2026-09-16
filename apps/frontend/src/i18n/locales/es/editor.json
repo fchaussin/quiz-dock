@@ -65,6 +65,8 @@
     "typeLabel": "Tipo",
     "promptLabel": "Enunciado",
     "promptPlaceholder": "Tu pregunta…",
+    "answerExplanationLabel": "Explicación de la respuesta (se muestra tras la revelación)",
+    "answerExplanationPlaceholder": "Por qué esta es la respuesta correcta… (opcional)",
     "timeLimitLabel": "Tiempo (s)",
     "pointsLabel": "Puntos",
     "pointsMode": {

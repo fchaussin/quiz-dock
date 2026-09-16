@@ -238,6 +238,7 @@ export class QuizzesService {
             type: q.type,
             prompt: q.prompt,
             mediaId: q.mediaId,
+            answerExplanation: q.answerExplanation,
             timeLimitS: q.timeLimitS,
             pointsMode: q.pointsMode,
             numericValue: q.numericValue,

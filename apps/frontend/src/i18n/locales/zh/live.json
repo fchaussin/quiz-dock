@@ -132,6 +132,7 @@
     "unsupportedType": "不支持的题目类型。"
   },
   "reveal": {
+    "explanation": "解析",
     "goodOrder": "正确顺序：",
     "goodAnswer": "正确答案："
   },

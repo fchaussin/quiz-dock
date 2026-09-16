@@ -56,6 +56,7 @@ describe('GameGateway (intégration socket)', () => {
             orderIndex: 0,
             type: 'single_choice',
             prompt: 'Capitale de la France ?',
+            answerExplanation: 'Paris est la **capitale**.',
             timeLimitS: 5, // minimum autorisé (contrainte 5..120)
             options: {
               create: [
@@ -161,6 +162,8 @@ describe('GameGateway (intégration socket)', () => {
     expect(q.questionIndex).toBe(0);
     expect(q.endsAt - q.startedAt).toBe(5000); // timeLimitS=5
     expect(q.startedAt).toBeGreaterThan(Date.now() - 100); // fenêtre de lecture future
+    // Anti-cheat: the explanation (#5) is never part of question:start.
+    expect(q).not.toHaveProperty('answerExplanation');
     // Anti-triche §7 : aucune option ne porte le flag correct.
     expect(q.options).toHaveLength(2);
     for (const o of q.options) {
@@ -232,6 +235,7 @@ describe('GameGateway (intégration socket)', () => {
     const revealP = new Promise<{
       correctOptionIds?: string[];
       yourResult?: { correct: boolean; points: number; totalScore: number; rank: number };
+      answerExplanation?: string;
     }>((resolve) => player.on('question:reveal', (r) => resolve(r as never)));
     const podiumP = new Promise<{ you?: { rank: number; score: number } }>((resolve) =>
       player.on('game:podium', (p) => resolve(p as never)),
@@ -248,6 +252,7 @@ describe('GameGateway (intégration socket)', () => {
 
     const reveal = await revealP;
     expect(reveal.correctOptionIds).toEqual([parisId]); // bonne réponse divulguée
+    expect(reveal.answerExplanation).toBe('Paris est la **capitale**.'); // #5
     expect(reveal.yourResult?.correct).toBe(true);
     expect(reveal.yourResult?.points).toBeGreaterThan(0);
     expect(reveal.yourResult?.rank).toBe(1);

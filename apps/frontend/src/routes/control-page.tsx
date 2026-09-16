@@ -24,7 +24,13 @@ import { Tooltip } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { APP_NAME } from '../config';
 import { Avatar } from '../game/avatar';
-import { LeaderboardList, OptionGrid, Podium, RevealAnswer } from '../game/live-components';
+import {
+  AnswerExplanation,
+  LeaderboardList,
+  OptionGrid,
+  Podium,
+  RevealAnswer,
+} from '../game/live-components';
 import { useGameRemaining } from '../game/use-countdown';
 import { type GameView, useGameSession } from '../game/use-game-session';
 
@@ -240,6 +246,7 @@ export function ControlPage() {
         {view.question && view.reveal ? (
           <RevealAnswer question={view.question} reveal={view.reveal} />
         ) : null}
+        {view.reveal ? <AnswerExplanation reveal={view.reveal} /> : null}
         {view.leaderboard ? (
           <div>
             <h2 className="mb-2 font-semibold">{t('control.leaderboard')}</h2>

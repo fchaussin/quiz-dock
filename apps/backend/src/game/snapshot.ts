@@ -48,6 +48,7 @@ export function buildSnapshot(quiz: QuizWithContent): QuizSnapshot {
         type: q.type as QuestionType,
         prompt: q.prompt,
         media: mediaOf(q.media),
+        answerExplanation: q.answerExplanation ?? null,
         timeLimitS: q.timeLimitS,
         basePoints: basePointsFor(q.pointsMode as PointsMode),
         numericValue: q.numericValue === null ? null : Number(q.numericValue),

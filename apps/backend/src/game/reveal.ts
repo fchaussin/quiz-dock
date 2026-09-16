@@ -5,6 +5,8 @@ import type { AnswerRecord, SnapshotQuestion } from './game.types';
 export interface RevealCommon {
   correctOptionIds?: string[];
   correctValue?: number | string | string[];
+  /** Markdown explanation of the answer (#5), omitted when the question has none. */
+  answerExplanation?: string;
   distribution: Record<string, number>;
 }
 
@@ -27,6 +29,7 @@ const OPTION_DISTRIBUTION = new Set<QuestionType>([
  */
 export function buildRevealCommon(q: SnapshotQuestion, records: AnswerRecord[]): RevealCommon {
   const common: RevealCommon = { distribution: {} };
+  if (q.answerExplanation) common.answerExplanation = q.answerExplanation;
 
   // Bonne(s) réponse(s) selon le type.
   switch (q.type) {

@@ -199,6 +199,8 @@ export interface PersonalResult {
 export interface QuestionRevealPayload {
   correctOptionIds?: string[];
   correctValue?: number | string | string[];
+  /** Markdown explanation of the answer (#5); only ever sent at reveal. */
+  answerExplanation?: string;
   distribution: Record<string, number>;
   yourResult?: PersonalResult;
 }

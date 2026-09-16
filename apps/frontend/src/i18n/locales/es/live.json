@@ -132,6 +132,7 @@
     "unsupportedType": "Tipo de pregunta no compatible."
   },
   "reveal": {
+    "explanation": "Explicación",
     "goodOrder": "Orden correcto:",
     "goodAnswer": "Respuesta correcta:"
   },

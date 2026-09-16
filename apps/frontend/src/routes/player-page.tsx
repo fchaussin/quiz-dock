@@ -14,7 +14,7 @@ import {
   loadPlayerSession,
   saveAvatarSeed,
 } from '../game/game-client';
-import { OptionGrid } from '../game/live-components';
+import { AnswerExplanation, OptionGrid } from '../game/live-components';
 import { RatingPanel } from '../game/rating-panel';
 import { useCountdown, useGameRemaining } from '../game/use-countdown';
 import { useGameSession } from '../game/use-game-session';
@@ -355,6 +355,7 @@ export function PlayerPage() {
         ) : r ? (
           <p className="text-muted-foreground">{t('player.rank', { rank: r.rank })}</p>
         ) : null}
+        {view.reveal ? <AnswerExplanation reveal={view.reveal} className="mt-2" /> : null}
       </div>,
     );
   }

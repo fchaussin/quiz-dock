@@ -132,6 +132,7 @@
     "unsupportedType": "Type de question non pris en charge."
   },
   "reveal": {
+    "explanation": "Explication",
     "goodOrder": "Bon ordre :",
     "goodAnswer": "Bonne réponse :"
   },

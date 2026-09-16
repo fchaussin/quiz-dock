@@ -7,7 +7,13 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useFullscreen } from '@/lib/use-fullscreen';
 import { Avatar } from '../game/avatar';
-import { LeaderboardList, OptionGrid, Podium, RevealAnswer } from '../game/live-components';
+import {
+  AnswerExplanation,
+  LeaderboardList,
+  OptionGrid,
+  Podium,
+  RevealAnswer,
+} from '../game/live-components';
 import { useGameRemaining } from '../game/use-countdown';
 import { useGameSession } from '../game/use-game-session';
 
@@ -96,6 +102,7 @@ export function ScreenPage() {
           {view.question.prompt}
         </Markdown>
         {view.reveal ? <RevealAnswer question={view.question} reveal={view.reveal} /> : null}
+        {view.reveal ? <AnswerExplanation reveal={view.reveal} className="text-lg" /> : null}
         {view.leaderboard ? (
           <div className="flex w-full max-w-md flex-col gap-2 text-lg">
             <h3 className="text-muted-foreground font-semibold">{t('screen.leaderboard')}</h3>

@@ -110,8 +110,8 @@ model User {
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  quizzes      Quiz[]
-  mediaAssets  MediaAsset[]
+  quizzes        Quiz[]
+  mediaAssets    MediaAsset[]
   hostedSessions GameSessionLog[]
   playerResults  PlayerResultLog[]
 
@@ -145,21 +145,23 @@ model Quiz {
 
 /// §2.3 — question.
 model Question {
-  id               String       @id @default(ulid()) @db.Char(26)
-  quizId           String       @map("quiz_id") @db.Char(26)
-  orderIndex       Int          @map("order_index")
-  type             QuestionType
-  prompt           String
-  mediaId          String?      @map("media_id") @db.Char(26)
-  timeLimitS       Int          @default(20) @map("time_limit_s")
-  pointsMode       PointsMode   @default(standard) @map("points_mode")
-  numericValue     Decimal?     @map("numeric_value")
-  numericTolerance Decimal?     @map("numeric_tolerance")
-  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                String       @id @default(ulid()) @db.Char(26)
+  quizId            String       @map("quiz_id") @db.Char(26)
+  orderIndex        Int          @map("order_index")
+  type              QuestionType
+  prompt            String
+  mediaId           String?      @map("media_id") @db.Char(26)
+  /// Markdown shown at REVEAL only (#5) — never sent before.
+  answerExplanation String?      @map("answer_explanation")
+  timeLimitS        Int          @default(20) @map("time_limit_s")
+  pointsMode        PointsMode   @default(standard) @map("points_mode")
+  numericValue      Decimal?     @map("numeric_value")
+  numericTolerance  Decimal?     @map("numeric_tolerance")
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  quiz            Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  media           MediaAsset?         @relation("QuestionMedia", fields: [mediaId], references: [id])
+  quiz            Quiz                 @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  media           MediaAsset?          @relation("QuestionMedia", fields: [mediaId], references: [id])
   options         AnswerOption[]
   acceptedAnswers AcceptedAnswer[]
   resultStats     QuestionResultStat[]
@@ -172,15 +174,15 @@ model Question {
 
 /// §2.4 — options (QCM, V/F, ordre).
 model AnswerOption {
-  id                 String      @id @default(ulid()) @db.Char(26)
-  questionId         String      @map("question_id") @db.Char(26)
-  orderIndex         Int         @map("order_index")
-  text               String?
-  mediaId            String?     @map("media_id") @db.Char(26)
-  color              OptionColor
-  shape              OptionShape
-  isCorrect          Boolean     @default(false) @map("is_correct")
-  correctOrderIndex  Int?        @map("correct_order_index")
+  id                String      @id @default(ulid()) @db.Char(26)
+  questionId        String      @map("question_id") @db.Char(26)
+  orderIndex        Int         @map("order_index")
+  text              String?
+  mediaId           String?     @map("media_id") @db.Char(26)
+  color             OptionColor
+  shape             OptionShape
+  isCorrect         Boolean     @default(false) @map("is_correct")
+  correctOrderIndex Int?        @map("correct_order_index")
 
   question Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
   media    MediaAsset? @relation("OptionMedia", fields: [mediaId], references: [id])
@@ -213,10 +215,10 @@ model MediaAsset {
   kind      MediaKind
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  owner          User           @relation(fields: [ownerId], references: [id])
-  coverForQuizzes Quiz[]        @relation("QuizCover")
-  questions      Question[]     @relation("QuestionMedia")
-  options        AnswerOption[] @relation("OptionMedia")
+  owner           User           @relation(fields: [ownerId], references: [id])
+  coverForQuizzes Quiz[]         @relation("QuizCover")
+  questions       Question[]     @relation("QuestionMedia")
+  options         AnswerOption[] @relation("OptionMedia")
 
   @@index([ownerId])
   @@map("media_asset")
@@ -239,8 +241,8 @@ model GameSessionLog {
   retainUntil  DateTime      @map("retain_until") @db.Timestamptz(6)
   createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  quiz         Quiz                 @relation(fields: [quizId], references: [id])
-  host         User                 @relation(fields: [hostId], references: [id])
+  quiz          Quiz                 @relation(fields: [quizId], references: [id])
+  host          User                 @relation(fields: [hostId], references: [id])
   playerResults PlayerResultLog[]
   questionStats QuestionResultStat[]
   answerLogs    AnswerLog[]

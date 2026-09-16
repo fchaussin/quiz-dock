@@ -65,6 +65,8 @@
     "typeLabel": "Type",
     "promptLabel": "Prompt",
     "promptPlaceholder": "Your question…",
+    "answerExplanationLabel": "Answer explanation (shown after the reveal)",
+    "answerExplanationPlaceholder": "Why this is the right answer… (optional)",
     "timeLimitLabel": "Time (s)",
     "pointsLabel": "Points",
     "pointsMode": {

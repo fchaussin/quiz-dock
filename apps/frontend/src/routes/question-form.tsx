@@ -58,6 +58,7 @@ interface FormValues {
   type: QType;
   prompt: string;
   mediaId: string | null;
+  answerExplanation: string;
   timeLimitS: number;
   pointsMode: 'standard' | 'double' | 'none';
   numericValue: number;
@@ -82,6 +83,7 @@ function initialValues(q?: QuizDetailDtoQuestionsItem): FormValues {
       type: 'single_choice',
       prompt: '',
       mediaId: null,
+      answerExplanation: '',
       timeLimitS: 20,
       pointsMode: 'standard',
       numericValue: 0,
@@ -94,6 +96,7 @@ function initialValues(q?: QuizDetailDtoQuestionsItem): FormValues {
     type: q.type as QType,
     prompt: q.prompt,
     mediaId: q.mediaId ?? null,
+    answerExplanation: q.answerExplanation ?? '',
     timeLimitS: q.timeLimitS,
     pointsMode: q.pointsMode as FormValues['pointsMode'],
     numericValue: q.numericValue ? Number(q.numericValue) : 0,
@@ -429,6 +432,24 @@ export function QuestionForm({
         </div>
       )}
 
+      {type !== 'poll' && (
+        <form.Field name="answerExplanation">
+          {(field) => (
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm font-medium leading-none">
+                {t('questionForm.answerExplanationLabel')}
+              </span>
+              <MarkdownEditor
+                aria-label={t('questionForm.answerExplanationLabel')}
+                value={field.state.value}
+                onChange={field.handleChange}
+                placeholder={t('questionForm.answerExplanationPlaceholder')}
+              />
+            </div>
+          )}
+        </form.Field>
+      )}
+
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="flex gap-2">
@@ -451,6 +472,7 @@ function buildPayload(v: FormValues) {
     timeLimitS: v.timeLimitS,
     pointsMode: v.type === 'poll' ? ('none' as const) : v.pointsMode,
     ...(v.mediaId ? { mediaId: v.mediaId } : {}),
+    answerExplanation: v.answerExplanation.trim() || null,
   };
   if (OPTION_TYPES.includes(v.type)) {
     return {
