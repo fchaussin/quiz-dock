@@ -11,6 +11,7 @@ import { Avatar } from '../game/avatar';
 import {
   joinSession,
   loadAvatarSeed,
+  loadNickname,
   loadPlayerSession,
   saveAvatarSeed,
 } from '../game/game-client';
@@ -31,7 +32,7 @@ export function PlayerPage() {
   const { t } = useTranslation('live');
   const { pin } = useParams({ from: '/join/$pin' });
   const { view, socket, markJoined } = useGameSession(pin, 'player');
-  const [nickname, setNickname] = useState(() => loadPlayerSession()?.nickname ?? '');
+  const [nickname, setNickname] = useState(() => loadPlayerSession()?.nickname ?? loadNickname());
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);

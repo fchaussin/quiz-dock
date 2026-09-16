@@ -19,6 +19,8 @@ vi.mock('../game/game-client', () => ({
   joinSession: (...a: unknown[]) => joinSession(...a),
   loadPlayerSession: () => loadPlayerSession(),
   loadAvatarSeed: () => null,
+  loadNickname: () => '',
+  saveNickname: () => undefined,
   saveAvatarSeed: () => undefined,
 }));
 

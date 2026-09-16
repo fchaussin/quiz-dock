@@ -46,6 +46,8 @@ const CHRONO_STEPS = [-5, -1, 1, 5] as const;
  */
 export function ControlPage() {
   const { t } = useTranslation(['live', 'common']);
+  // Same explanation as in the editor before switching full capture on (GDPR, archive size).
+  const [confirmCapture, setConfirmCapture] = useState(false);
   const { pin } = useParams({ from: '/present/$pin/control' });
   const { view, socket } = useGameSession(pin, 'host');
   const [shareNote, setShareNote] = useState<string | null>(null);
@@ -183,12 +185,23 @@ export function ControlPage() {
         {/* Capture intégrale (§3.1 / RG-13) : choix avant le démarrage, verrouillé une
             fois la partie lancée (cette vue lobby disparaît au start). Les joueurs déjà
             connectés sont informés en direct (avis de consentement §2.10). */}
+        <ConfirmDialog
+          open={confirmCapture}
+          title={t('common:captureConfirm.title')}
+          description={t('common:captureConfirm.description')}
+          confirmLabel={t('common:captureConfirm.confirmLabel')}
+          onCancel={() => setConfirmCapture(false)}
+          onConfirm={() => {
+            setConfirmCapture(false);
+            setCapture(true);
+          }}
+        />
         <label className="flex items-start gap-2 rounded-lg border p-4 text-sm">
           <input
             type="checkbox"
             className="mt-0.5"
             checked={view.fullCapture}
-            onChange={(e) => setCapture(e.target.checked)}
+            onChange={(e) => (e.target.checked ? setConfirmCapture(true) : setCapture(false))}
           />
           <span>
             <span className="font-medium">{t('control.captureLabel')}</span>

@@ -51,6 +51,8 @@ import { MarkdownEditor } from '@/components/markdown-editor';
 import { Select } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard';
+import { clearDraft, loadDraft, saveDraft } from '@/lib/draft-store';
+import { DraftNotice } from '@/components/draft-notice';
 import { apiErrorText } from '../api/http';
 import type { QuizDetailDtoSlidesItem } from '../api/generated/model';
 import { getQuizzesControllerGetQueryKey } from '../api/generated/quizzes/quizzes';
@@ -148,7 +150,19 @@ export function SlideForm({
     }
   };
   const [initial] = useState(() => initialValues(slide));
-  const [values, setValues] = useState<FormValues>(initial);
+  // Draft kept in localStorage until saved or discarded (survives reload / closed tab).
+  const draftKey = `quiz:${quizId}:slide:${slide?.id ?? 'new'}`;
+  const [restored, setRestored] = useState(() => loadDraft<FormValues>(draftKey));
+  const [values, setValues] = useState<FormValues>(restored ?? initial);
+  useEffect(() => {
+    if (JSON.stringify(values) === JSON.stringify(initial)) clearDraft(draftKey);
+    else saveDraft(draftKey, values);
+  }, [values, initial, draftKey]);
+  const discardDraft = () => {
+    clearDraft(draftKey);
+    setRestored(null);
+    setValues(initial);
+  };
   const patch = (p: Partial<FormValues>) => setValues((v) => ({ ...v, ...p }));
 
   const dirty = JSON.stringify(values) !== JSON.stringify(initial);
@@ -170,6 +184,7 @@ export function SlideForm({
       if (slide) await update.mutateAsync({ sid: slide.id, data });
       else await add.mutateAsync({ id: quizId, data });
       await queryClient.invalidateQueries({ queryKey: getQuizzesControllerGetQueryKey(quizId) });
+      clearDraft(draftKey);
       onClose();
     } catch (err) {
       setError(apiErrorText(err, t('slideForm.invalidError')));
@@ -214,6 +229,7 @@ export function SlideForm({
         void submit();
       }}
     >
+      {restored ? <DraftNotice onDiscard={discardDraft} /> : null}
       {/* What the projected screen will show, at slide proportions — foldable, remembered. */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
@@ -288,6 +304,7 @@ export function SlideForm({
         onCancel={() => setConfirmDiscard(false)}
         onConfirm={() => {
           setConfirmDiscard(false);
+          clearDraft(draftKey);
           onClose();
         }}
       />
