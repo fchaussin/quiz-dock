@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { ArrowLeft, Check, ChevronRight, Download, Radio, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
+import { Markdown } from '@/components/markdown';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -229,7 +230,9 @@ export function SessionDetailPage() {
               {s.questions.map((q) => (
                 <tr key={q.orderIndex} className="border-b last:border-0">
                   <td className="py-2 pr-2 tabular-nums">{q.orderIndex + 1}</td>
-                  <td className="max-w-xs truncate py-2 pr-2">{q.prompt}</td>
+                  <td className="max-w-xs truncate py-2 pr-2">
+                    <Markdown profile="inline">{q.prompt}</Markdown>
+                  </td>
                   <td className="py-2 pr-2 text-right tabular-nums">{q.answerCount}</td>
                   <td className="py-2 pr-2 text-right tabular-nums">
                     {pct(q.successRate)}{' '}
@@ -402,7 +405,9 @@ export function SessionPlayerPage() {
                 {p.answers.map((a) => (
                   <tr key={a.orderIndex} className="border-b last:border-0">
                     <td className="py-2 pr-2 tabular-nums">{a.orderIndex + 1}</td>
-                    <td className="max-w-[14rem] truncate py-2 pr-2">{a.prompt}</td>
+                    <td className="max-w-[14rem] truncate py-2 pr-2">
+                      <Markdown profile="inline">{a.prompt}</Markdown>
+                    </td>
                     <td className="max-w-[12rem] truncate py-2 pr-2">{a.answer}</td>
                     <td className="py-2 pr-2 text-center">
                       {a.isCorrect ? (

@@ -5,6 +5,7 @@ import type {
   QuestionStartPayload,
 } from '@quiz-dock/contracts';
 import { useTranslation } from 'react-i18next';
+import { Markdown } from '@/components/markdown';
 import { COLOR_BG, OPTION_BG_FALLBACK, SHAPE_GLYPH } from '@/lib/option-style';
 import { cn } from '@/lib/utils';
 import { Avatar } from './avatar';
@@ -66,7 +67,7 @@ export function OptionGrid({
             <span aria-hidden className="text-2xl">
               {SHAPE_GLYPH[o.shape] ?? '●'}
             </span>
-            {o.text ? <span>{o.text}</span> : null}
+            {o.text ? <Markdown profile="inline">{o.text}</Markdown> : null}
             {isCorrect ? <span className="ml-auto">✓</span> : null}
           </Tag>
         );

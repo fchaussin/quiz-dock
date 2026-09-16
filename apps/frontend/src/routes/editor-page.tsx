@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Markdown } from '@/components/markdown';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -345,7 +346,9 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
                       {i + 1}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium">{q.prompt}</p>
+                      <Markdown profile="inline" className="block truncate font-medium">
+                        {q.prompt}
+                      </Markdown>
                       <p className="text-muted-foreground text-xs">
                         {t(`questionType.${q.type}`, { defaultValue: q.type })}
                       </p>
