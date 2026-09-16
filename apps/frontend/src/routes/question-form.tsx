@@ -294,6 +294,10 @@ export function QuestionForm({
           ))}
         </Select>
       </Label>
+      {/* What this type does on screen and how it scores — the rules are not obvious. */}
+      <p className="text-muted-foreground -mt-3 text-xs leading-snug">
+        {t(`questionTypeHelp.${type}`)}
+      </p>
 
       <form.Field name="prompt">
         {(field) => (

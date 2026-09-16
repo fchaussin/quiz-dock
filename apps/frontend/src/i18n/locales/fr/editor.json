@@ -236,5 +236,14 @@
     "slideTitle": "Supprimer cette slide ?",
     "description": "« {{label}} » sera définitivement supprimé.",
     "confirmLabel": "Supprimer"
+  },
+  "questionTypeHelp": {
+    "single_choice": "Une seule bonne réponse parmi 2 à 8 options. Points selon la rapidité, bonus de série.",
+    "multiple_choice": "Plusieurs bonnes réponses ; le participant coche puis valide. Tout ou rien : l’ensemble coché doit être exactement le bon.",
+    "true_false": "Deux options fixes, une seule bonne. Le plus rapide à jouer.",
+    "text_input": "Le participant tape sa réponse. Comparée aux réponses acceptées sans tenir compte de la casse, des accents ni des espaces en trop.",
+    "numeric": "Le participant saisit un nombre ; bon s’il est à ± tolérance de la valeur cible.",
+    "ordering": "Le participant remet les options dans l’ordre défini par les positions (#). Tout ou rien.",
+    "poll": "Recueil d’opinion : aucune bonne réponse, aucun point ; la répartition est affichée à la révélation."
   }
 }

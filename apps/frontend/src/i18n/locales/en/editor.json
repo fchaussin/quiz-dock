@@ -236,5 +236,14 @@
     "slideTitle": "Delete this slide?",
     "description": "“{{label}}” will be permanently deleted.",
     "confirmLabel": "Delete"
+  },
+  "questionTypeHelp": {
+    "single_choice": "One correct answer among 2 to 8 options. Points scale with speed, plus a streak bonus.",
+    "multiple_choice": "Several correct answers; the participant ticks then submits. All or nothing: the ticked set must match exactly.",
+    "true_false": "Two fixed options, one correct. The fastest to play.",
+    "text_input": "The participant types the answer. Matched against the accepted answers ignoring case, accents and extra spaces.",
+    "numeric": "The participant enters a number; correct when within ± tolerance of the target.",
+    "ordering": "The participant sorts the options into the order set by the positions (#). All or nothing.",
+    "poll": "Opinion only: no correct answer, no points; the distribution is shown at the reveal."
   }
 }
