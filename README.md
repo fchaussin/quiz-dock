@@ -143,7 +143,7 @@ service, or the `:standalone` entrypoint): pull the new tag and `up` again. Two 
 **back up PostgreSQL first** (`pg_dump`), and **don't roll back** an image once its
 migrations ran — restore the backup instead. Each release lists its schema changes
 under *Upgrading* in the [release notes](https://github.com/quizdock/quiz-dock/releases).
-See [docs/self-hosting](docs/self-hosting/README.md#upgrading) for the full procedure.
+Full procedure: https://github.com/quizdock/quiz-dock/blob/main/docs/self-hosting/README.md#upgrading
 
 ### Option B — build from source
 
