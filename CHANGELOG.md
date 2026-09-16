@@ -4,6 +4,31 @@ All notable changes to QuizDock are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com); versions follow
 [Semantic Versioning](https://semver.org). Generated from conventional commits.
 
+## [0.4.1] - 2026-09-16
+
+### Bug Fixes
+
+- Load zh-TW dashboard namespace from the right folder *(i18n)*
+
+### Documentation
+
+- Add zh-TW as avaliable language in docs files
+
+### Features
+
+- Add zh-TW translations *(i18n)*
+- Describe the selected question type's behaviour under the type select *(editor)*
+- Navigation shells for host, participant and projection
+- Document title per route ("<page> · <app name>") *(frontend)*
+- Running-sessions badge on each quiz card *(dashboard)*
+- Form drafts in localStorage, persistent nickname, capture confirm on the console
+- Text block size — S 20 / M 30 / L 40 px on the stage *(slides)*
+
+### Contributors
+
+- Francois Chaussin
+- noeFly
+
 ## [0.4.0] - 2026-09-16
 
 ### Bug Fixes
@@ -40,11 +65,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com); versions follow
 
 - Remediate transitive HIGH/CRITICAL CVEs, scan before audit gate *(security)*
 
+### Contributors
+
+- Francois Chaussin
+- fchaussin
+
 ## [0.3.2] - 2026-06-24
 
 ### Security
 
 - Remediate transitive CVEs + add Trivy/pnpm-audit scanning *(security)*
+
+### Contributors
+
+- fchaussin
 
 ## [0.3.1] - 2026-06-24
 
@@ -64,6 +98,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com); versions follow
 ### Features
 
 - All-in-one :standalone image (one-command beginner use) *(deploy)*
+
+### Contributors
+
+- fchaussin
 
 ## [0.3.0] - 2026-06-24
 
@@ -158,6 +196,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com); versions follow
 - De-specialize education vocabulary -> generic *(brand)*
 - Semantic color tokens over Bootstrap-style "success" *(frontend)*
 
+### Contributors
+
+- fchaussin
+
 ## [0.2.0] - 2026-06-12
 
 ### Documentation
@@ -187,11 +229,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com); versions follow
 
 - Généralise Keycloak → OIDC (specs + code + schéma) *(auth)*
 
+### Contributors
+
+- fchaussin
+
 ## [0.1.2] - 2026-06-10
 
 ### Features
 
 - Schéma Prisma, migrations et PrismaService (P1-DATA-1) *(data)*
+
+### Contributors
+
+- fchaussin
 
 ## [0.1.1] - 2026-06-09
 
@@ -202,6 +252,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com); versions follow
 ### Features
 
 - Génère l'OpenAPI et le client REST Orval (TanStack Query) *(api)*
+
+### Contributors
+
+- fchaussin
 
 ## [0.1.0] - 2026-06-09
 
@@ -219,5 +273,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com); versions follow
 - Squelette React + Vite avec page d'accueil *(frontend)*
 - Squelette NestJS avec /health et OpenAPI *(backend)*
 - Package partagé d'énumérations et d'événements WS (dual ESM/CJS) *(contracts)*
+
+### Contributors
+
+- fchaussin
 
 
