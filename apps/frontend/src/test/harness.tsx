@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/react-router';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { vi } from 'vitest';
 import { AuthProvider } from '../auth/auth-context';
 import { routeTree } from '../router';
@@ -53,4 +53,19 @@ export function renderApp(initialPath: string) {
     </QueryClientProvider>,
   );
   return { router, queryClient, ...utils };
+}
+
+/**
+ * Types Markdown into a `MarkdownEditor` field found by its accessible label:
+ * switches that field to source mode (the WYSIWYG contenteditable has no value
+ * setter in jsdom), then changes the textarea.
+ */
+export function setMarkdownField(label: string, value: string) {
+  const field = screen.getByLabelText(label);
+  const toggle = within(field.closest('[data-markdown-editor]') as HTMLElement).getByRole(
+    'button',
+    { name: 'Markdown' },
+  );
+  fireEvent.click(toggle);
+  fireEvent.change(screen.getByLabelText(label), { target: { value } });
 }

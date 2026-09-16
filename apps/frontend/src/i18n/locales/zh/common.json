@@ -6,5 +6,15 @@
     "draft": "草稿",
     "ready": "就绪",
     "archived": "已归档"
+  },
+  "markdownEditor": {
+    "visual": "可视化编辑",
+    "source": "Markdown",
+    "bold": "粗体",
+    "italic": "斜体",
+    "code": "代码",
+    "codeBlock": "代码块",
+    "bulletList": "无序列表",
+    "orderedList": "有序列表"
   }
 }

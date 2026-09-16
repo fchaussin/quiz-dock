@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
  * **Restricted** Markdown rendering for text fields typed in the builder (#4).
  * Two profiles:
  * - `block` (description, prompt, explanation): paragraphs, bold, italic,
- *   lists, links, inline/block code.
+ *   lists, inline/block code. No links (content is shown live on a projected
+ *   screen or a phone mid-answer).
  * - `inline` (option label): bold, italic, inline code only — no link (the
  *   label is clickable) and no block element.
  *
@@ -18,7 +19,7 @@ import { cn } from '@/lib/utils';
 export type MarkdownProfile = 'block' | 'inline';
 
 const ALLOWED: Record<MarkdownProfile, string[]> = {
-  block: ['p', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'code', 'pre', 'br'],
+  block: ['p', 'strong', 'em', 'ul', 'ol', 'li', 'code', 'pre', 'br'],
   inline: ['strong', 'em', 'code'],
 };
 
@@ -30,14 +31,6 @@ function dom<T extends { node?: unknown }>(props: T): Omit<T, 'node'> {
 }
 
 const COMPONENTS: Components = {
-  a: (p) => (
-    <a
-      {...dom(p)}
-      className="underline underline-offset-2"
-      target="_blank"
-      rel="noopener noreferrer"
-    />
-  ),
   ul: (p) => <ul {...dom(p)} className="list-disc pl-6 text-left" />,
   ol: (p) => <ol {...dom(p)} className="list-decimal pl-6 text-left" />,
   code: (p) => <code {...dom(p)} className="rounded bg-black/10 px-1 font-mono text-[0.9em]" />,

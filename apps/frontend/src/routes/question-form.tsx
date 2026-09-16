@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { MarkdownEditor } from '@/components/markdown-editor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { apiErrorText } from '../api/http';
 import type { QuizDetailDtoQuestionsItem } from '../api/generated/model';
 import { MediaUpload } from './media-upload';
@@ -197,15 +197,17 @@ export function QuestionForm({
 
       <form.Field name="prompt">
         {(field) => (
-          <Label>
-            {t('questionForm.promptLabel')}
-            <Textarea
-              rows={4}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium leading-none">
+              {t('questionForm.promptLabel')}
+            </span>
+            <MarkdownEditor
+              aria-label={t('questionForm.promptLabel')}
               value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
+              onChange={field.handleChange}
               placeholder={t('questionForm.promptPlaceholder')}
             />
-          </Label>
+          </div>
         )}
       </form.Field>
 
@@ -251,14 +253,13 @@ export function QuestionForm({
           <legend className="px-1 text-sm font-medium">{t('questionForm.optionsLegend')}</legend>
           {options.map((opt, i) => (
             <div key={i} className="flex flex-wrap items-center gap-2">
-              <Input
+              <MarkdownEditor
+                profile="inline"
                 aria-label={t('questionForm.optionAriaLabel', { index: i + 1 })}
-                className="flex-1"
+                className="min-w-48 flex-1"
                 value={opt.text}
-                onChange={(e) =>
-                  setOptions(
-                    options.map((o, idx) => (idx === i ? { ...o, text: e.target.value } : o)),
-                  )
+                onChange={(text) =>
+                  setOptions(options.map((o, idx) => (idx === i ? { ...o, text } : o)))
                 }
                 placeholder={t('questionForm.optionPlaceholder', { index: i + 1 })}
               />

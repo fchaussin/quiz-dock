@@ -6,5 +6,15 @@
     "draft": "Brouillon",
     "ready": "Prêt",
     "archived": "Archivé"
+  },
+  "markdownEditor": {
+    "visual": "Éditeur visuel",
+    "source": "Markdown",
+    "bold": "Gras",
+    "italic": "Italique",
+    "code": "Code",
+    "codeBlock": "Bloc de code",
+    "bulletList": "Liste à puces",
+    "orderedList": "Liste numérotée"
   }
 }
