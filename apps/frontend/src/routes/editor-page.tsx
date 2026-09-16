@@ -18,13 +18,12 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MarkdownEditor } from '@/components/markdown-editor';
 import { Markdown } from '@/components/markdown';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -158,55 +157,131 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
     quiz.status === 'ready' ? 'success' : quiz.status === 'archived' ? 'muted' : 'default';
 
   return (
-    <section className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-      {/* En-tête */}
-      <header className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-bold">{t('header.title')}</h1>
-        <Badge variant={statusVariant}>
-          {t(`common:quizStatus.${quiz.status}`, { defaultValue: quiz.status })}
-        </Badge>
-        <Link
-          to="/quizzes/$quizId/sessions"
-          params={{ quizId: quiz.id }}
-          className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'ml-auto')}
-        >
-          <History className="size-4" />
-          {t('header.history')}
-        </Link>
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          onClick={() => setConfirmDelete(true)}
-        >
-          <Trash2 className="size-4" />
-          {t('header.deleteQuiz')}
-        </Button>
-        <a
-          className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
-          href={`/quizzes/${quiz.id}/preview`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <ExternalLink className="size-4" />
-          {t('header.preview')}
-        </a>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+      {/* Header: the quiz itself is the page title; the editor label is secondary. */}
+      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <div className="min-w-0">
+          <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+            {t('header.title')}
+          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-3">
+            <h1 className="truncate text-3xl font-bold tracking-tight">{quiz.title}</h1>
+            <Badge variant={statusVariant}>
+              {t(`common:quizStatus.${quiz.status}`, { defaultValue: quiz.status })}
+            </Badge>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-1">
+          <a
+            className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
+            href={`/quizzes/${quiz.id}/preview`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLink className="size-4" />
+            {t('header.preview')}
+          </a>
+          <Link
+            to="/quizzes/$quizId/sessions"
+            params={{ quizId: quiz.id }}
+            className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
+          >
+            <History className="size-4" />
+            {t('header.history')}
+          </Link>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:text-destructive"
+            onClick={() => setConfirmDelete(true)}
+          >
+            <Trash2 className="size-4" />
+            {t('header.deleteQuiz')}
+          </Button>
+        </div>
       </header>
 
-      {/* Mise en page responsive (grille unique, `order-*` pour le placement mobile) :
-          • mobile (1 col)   : Réglages → Questions → Diffusion → Avis
-          • tablette (2 col) : Réglages pleine largeur, Questions pleine largeur,
-                               puis Diffusion + Avis côte à côte
-          • desktop (3 col)  : colonne latérale Réglages/Diffusion/Avis + Questions à droite
-          `min-w-0` sur chaque cellule : un contenu large ne déborde plus horizontalement. */}
-      <div className="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Réglages du quiz — `lg:col-span-1` annule le `sm:col-span-2` (sinon il
-            déborderait sur la colonne des Questions au desktop). */}
-        <Card className="order-1 min-w-0 sm:col-span-2 lg:col-span-1 lg:col-start-1 lg:row-start-1">
-          <CardHeader>
-            <CardTitle>{t('settings.title')}</CardTitle>
-          </CardHeader>
-          <CardContent>
+      {/* Working area first (the sequence), settings in a sticky sidebar on wide screens.
+          DOM order = mobile order, no `order-*` juggling. */}
+      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <main className="flex min-w-0 flex-col gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold">
+              {t('questions.title', { count: quiz.questionCount })}
+            </h2>
+            <div className="flex gap-1">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => setEditing('new-slide')}
+                disabled={editing === 'new-slide'}
+              >
+                <LayoutTemplate className="size-4" />
+                {t('slides.add')}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setEditing('new')}
+                disabled={editing === 'new'}
+              >
+                <Plus className="size-4" />
+                {t('questions.add')}
+              </Button>
+            </div>
+          </div>
+
+          {editing === 'new' && <QuestionForm quizId={quiz.id} onClose={() => setEditing(null)} />}
+          {editing === 'new-slide' && (
+            <SlideForm quizId={quiz.id} onClose={() => setEditing(null)} />
+          )}
+
+          <ul className="divide-border flex flex-col divide-y">
+            {items.map((item, i) => (
+              <li key={item.id} className={editing === item.id ? 'py-3' : undefined}>
+                {editing === item.id ? (
+                  item.kind === 'question' ? (
+                    <QuestionForm
+                      quizId={quiz.id}
+                      question={item.question}
+                      onClose={() => setEditing(null)}
+                    />
+                  ) : (
+                    <SlideForm
+                      quizId={quiz.id}
+                      slide={item.slide}
+                      onClose={() => setEditing(null)}
+                    />
+                  )
+                ) : (
+                  <ItemRow
+                    item={item}
+                    number={questionNumber(items, i)}
+                    canMoveUp={i > 0 && !reorder.isPending}
+                    canMoveDown={i < items.length - 1 && !reorder.isPending}
+                    onMove={(d) => void move(i, d)}
+                    onEdit={() => setEditing(item.id)}
+                    onDelete={() =>
+                      void (item.kind === 'question'
+                        ? onDeleteQuestion(item.id)
+                        : onDeleteSlide(item.id))
+                    }
+                  />
+                )}
+              </li>
+            ))}
+            {items.length === 0 && editing === null && (
+              <li className="text-muted-foreground rounded-xl border border-dashed py-10 text-center text-sm">
+                {t('questions.empty')}
+              </li>
+            )}
+          </ul>
+        </main>
+
+        <aside className="divide-border flex flex-col divide-y lg:sticky lg:top-6">
+          <Section title={t('settings.title')} className="pb-6">
             <form
               className="flex flex-col gap-4"
               onSubmit={(e) => {
@@ -239,20 +314,20 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
                   </div>
                 )}
               </form.Field>
-              <Button type="submit" disabled={!isDirty || update.isPending} className="self-start">
+              <Button
+                type="submit"
+                size="sm"
+                variant={isDirty ? 'default' : 'outline'}
+                disabled={!isDirty || update.isPending}
+                className="self-start"
+              >
                 <Save className="size-4" />
                 {t('settings.save')}
               </Button>
             </form>
-          </CardContent>
-        </Card>
+          </Section>
 
-        {/* Diffusion */}
-        <Card className="order-3 min-w-0 lg:col-start-1 lg:row-start-2">
-          <CardHeader>
-            <CardTitle>{t('broadcast.title')}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+          <Section title={t('broadcast.title')} className="py-6">
             {quiz.status === 'ready' && !livePin ? (
               <label className="flex items-start gap-2 text-sm">
                 <input
@@ -294,14 +369,16 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
                   )}
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => void changeStatus('draft')}
                   >
                     {t('broadcast.backToDraft')}
                   </Button>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => void changeStatus('archived')}
                   >
                     {t('broadcast.archive')}
@@ -316,89 +393,10 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
             </div>
             {presentError ? <p className="text-destructive text-sm">{presentError}</p> : null}
             {livePin ? <GameAccessPanel pin={livePin} /> : null}
-          </CardContent>
-        </Card>
+          </Section>
 
-        {/* Avis des joueurs (§2.11) — visible du seul propriétaire. */}
-        <FeedbackCard quizId={quiz.id} className="order-4 min-w-0 lg:col-start-1 lg:row-start-3" />
-
-        {/* Questions (zone de travail principale) — remontée au-dessus de
-            Diffusion/Avis sur mobile et tablette via `order-2`. */}
-        <Card className="order-2 min-w-0 sm:col-span-2 lg:col-span-2 lg:col-start-2 lg:row-span-3 lg:row-start-1">
-          <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
-            <CardTitle>{t('questions.title', { count: quiz.questionCount })}</CardTitle>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setEditing('new-slide')}
-                disabled={editing === 'new-slide'}
-              >
-                <LayoutTemplate className="size-4" />
-                {t('slides.add')}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => setEditing('new')}
-                disabled={editing === 'new'}
-              >
-                <Plus className="size-4" />
-                {t('questions.add')}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            {editing === 'new' && (
-              <QuestionForm quizId={quiz.id} onClose={() => setEditing(null)} />
-            )}
-            {editing === 'new-slide' && (
-              <SlideForm quizId={quiz.id} onClose={() => setEditing(null)} />
-            )}
-
-            <ul className="flex flex-col gap-2">
-              {items.map((item, i) => (
-                <li key={item.id}>
-                  {editing === item.id ? (
-                    item.kind === 'question' ? (
-                      <QuestionForm
-                        quizId={quiz.id}
-                        question={item.question}
-                        onClose={() => setEditing(null)}
-                      />
-                    ) : (
-                      <SlideForm
-                        quizId={quiz.id}
-                        slide={item.slide}
-                        onClose={() => setEditing(null)}
-                      />
-                    )
-                  ) : (
-                    <ItemRow
-                      item={item}
-                      number={questionNumber(items, i)}
-                      canMoveUp={i > 0 && !reorder.isPending}
-                      canMoveDown={i < items.length - 1 && !reorder.isPending}
-                      onMove={(d) => void move(i, d)}
-                      onEdit={() => setEditing(item.id)}
-                      onDelete={() =>
-                        void (item.kind === 'question'
-                          ? onDeleteQuestion(item.id)
-                          : onDeleteSlide(item.id))
-                      }
-                    />
-                  )}
-                </li>
-              ))}
-              {items.length === 0 && editing === null && (
-                <li className="text-muted-foreground py-4 text-center text-sm">
-                  {t('questions.empty')}
-                </li>
-              )}
-            </ul>
-          </CardContent>
-        </Card>
+          <FeedbackSection quizId={quiz.id} className="pt-6" />
+        </aside>
       </div>
 
       <ConfirmDialog
@@ -413,6 +411,26 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
           void onDeleteQuiz();
         }}
       />
+    </div>
+  );
+}
+
+/** Sidebar block: a small caps label, then content — no card chrome. */
+function Section({
+  title,
+  className,
+  children,
+}: {
+  title: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className={cn('flex flex-col gap-4', className)}>
+      <h2 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+        {title}
+      </h2>
+      {children}
     </section>
   );
 }
@@ -442,44 +460,39 @@ function StarRow({ value, size = 'size-4' }: { value: number; size?: string }) {
  * Avis des joueurs sur le quiz (§2.11) — réservé au propriétaire (l'endpoint refuse
  * les autres). Moyenne, nombre et liste des commentaires (récents d'abord).
  */
-function FeedbackCard({ quizId, className }: { quizId: string; className?: string }) {
+function FeedbackSection({ quizId, className }: { quizId: string; className?: string }) {
   const { t } = useTranslation(['editor', 'common']);
   const { data, isLoading } = useQuizzesControllerFeedback(quizId);
   const summary = data?.data;
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle>{t('feedback.title')}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        {isLoading ? <p className="text-muted-foreground text-sm">{t('common:loading')}</p> : null}
-        {summary && summary.count === 0 ? (
-          <p className="text-muted-foreground text-sm">{t('feedback.empty')}</p>
-        ) : null}
-        {summary && summary.count > 0 ? (
-          <>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold tabular-nums">{summary.average.toFixed(1)}</span>
-              <StarRow value={Math.round(summary.average)} size="size-5" />
-              <span className="text-muted-foreground text-sm">
-                {t('feedback.count', { count: summary.count })}
-              </span>
-            </div>
-            <ul className="flex max-h-60 flex-col gap-2 overflow-auto">
-              {summary.items.map((f) => (
-                <li key={f.id} className="rounded-md border p-2 text-sm">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium">{f.nickname}</span>
-                    <StarRow value={f.rating} size="size-3.5" />
-                  </div>
-                  {f.comment ? <p className="text-muted-foreground mt-1">{f.comment}</p> : null}
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : null}
-      </CardContent>
-    </Card>
+    <Section title={t('feedback.title')} className={className}>
+      {isLoading ? <p className="text-muted-foreground text-sm">{t('common:loading')}</p> : null}
+      {summary && summary.count === 0 ? (
+        <p className="text-muted-foreground text-sm">{t('feedback.empty')}</p>
+      ) : null}
+      {summary && summary.count > 0 ? (
+        <>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-bold tabular-nums">{summary.average.toFixed(1)}</span>
+            <StarRow value={Math.round(summary.average)} size="size-5" />
+            <span className="text-muted-foreground text-sm">
+              {t('feedback.count', { count: summary.count })}
+            </span>
+          </div>
+          <ul className="flex max-h-60 flex-col gap-2 overflow-auto">
+            {summary.items.map((f) => (
+              <li key={f.id} className="bg-muted/50 rounded-lg p-3 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium">{f.nickname}</span>
+                  <StarRow value={f.rating} size="size-3.5" />
+                </div>
+                {f.comment ? <p className="text-muted-foreground mt-1">{f.comment}</p> : null}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+    </Section>
   );
 }
 
@@ -554,14 +567,12 @@ function ItemRow({
   const isSlide = item.kind === 'slide';
   const label = isSlide ? item.slide.title || item.slide.body || '' : item.question.prompt;
   return (
-    <div
-      className={cn(
-        'bg-card flex flex-wrap items-center gap-2 rounded-lg border p-3 transition-colors hover:bg-accent/40 sm:flex-nowrap sm:gap-3',
-        isSlide && 'border-dashed',
-      )}
-    >
+    <div className="group flex items-center gap-3 py-3 sm:gap-4">
       <span
-        className="bg-muted text-muted-foreground flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+        className={cn(
+          'text-muted-foreground w-7 shrink-0 text-center text-sm tabular-nums',
+          isSlide && 'flex justify-center',
+        )}
         aria-label={isSlide ? t('slides.kind') : undefined}
       >
         {isSlide ? <LayoutTemplate className="size-4" /> : number}
@@ -596,7 +607,7 @@ function ItemRow({
       >
         <ArrowDown className="size-4" />
       </Button>
-      <Button type="button" variant="outline" size="sm" onClick={onEdit}>
+      <Button type="button" variant="ghost" size="sm" onClick={onEdit}>
         <Pencil className="size-4" />
         {t('questions.edit')}
       </Button>

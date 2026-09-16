@@ -76,7 +76,7 @@ export function SlideForm({
 
   return (
     <form
-      className="flex flex-col gap-3 rounded-lg border border-primary/40 p-4"
+      className="bg-muted/40 flex flex-col gap-5 rounded-xl p-5"
       onSubmit={(e) => {
         e.preventDefault();
         void form.handleSubmit();
@@ -119,7 +119,7 @@ export function SlideForm({
               type="number"
               min={1}
               max={600}
-              className="w-24"
+              className="w-28"
               placeholder={t('slideForm.displayDelayPlaceholder')}
               value={field.state.value ?? ''}
               onChange={(e) =>

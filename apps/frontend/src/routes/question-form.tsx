@@ -8,6 +8,8 @@ import { MarkdownEditor } from '@/components/markdown-editor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
+import { COLOR_BG, OPTION_BG_FALLBACK } from '@/lib/option-style';
+import { cn } from '@/lib/utils';
 import { apiErrorText } from '../api/http';
 import type { QuizDetailDtoQuestionsItem } from '../api/generated/model';
 import { MediaUpload } from './media-upload';
@@ -180,11 +182,12 @@ export function QuestionForm({
     );
   };
 
-  const optionField = 'h-9 rounded-md border border-input bg-transparent px-2 text-sm';
+  const optionField =
+    'border-input h-9 rounded-md border bg-background px-2 text-sm shadow-sm focus-visible:ring-ring focus-visible:ring-1 focus-visible:outline-none';
 
   return (
     <form
-      className="flex flex-col gap-3 rounded-lg border border-primary/40 p-4"
+      className="bg-muted/40 flex flex-col gap-5 rounded-xl p-5"
       onSubmit={(e) => {
         e.preventDefault();
         void form.handleSubmit();
@@ -219,7 +222,7 @@ export function QuestionForm({
 
       <MediaUpload value={mediaId} onChange={(id) => form.setFieldValue('mediaId', id)} />
 
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <form.Field name="timeLimitS">
           {(field) => (
             <Label>
@@ -228,7 +231,6 @@ export function QuestionForm({
                 type="number"
                 min={5}
                 max={120}
-                className="w-24"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(Number(e.target.value))}
               />
@@ -243,7 +245,6 @@ export function QuestionForm({
                 type="number"
                 min={1}
                 max={300}
-                className="w-24"
                 placeholder={t('questionForm.revealDelayPlaceholder')}
                 value={field.state.value ?? ''}
                 onChange={(e) =>
@@ -259,7 +260,6 @@ export function QuestionForm({
               <Label>
                 {t('questionForm.pointsLabel')}
                 <Select
-                  className="w-32"
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value as FormValues['pointsMode'])}
                 >
@@ -273,8 +273,10 @@ export function QuestionForm({
       </div>
 
       {OPTION_TYPES.includes(type) && (
-        <fieldset className="flex flex-col gap-2 rounded-md border p-3">
-          <legend className="px-1 text-sm font-medium">{t('questionForm.optionsLegend')}</legend>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
+            {t('questionForm.optionsLegend')}
+          </legend>
           {options.map((opt, i) => (
             <div key={i} className="flex flex-wrap items-center gap-2">
               <MarkdownEditor
@@ -286,6 +288,13 @@ export function QuestionForm({
                   setOptions(options.map((o, idx) => (idx === i ? { ...o, text } : o)))
                 }
                 placeholder={t('questionForm.optionPlaceholder', { index: i + 1 })}
+              />
+              <span
+                aria-hidden
+                className={cn(
+                  'size-3 shrink-0 rounded-full',
+                  COLOR_BG[opt.color] ?? OPTION_BG_FALLBACK,
+                )}
               />
               <select
                 aria-label={t('questionForm.colorAriaLabel', { index: i + 1 })}
@@ -363,7 +372,7 @@ export function QuestionForm({
           {type !== 'true_false' && options.length < 6 && (
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               size="sm"
               className="self-start"
               onClick={() => setOptions([...options, newOption(options.length)])}
@@ -376,8 +385,8 @@ export function QuestionForm({
       )}
 
       {type === 'text_input' && (
-        <fieldset className="flex flex-col gap-2 rounded-md border p-3">
-          <legend className="px-1 text-sm font-medium">
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
             {t('questionForm.acceptedAnswersLegend')}
           </legend>
           {answers.map((a, i) => (
@@ -410,7 +419,7 @@ export function QuestionForm({
           ))}
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="sm"
             className="self-start"
             onClick={() => form.setFieldValue('acceptedAnswers', [...answers, { text: '' }])}
