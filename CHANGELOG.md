@@ -4,6 +4,24 @@ All notable changes to QuizDock are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com); versions follow
 [Semantic Versioning](https://semver.org). Generated from conventional commits.
 
+## [0.4.2] - 2026-09-16
+
+### Bug Fixes
+
+- Zh-TW nickname typo (匿稱 → 暱稱) *(i18n)*
+
+### Documentation
+
+- Mention zh-TW in index.ts header and .env.example
+
+### Features
+
+- Add missing zh-TW keys (machine-assisted, native review welcome) *(i18n)*
+
+### Contributors
+
+- Francois Chaussin
+
 ## [0.4.1] - 2026-09-16
 
 ### Bug Fixes
