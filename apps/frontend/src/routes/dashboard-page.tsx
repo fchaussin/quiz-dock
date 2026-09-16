@@ -35,6 +35,11 @@ export function DashboardPage() {
   const [endPin, setEndPin] = useState<string | null>(null);
   const quizzes = data?.data ?? [];
   const activeGames = gamesData?.data ?? [];
+  // Live sessions per quiz, for the badge on each card.
+  const runningByQuiz = activeGames.reduce<Record<string, number>>((acc, g) => {
+    acc[g.quizId] = (acc[g.quizId] ?? 0) + 1;
+    return acc;
+  }, {});
 
   const onEndGame = (pin: string) => {
     endGame.mutate(
@@ -143,6 +148,12 @@ export function DashboardPage() {
             <Badge variant={STATUS_VARIANT[quiz.status] ?? 'default'}>
               {t(`common:quizStatus.${quiz.status}`, { defaultValue: quiz.status })}
             </Badge>
+            {runningByQuiz[quiz.id] ? (
+              <Badge variant="success" className="gap-1">
+                <Radio className="size-3" />
+                {t('running', { count: runningByQuiz[quiz.id] })}
+              </Badge>
+            ) : null}
             <span className="text-sm text-muted-foreground">
               {t('questionCount', { count: quiz.questionCount })}
             </span>

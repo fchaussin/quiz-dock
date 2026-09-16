@@ -8,6 +8,7 @@
 
 export interface ActiveGameDto {
   pin: string;
+  quizId: string;
   title: string;
   state: string;
   /**

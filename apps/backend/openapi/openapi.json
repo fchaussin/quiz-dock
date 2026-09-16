@@ -4157,6 +4157,9 @@
           "pin": {
             "type": "string"
           },
+          "quizId": {
+            "type": "string"
+          },
           "title": {
             "type": "string"
           },
@@ -4171,6 +4174,7 @@
         },
         "required": [
           "pin",
+          "quizId",
           "title",
           "state",
           "playerCount"
