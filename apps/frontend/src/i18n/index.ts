@@ -37,6 +37,15 @@ import sessionsZh from './locales/zh/sessions.json';
 import authZh from './locales/zh/auth.json';
 import errorsZh from './locales/zh/errors.json';
 import validationZh from './locales/zh/validation.json';
+import commonZhTW from './locales/zh-TW/common.json';
+import dashboardZhTW from './locales/zh/dashboard.json';
+import editorZhTW from './locales/zh-TW/editor.json';
+import liveZhTW from './locales/zh-TW/live.json';
+import joinZhTW from './locales/zh-TW/join.json';
+import sessionsZhTW from './locales/zh-TW/sessions.json';
+import authZhTW from './locales/zh-TW/auth.json';
+import errorsZhTW from './locales/zh-TW/errors.json';
+import validationZhTW from './locales/zh-TW/validation.json';
 
 /**
  * i18n — dictionnaire 100 % côté front (le backend n'émet que des codes, cf.
@@ -94,9 +103,20 @@ export const resources = {
     errors: errorsZh,
     validation: validationZh,
   },
+  "zh-TW": {
+    common: commonZhTW,
+    dashboard: dashboardZhTW,
+    editor: editorZhTW,
+    live: liveZhTW,
+    join: joinZhTW,
+    sessions: sessionsZhTW,
+    auth: authZhTW,
+    errors: errorsZhTW,
+    validation: validationZhTW,
+  },
 } as const;
 
-export const supportedLngs = ['en', 'fr', 'es', 'zh'] as const;
+export const supportedLngs = ['en', 'fr', 'es', 'zh', 'zh-TW'] as const;
 export type AppLang = (typeof supportedLngs)[number];
 
 const DEFAULT_LANG: AppLang = 'en';
