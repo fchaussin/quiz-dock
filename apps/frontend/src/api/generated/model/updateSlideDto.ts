@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { UpdateSlideDtoBlocksItem } from './updateSlideDtoBlocksItem';
+import type { UpdateSlideDtoGradient } from './updateSlideDtoGradient';
 import type { UpdateSlideDtoTextTone } from './updateSlideDtoTextTone';
 
 export interface UpdateSlideDto {
@@ -17,6 +18,8 @@ export interface UpdateSlideDto {
      * @nullable
      */
   mediaId?: string | null;
+  /** @nullable */
+  gradient?: UpdateSlideDtoGradient;
   textTone?: UpdateSlideDtoTextTone;
   textOutline?: boolean;
   /**

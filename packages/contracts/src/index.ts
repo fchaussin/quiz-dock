@@ -149,6 +149,10 @@ export interface QuestionStartPayload {
   basePoints: number;
   startedAt: number; // ms epoch serveur (§6)
   endsAt: number;
+  /** Optional full-cover background (image or gradient), like a slide's. */
+  background?: SlideBackground | null;
+  textTone?: SlideTextTone;
+  textOutline?: boolean;
 }
 
 /** Text over a full-cover background: light text on a darkened image, or dark text on a lightened one. */
@@ -175,7 +179,22 @@ export type SlideLeafBlock =
     };
 export type SlideBlock =
   | SlideLeafBlock
-  | { type: 'columns'; id: string; columns: SlideLeafBlock[][] };
+  | {
+      type: 'columns';
+      id: string;
+      columns: SlideLeafBlock[][];
+      /** Width split for two columns; equal when absent (and always for three). */
+      ratio?: SlideColumnsRatio;
+    };
+export type SlideColumnsRatio = '1-1' | '1-2' | '2-1';
+
+/** A CSS linear gradient built by the author: 2–4 colours along an angle. */
+export interface SlideGradient {
+  angle: number;
+  colors: string[];
+}
+/** Full-cover background: an uploaded image, or a generated gradient. */
+export type SlideBackground = { url: string } | { gradient: SlideGradient };
 
 /**
  * A content slide on screen (#7). `questionIndex` is the question that follows
@@ -186,8 +205,8 @@ export interface SlideShowPayload {
   slideIndex: number;
   questionIndex: number;
   blocks: SlideBlock[];
-  /** Optional full-cover background image. */
-  background: { url: string } | null;
+  /** Optional full-cover background (image or gradient). */
+  background: SlideBackground | null;
   textTone: SlideTextTone;
   /** Subtitle-like halo around the text (contrast over any background). */
   textOutline: boolean;

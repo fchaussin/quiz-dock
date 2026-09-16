@@ -3,6 +3,7 @@ import type {
   PublicOption,
   QuestionRevealPayload,
   QuestionStartPayload,
+  SlideColumnsRatio,
   SlideImageSize,
   SlideLeafBlock,
   SlideShowPayload,
@@ -12,6 +13,7 @@ import { Markdown } from '@/components/markdown';
 import { COLOR_BG, OPTION_BG_FALLBACK, SHAPE_GLYPH } from '@/lib/option-style';
 import { cn } from '@/lib/utils';
 import { Avatar } from './avatar';
+import { Surface } from './surface';
 
 /**
  * Grille d'options colorées + formes. `onPick` la rend interactive (joueur) ;
@@ -197,34 +199,25 @@ export function AnswerExplanation({
  * full-cover background with light/dark text and a subtitle-like outline.
  */
 export function SlideView({ slide, large }: { slide: SlideShowPayload; large?: boolean }) {
-  const bg = slide.background?.url ?? null;
-  const light = slide.textTone !== 'dark';
-  const outline = bg && slide.textOutline;
   return (
-    <article
-      className={cn(
-        'relative flex h-full min-h-full w-full flex-col justify-center overflow-hidden',
-        large ? 'gap-8 p-12' : 'gap-4 p-4',
-        bg && (light ? 'text-white' : 'text-neutral-900'),
-        outline &&
-          (light
-            ? '[text-shadow:0_0_2px_rgba(0,0,0,.95),0_0_8px_rgba(0,0,0,.9),0_2px_2px_rgba(0,0,0,.9)]'
-            : '[text-shadow:0_0_2px_rgba(255,255,255,.95),0_0_8px_rgba(255,255,255,.9),0_2px_2px_rgba(255,255,255,.9)]'),
-      )}
+    <Surface
+      background={slide.background}
+      textTone={slide.textTone}
+      textOutline={slide.textOutline}
+      className="h-full min-h-full w-full"
     >
-      {bg ? (
-        <>
-          <img src={bg} alt="" className="absolute inset-0 h-full w-full object-cover" />
-          <div className={cn('absolute inset-0', light ? 'bg-black/40' : 'bg-white/55')} />
-        </>
-      ) : null}
-      <div className={cn('relative z-10 flex w-full flex-col', large ? 'gap-8' : 'gap-4')}>
+      <article
+        className={cn(
+          'flex h-full min-h-full w-full flex-col justify-center',
+          large ? 'gap-8 p-12' : 'gap-4 p-4',
+        )}
+      >
         {slide.blocks.map((b) =>
           b.type === 'columns' ? (
             <div
               key={b.id}
               className={cn('grid items-start', large ? 'gap-12' : 'gap-4')}
-              style={{ gridTemplateColumns: `repeat(${b.columns.length}, minmax(0, 1fr))` }}
+              style={{ gridTemplateColumns: columnsTemplate(b.columns.length, b.ratio) }}
             >
               {b.columns.map((col, i) => (
                 <div key={i} className={cn('flex min-w-0 flex-col', large ? 'gap-6' : 'gap-3')}>
@@ -238,9 +231,16 @@ export function SlideView({ slide, large }: { slide: SlideShowPayload; large?: b
             <SlideBlockView key={b.id} block={b} large={large} />
           ),
         )}
-      </div>
-    </article>
+      </article>
+    </Surface>
   );
+}
+
+/** Grid template for a columns block: equal columns, or a 1-2 / 2-1 split for two. */
+export function columnsTemplate(count: number, ratio?: SlideColumnsRatio): string {
+  if (count === 2 && ratio === '1-2') return 'minmax(0, 1fr) minmax(0, 2fr)';
+  if (count === 2 && ratio === '2-1') return 'minmax(0, 2fr) minmax(0, 1fr)';
+  return `repeat(${count}, minmax(0, 1fr))`;
 }
 
 const IMAGE_WIDTH: Record<SlideImageSize, string> = {

@@ -15,6 +15,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import type { SlideGradient, SlideTextTone } from '@quiz-dock/contracts';
 import { useForm, useStore } from '@tanstack/react-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -31,6 +32,7 @@ import { COLOR_BG, OPTION_BG_FALLBACK, SHAPE_GLYPH } from '@/lib/option-style';
 import { cn } from '@/lib/utils';
 import { apiErrorText } from '../api/http';
 import type { QuizDetailDtoQuestionsItem } from '../api/generated/model';
+import { BackgroundField, NO_BACKGROUND, type BackgroundValue } from './background-field';
 import { MediaUpload } from './media-upload';
 import {
   useQuestionsControllerAdd,
@@ -92,6 +94,7 @@ interface FormValues {
   prompt: string;
   mediaId: string | null;
   answerExplanation: string;
+  background: BackgroundValue;
   timeLimitS: number;
   revealDelayS: number | null;
   pointsMode: 'standard' | 'double' | 'none';
@@ -122,6 +125,7 @@ function initialValues(q?: QuizDetailDtoQuestionsItem): FormValues {
       prompt: '',
       mediaId: null,
       answerExplanation: '',
+      background: NO_BACKGROUND,
       timeLimitS: 20,
       revealDelayS: null,
       pointsMode: 'standard',
@@ -136,6 +140,12 @@ function initialValues(q?: QuizDetailDtoQuestionsItem): FormValues {
     prompt: q.prompt,
     mediaId: q.mediaId ?? null,
     answerExplanation: q.answerExplanation ?? '',
+    background: {
+      mediaId: q.backgroundMediaId ?? null,
+      gradient: (q.backgroundGradient as SlideGradient | null | undefined) ?? null,
+      textTone: (q.textTone as SlideTextTone | undefined) ?? 'light',
+      textOutline: q.textOutline ?? false,
+    },
     timeLimitS: q.timeLimitS,
     revealDelayS: q.revealDelayS ?? null,
     pointsMode: q.pointsMode as FormValues['pointsMode'],
@@ -525,6 +535,10 @@ export function QuestionForm({
         </form.Field>
       )}
 
+      <form.Field name="background">
+        {(field) => <BackgroundField value={field.state.value} onChange={field.handleChange} />}
+      </form.Field>
+
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="flex gap-2">
@@ -561,6 +575,10 @@ function buildPayload(v: FormValues) {
     pointsMode: v.type === 'poll' ? ('none' as const) : v.pointsMode,
     ...(v.mediaId ? { mediaId: v.mediaId } : {}),
     answerExplanation: v.answerExplanation.trim() || null,
+    backgroundMediaId: v.background.mediaId,
+    backgroundGradient: v.background.gradient,
+    textTone: v.background.textTone,
+    textOutline: v.background.textOutline,
   };
   if (OPTION_TYPES.includes(v.type)) {
     return {

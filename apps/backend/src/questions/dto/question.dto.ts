@@ -1,5 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
+import { backgroundOutputFields } from '../../common/background.schema';
 
 // ⚠️ DTO **builder** (animateur, propriétaire) : expose `isCorrect` /
 // `correctOrderIndex`. NE PAS réutiliser tel quel pour le payload joueur
@@ -38,6 +39,7 @@ export const questionSchema = z.object({
   prompt: z.string(),
   mediaId: z.string().nullable(),
   answerExplanation: z.string().nullable(),
+  ...backgroundOutputFields,
   timeLimitS: z.number().int(),
   revealDelayS: z.number().int().nullable(),
   pointsMode: z.enum(['standard', 'double', 'none']),

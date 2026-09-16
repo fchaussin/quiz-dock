@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { backgroundFields, noBackgroundConflict } from '../../common/background.schema';
 
 /**
  * Normalise une réponse texte pour comparaison (RG-06) : minuscule, sans accent,
@@ -55,6 +56,7 @@ export const questionContentSchema = z
     prompt: z.string().trim().min(1).max(1000),
     // Markdown, shown at REVEAL only (#5). `null` clears it.
     answerExplanation: z.string().trim().max(2000).nullable().optional(),
+    ...backgroundFields,
     mediaId: z.string().length(26).optional(),
     timeLimitS: z.number().int().min(5).max(120).default(20),
     // Auto-mode delay on REVEAL (#6); null = engine default. Bounds match the SQL CHECK.
@@ -69,6 +71,7 @@ export const questionContentSchema = z
     const err = (message: string, path: (string | number)[] = []) =>
       ctx.addIssue({ code: 'custom', message, path });
     const correct = d.options.filter((o) => o.isCorrect).length;
+    if (!noBackgroundConflict(d)) err('slide.background_conflict', ['backgroundGradient']);
 
     // Champs interdits hors de leur type.
     if (!OPTION_TYPES.has(d.type) && d.options.length > 0) {

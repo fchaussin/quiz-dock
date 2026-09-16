@@ -91,7 +91,6 @@
     "submitAdd": "Ajouter",
     "submitUpdate": "Enregistrer",
     "blocksLegend": "Contenu",
-    "backgroundLegend": "Fond",
     "block": {
       "heading": "Titre",
       "subheading": "Sous-titre",
@@ -116,7 +115,8 @@
       "left": "Gauche",
       "center": "Centre",
       "right": "Droite"
-    }
+    },
+    "ratio": "Répartition des colonnes"
   },
   "discardConfirm": {
     "title": "Abandonner les modifications ?",
@@ -197,5 +197,17 @@
     "add": "Ajouter un média (image/audio)",
     "fileInputLabel": "Fichier média",
     "uploadError": "Échec de l’upload."
+  },
+  "background": {
+    "legend": "Fond",
+    "kind": {
+      "none": "Blanc",
+      "image": "Image",
+      "gradient": "Dégradé"
+    },
+    "color": "Couleur {{index}}",
+    "removeColor": "Retirer la couleur {{index}}",
+    "addColor": "Ajouter une couleur",
+    "angle": "Angle"
   }
 }

@@ -1,4 +1,4 @@
-import type { SlideBlock } from '@quiz-dock/contracts';
+import type { SlideBlock, SlideGradient } from '@quiz-dock/contracts';
 import { ChevronLeft, ChevronRight, Maximize, Minimize } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -71,7 +71,9 @@ function QuizPreview({ quiz }: { quiz: QuizDetailDto }) {
                 blocks: item.slide.blocks as SlideBlock[],
                 background: item.slide.mediaId
                   ? { url: `/api/v1/media/${item.slide.mediaId}` }
-                  : null,
+                  : item.slide.gradient
+                    ? { gradient: item.slide.gradient as SlideGradient }
+                    : null,
                 textTone: item.slide.textTone,
                 textOutline: item.slide.textOutline,
                 displayDelayS: item.slide.displayDelayS,

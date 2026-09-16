@@ -1267,6 +1267,44 @@
                   "type": "string",
                   "nullable": true
                 },
+                "backgroundMediaId": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "backgroundGradient": {
+                  "type": "object",
+                  "properties": {
+                    "angle": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 360
+                    },
+                    "colors": {
+                      "minItems": 2,
+                      "maxItems": 4,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "angle",
+                    "colors"
+                  ],
+                  "nullable": true
+                },
+                "textTone": {
+                  "type": "string",
+                  "enum": [
+                    "light",
+                    "dark"
+                  ]
+                },
+                "textOutline": {
+                  "type": "boolean"
+                },
                 "timeLimitS": {
                   "type": "integer",
                   "minimum": -9007199254740991,
@@ -1394,6 +1432,10 @@
                 "prompt",
                 "mediaId",
                 "answerExplanation",
+                "backgroundMediaId",
+                "backgroundGradient",
+                "textTone",
+                "textOutline",
                 "timeLimitS",
                 "revealDelayS",
                 "pointsMode",
@@ -1686,6 +1728,14 @@
                                 ]
                               }
                             }
+                          },
+                          "ratio": {
+                            "type": "string",
+                            "enum": [
+                              "1-1",
+                              "1-2",
+                              "2-1"
+                            ]
                           }
                         },
                         "required": [
@@ -1699,6 +1749,30 @@
                 },
                 "mediaId": {
                   "type": "string",
+                  "nullable": true
+                },
+                "gradient": {
+                  "type": "object",
+                  "properties": {
+                    "angle": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 360
+                    },
+                    "colors": {
+                      "minItems": 2,
+                      "maxItems": 4,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "angle",
+                    "colors"
+                  ],
                   "nullable": true
                 },
                 "textTone": {
@@ -1725,6 +1799,7 @@
                 "orderIndex",
                 "blocks",
                 "mediaId",
+                "gradient",
                 "textTone",
                 "textOutline",
                 "displayDelayS"
@@ -2222,6 +2297,48 @@
             "maxLength": 2000,
             "nullable": true
           },
+          "backgroundMediaId": {
+            "type": "string",
+            "minLength": 26,
+            "maxLength": 26,
+            "nullable": true
+          },
+          "backgroundGradient": {
+            "type": "object",
+            "properties": {
+              "angle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "colors": {
+                "minItems": 2,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$"
+                }
+              }
+            },
+            "required": [
+              "angle",
+              "colors"
+            ],
+            "nullable": true
+          },
+          "textTone": {
+            "default": "light",
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "textOutline": {
+            "default": false,
+            "type": "boolean"
+          },
           "mediaId": {
             "type": "string",
             "minLength": 26,
@@ -2374,6 +2491,44 @@
             "type": "string",
             "nullable": true
           },
+          "backgroundMediaId": {
+            "type": "string",
+            "nullable": true
+          },
+          "backgroundGradient": {
+            "type": "object",
+            "properties": {
+              "angle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "colors": {
+                "minItems": 2,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$"
+                }
+              }
+            },
+            "required": [
+              "angle",
+              "colors"
+            ],
+            "nullable": true
+          },
+          "textTone": {
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "textOutline": {
+            "type": "boolean"
+          },
           "timeLimitS": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -2501,6 +2656,10 @@
           "prompt",
           "mediaId",
           "answerExplanation",
+          "backgroundMediaId",
+          "backgroundGradient",
+          "textTone",
+          "textOutline",
           "timeLimitS",
           "revealDelayS",
           "pointsMode",
@@ -2565,6 +2724,48 @@
             "type": "string",
             "maxLength": 2000,
             "nullable": true
+          },
+          "backgroundMediaId": {
+            "type": "string",
+            "minLength": 26,
+            "maxLength": 26,
+            "nullable": true
+          },
+          "backgroundGradient": {
+            "type": "object",
+            "properties": {
+              "angle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "colors": {
+                "minItems": 2,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$"
+                }
+              }
+            },
+            "required": [
+              "angle",
+              "colors"
+            ],
+            "nullable": true
+          },
+          "textTone": {
+            "default": "light",
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "textOutline": {
+            "default": false,
+            "type": "boolean"
           },
           "mediaId": {
             "type": "string",
@@ -2948,6 +3149,14 @@
                           ]
                         }
                       }
+                    },
+                    "ratio": {
+                      "type": "string",
+                      "enum": [
+                        "1-1",
+                        "1-2",
+                        "2-1"
+                      ]
                     }
                   },
                   "required": [
@@ -2963,6 +3172,30 @@
             "type": "string",
             "minLength": 26,
             "maxLength": 26,
+            "nullable": true
+          },
+          "gradient": {
+            "type": "object",
+            "properties": {
+              "angle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "colors": {
+                "minItems": 2,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$"
+                }
+              }
+            },
+            "required": [
+              "angle",
+              "colors"
+            ],
             "nullable": true
           },
           "textTone": {
@@ -3265,6 +3498,14 @@
                           ]
                         }
                       }
+                    },
+                    "ratio": {
+                      "type": "string",
+                      "enum": [
+                        "1-1",
+                        "1-2",
+                        "2-1"
+                      ]
                     }
                   },
                   "required": [
@@ -3278,6 +3519,30 @@
           },
           "mediaId": {
             "type": "string",
+            "nullable": true
+          },
+          "gradient": {
+            "type": "object",
+            "properties": {
+              "angle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "colors": {
+                "minItems": 2,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$"
+                }
+              }
+            },
+            "required": [
+              "angle",
+              "colors"
+            ],
             "nullable": true
           },
           "textTone": {
@@ -3304,6 +3569,7 @@
           "orderIndex",
           "blocks",
           "mediaId",
+          "gradient",
           "textTone",
           "textOutline",
           "displayDelayS"
@@ -3609,6 +3875,14 @@
                           ]
                         }
                       }
+                    },
+                    "ratio": {
+                      "type": "string",
+                      "enum": [
+                        "1-1",
+                        "1-2",
+                        "2-1"
+                      ]
                     }
                   },
                   "required": [
@@ -3624,6 +3898,30 @@
             "type": "string",
             "minLength": 26,
             "maxLength": 26,
+            "nullable": true
+          },
+          "gradient": {
+            "type": "object",
+            "properties": {
+              "angle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "colors": {
+                "minItems": 2,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$"
+                }
+              }
+            },
+            "required": [
+              "angle",
+              "colors"
+            ],
             "nullable": true
           },
           "textTone": {

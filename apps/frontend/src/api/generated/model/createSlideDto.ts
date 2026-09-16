@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CreateSlideDtoBlocksItem } from './createSlideDtoBlocksItem';
+import type { CreateSlideDtoGradient } from './createSlideDtoGradient';
 import type { CreateSlideDtoTextTone } from './createSlideDtoTextTone';
 
 export interface CreateSlideDto {
@@ -17,6 +18,8 @@ export interface CreateSlideDto {
      * @nullable
      */
   mediaId?: string | null;
+  /** @nullable */
+  gradient?: CreateSlideDtoGradient;
   textTone?: CreateSlideDtoTextTone;
   textOutline?: boolean;
   /**

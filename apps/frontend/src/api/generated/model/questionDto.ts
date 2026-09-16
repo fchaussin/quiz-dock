@@ -6,8 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { QuestionDtoAcceptedAnswersItem } from './questionDtoAcceptedAnswersItem';
+import type { QuestionDtoBackgroundGradient } from './questionDtoBackgroundGradient';
 import type { QuestionDtoOptionsItem } from './questionDtoOptionsItem';
 import type { QuestionDtoPointsMode } from './questionDtoPointsMode';
+import type { QuestionDtoTextTone } from './questionDtoTextTone';
 import type { QuestionDtoType } from './questionDtoType';
 
 export interface QuestionDto {
@@ -24,6 +26,12 @@ export interface QuestionDto {
   mediaId: string | null;
   /** @nullable */
   answerExplanation: string | null;
+  /** @nullable */
+  backgroundMediaId: string | null;
+  /** @nullable */
+  backgroundGradient: QuestionDtoBackgroundGradient;
+  textTone: QuestionDtoTextTone;
+  textOutline: boolean;
   /**
      * @minimum -9007199254740991
      * @maximum 9007199254740991

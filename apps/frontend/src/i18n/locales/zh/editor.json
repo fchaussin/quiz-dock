@@ -91,7 +91,6 @@
     "submitAdd": "添加",
     "submitUpdate": "保存",
     "blocksLegend": "内容",
-    "backgroundLegend": "背景",
     "block": {
       "heading": "标题",
       "subheading": "副标题",
@@ -116,7 +115,8 @@
       "left": "左",
       "center": "居中",
       "right": "右"
-    }
+    },
+    "ratio": "分栏比例"
   },
   "discardConfirm": {
     "title": "放弃修改？",
@@ -197,5 +197,17 @@
     "add": "添加媒体（图片/音频）",
     "fileInputLabel": "媒体文件",
     "uploadError": "上传失败。"
+  },
+  "background": {
+    "legend": "背景",
+    "kind": {
+      "none": "白色",
+      "image": "图片",
+      "gradient": "渐变"
+    },
+    "color": "颜色 {{index}}",
+    "removeColor": "移除颜色 {{index}}",
+    "addColor": "添加颜色",
+    "angle": "角度"
   }
 }

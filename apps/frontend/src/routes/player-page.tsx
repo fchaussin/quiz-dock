@@ -15,6 +15,8 @@ import {
   saveAvatarSeed,
 } from '../game/game-client';
 import { AnswerExplanation, OptionGrid, SlideView } from '../game/live-components';
+import { cn } from '@/lib/utils';
+import { Surface } from '../game/surface';
 import { RatingPanel } from '../game/rating-panel';
 import { useCountdown, useGameRemaining } from '../game/use-countdown';
 import { useGameSession } from '../game/use-game-session';
@@ -221,9 +223,19 @@ export function PlayerPage() {
   };
 
   const wrap = (children: React.ReactNode) => (
-    <section className="mx-auto flex w-full max-w-sm flex-col items-center gap-6 py-8 text-center">
-      {children}
-    </section>
+    <Surface
+      background={view.question?.background}
+      textTone={view.question?.textTone}
+      textOutline={view.question?.textOutline}
+      className={cn(
+        '-mx-4 -my-4 min-h-[calc(100dvh-4rem)] px-4 py-4',
+        !view.question?.background && 'bg-transparent',
+      )}
+    >
+      <section className="mx-auto flex w-full max-w-sm flex-col items-center gap-6 py-8 text-center">
+        {children}
+      </section>
+    </Surface>
   );
 
   // ── Écran « Rejoindre » (pas de session locale valide) ─────────────────────

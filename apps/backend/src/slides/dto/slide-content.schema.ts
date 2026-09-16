@@ -1,4 +1,7 @@
 import { z } from 'zod';
+import { gradientSchema } from '../../common/background.schema';
+
+export { gradientSchema };
 
 const blockId = z.string().min(1).max(64);
 
@@ -29,6 +32,8 @@ const columnsBlockSchema = z.object({
   type: z.literal('columns'),
   id: blockId,
   columns: z.array(z.array(leafBlockSchema).max(10)).min(2).max(3),
+  /** Width split for two columns (ignored for three). */
+  ratio: z.enum(['1-1', '1-2', '2-1']).optional(),
 });
 
 export const slideBlockSchema = z.union([leafBlockSchema, columnsBlockSchema]);
@@ -43,14 +48,19 @@ export const slideContentSchema = z
   .object({
     blocks: z.array(slideBlockSchema).max(30).default([]),
     mediaId: z.string().length(26).nullable().optional(),
+    gradient: gradientSchema.nullable().optional(),
     textTone: z.enum(['light', 'dark']).default('light'),
     textOutline: z.boolean().default(false),
     // Auto-mode display time: null = engine default, 0 = manual override, else seconds.
     displayDelayS: z.number().int().min(0).max(600).nullable().optional(),
   })
-  .refine((d) => d.blocks.length > 0 || Boolean(d.mediaId), {
+  .refine((d) => d.blocks.length > 0 || Boolean(d.mediaId) || Boolean(d.gradient), {
     message: 'slide.empty',
     path: ['blocks'],
+  })
+  .refine((d) => !(d.mediaId && d.gradient), {
+    message: 'slide.background_conflict',
+    path: ['gradient'],
   });
 
 export type SlideContent = z.infer<typeof slideContentSchema>;

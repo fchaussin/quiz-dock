@@ -91,7 +91,6 @@
     "submitAdd": "Add",
     "submitUpdate": "Save",
     "blocksLegend": "Content",
-    "backgroundLegend": "Background",
     "block": {
       "heading": "Heading",
       "subheading": "Subheading",
@@ -116,7 +115,8 @@
       "left": "Left",
       "center": "Centre",
       "right": "Right"
-    }
+    },
+    "ratio": "Column split"
   },
   "discardConfirm": {
     "title": "Discard changes?",
@@ -197,5 +197,17 @@
     "add": "Add media (image/audio)",
     "fileInputLabel": "Media file",
     "uploadError": "Upload failed."
+  },
+  "background": {
+    "legend": "Background",
+    "kind": {
+      "none": "White",
+      "image": "Image",
+      "gradient": "Gradient"
+    },
+    "color": "Colour {{index}}",
+    "removeColor": "Remove colour {{index}}",
+    "addColor": "Add a colour",
+    "angle": "Angle"
   }
 }

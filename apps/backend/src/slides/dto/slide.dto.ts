@@ -1,6 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
-import { slideBlockSchema } from './slide-content.schema';
+import { gradientSchema, slideBlockSchema } from './slide-content.schema';
 
 /** A slide as returned by the API (#7). Position = `beforeQuestionId` (null = end) + `orderIndex`. */
 export const slideSchema = z.object({
@@ -11,6 +11,7 @@ export const slideSchema = z.object({
   blocks: z.array(slideBlockSchema),
   /** Full-cover background media, if any. */
   mediaId: z.string().nullable(),
+  gradient: gradientSchema.nullable(),
   textTone: z.enum(['light', 'dark']),
   textOutline: z.boolean(),
   displayDelayS: z.number().int().nullable(),

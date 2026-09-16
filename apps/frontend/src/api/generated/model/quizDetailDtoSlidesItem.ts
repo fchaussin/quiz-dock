@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { QuizDetailDtoSlidesItemBlocksItem } from './quizDetailDtoSlidesItemBlocksItem';
+import type { QuizDetailDtoSlidesItemGradient } from './quizDetailDtoSlidesItemGradient';
 import type { QuizDetailDtoSlidesItemTextTone } from './quizDetailDtoSlidesItemTextTone';
 
 export type QuizDetailDtoSlidesItem = {
@@ -21,6 +22,8 @@ export type QuizDetailDtoSlidesItem = {
   blocks: QuizDetailDtoSlidesItemBlocksItem[];
   /** @nullable */
   mediaId: string | null;
+  /** @nullable */
+  gradient: QuizDetailDtoSlidesItemGradient;
   textTone: QuizDetailDtoSlidesItemTextTone;
   textOutline: boolean;
   /**

@@ -15,7 +15,13 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { SlideBlock, SlideLeafBlock, SlideTextTone } from '@quiz-dock/contracts';
+import type {
+  SlideBlock,
+  SlideColumnsRatio,
+  SlideGradient,
+  SlideLeafBlock,
+  SlideTextTone,
+} from '@quiz-dock/contracts';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Columns2,
@@ -42,12 +48,15 @@ import { apiErrorText } from '../api/http';
 import type { QuizDetailDtoSlidesItem } from '../api/generated/model';
 import { getQuizzesControllerGetQueryKey } from '../api/generated/quizzes/quizzes';
 import { useSlidesControllerAdd, useSlidesControllerUpdate } from '../api/generated/slides/slides';
+import { columnsTemplate } from '../game/live-components';
 import { SlideStage } from '../game/slide-stage';
+import { BackgroundField } from './background-field';
 import { MediaUpload } from './media-upload';
 
 interface FormValues {
   blocks: SlideBlock[];
   mediaId: string | null;
+  gradient: SlideGradient | null;
   textTone: SlideTextTone;
   textOutline: boolean;
   displayDelayS: number | null;
@@ -62,6 +71,7 @@ function initialValues(s?: QuizDetailDtoSlidesItem): FormValues {
       { type: 'heading', id: blockId(), text: '', level: 1 },
     ],
     mediaId: s?.mediaId ?? null,
+    gradient: (s?.gradient as SlideGradient | null | undefined) ?? null,
     textTone: (s?.textTone as SlideTextTone | undefined) ?? 'light',
     textOutline: s?.textOutline ?? false,
     displayDelayS: s?.displayDelayS ?? null,
@@ -128,6 +138,7 @@ export function SlideForm({
     const data = {
       blocks: complete(values.blocks),
       mediaId: values.mediaId,
+      gradient: values.gradient,
       textTone: values.textTone,
       textOutline: values.textOutline,
       displayDelayS: values.displayDelayS,
@@ -162,7 +173,11 @@ export function SlideForm({
     slideIndex: 0,
     questionIndex: 0,
     blocks: values.blocks,
-    background: values.mediaId ? { url: `/api/v1/media/${values.mediaId}` } : null,
+    background: values.mediaId
+      ? { url: `/api/v1/media/${values.mediaId}` }
+      : values.gradient
+        ? { gradient: values.gradient }
+        : null,
     textTone: values.textTone,
     textOutline: values.textOutline,
     displayDelayS: values.displayDelayS,
@@ -198,33 +213,15 @@ export function SlideForm({
         <AddBlockBar onAdd={addBlock} />
       </fieldset>
 
-      <fieldset className="flex flex-col gap-3">
-        <legend className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
-          {t('slideForm.backgroundLegend')}
-        </legend>
-        <MediaUpload value={values.mediaId} onChange={(id) => patch({ mediaId: id })} />
-        {values.mediaId ? (
-          <div className="flex flex-wrap items-center gap-4">
-            <Select
-              aria-label={t('slideForm.contrastLegend')}
-              className="w-64"
-              value={values.textTone}
-              onChange={(e) => patch({ textTone: e.target.value as SlideTextTone })}
-            >
-              <option value="light">{t('slideForm.tone.light')}</option>
-              <option value="dark">{t('slideForm.tone.dark')}</option>
-            </Select>
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={values.textOutline}
-                onChange={(e) => patch({ textOutline: e.target.checked })}
-              />
-              {t('slideForm.outline')}
-            </label>
-          </div>
-        ) : null}
-      </fieldset>
+      <BackgroundField
+        value={{
+          mediaId: values.mediaId,
+          gradient: values.gradient,
+          textTone: values.textTone,
+          textOutline: values.textOutline,
+        }}
+        onChange={(b) => patch(b)}
+      />
 
       <DisplayTimeField
         value={values.displayDelayS}
@@ -401,59 +398,83 @@ function BlockEditor({
   const setCol = (i: number, col: SlideLeafBlock[]) =>
     onChange({ ...block, columns: block.columns.map((c, idx) => (idx === i ? col : c)) });
   return (
-    <div
-      className="grid gap-3"
-      style={{ gridTemplateColumns: `repeat(${block.columns.length}, minmax(0, 1fr))` }}
-    >
-      {block.columns.map((col, i) => (
-        <div key={i} className="bg-muted/40 flex min-w-0 flex-col gap-2 rounded-md p-2">
-          {col.map((leaf) => (
-            <div key={leaf.id} className="flex items-start gap-1">
-              <div className="min-w-0 flex-1">
-                <LeafEditor
-                  block={leaf}
-                  onChange={(next) =>
+    <div className="flex flex-col gap-2">
+      {block.columns.length === 2 ? (
+        <div
+          className="flex items-center gap-1"
+          role="radiogroup"
+          aria-label={t('slideForm.ratio')}
+        >
+          {(['1-1', '1-2', '2-1'] as SlideColumnsRatio[]).map((r) => (
+            <Button
+              key={r}
+              type="button"
+              size="sm"
+              variant={(block.ratio ?? '1-1') === r ? 'default' : 'ghost'}
+              className="h-7 px-2 text-xs"
+              role="radio"
+              aria-checked={(block.ratio ?? '1-1') === r}
+              onClick={() => onChange({ ...block, ratio: r })}
+            >
+              {r.replace('-', ' : ')}
+            </Button>
+          ))}
+        </div>
+      ) : null}
+      <div
+        className="grid gap-3"
+        style={{ gridTemplateColumns: columnsTemplate(block.columns.length, block.ratio) }}
+      >
+        {block.columns.map((col, i) => (
+          <div key={i} className="bg-muted/40 flex min-w-0 flex-col gap-2 rounded-md p-2">
+            {col.map((leaf) => (
+              <div key={leaf.id} className="flex items-start gap-1">
+                <div className="min-w-0 flex-1">
+                  <LeafEditor
+                    block={leaf}
+                    onChange={(next) =>
+                      setCol(
+                        i,
+                        col.map((l) => (l.id === leaf.id ? next : l)),
+                      )
+                    }
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="size-7 shrink-0"
+                  aria-label={t('slideForm.removeBlock')}
+                  onClick={() =>
                     setCol(
                       i,
-                      col.map((l) => (l.id === leaf.id ? next : l)),
+                      col.filter((l) => l.id !== leaf.id),
                     )
                   }
-                />
+                >
+                  <X className="size-3.5" />
+                </Button>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-7 shrink-0"
-                aria-label={t('slideForm.removeBlock')}
-                onClick={() =>
-                  setCol(
-                    i,
-                    col.filter((l) => l.id !== leaf.id),
-                  )
-                }
-              >
-                <X className="size-3.5" />
-              </Button>
-            </div>
-          ))}
-          <div className="flex flex-wrap gap-1">
-            {(['heading', 'text', 'image'] as LeafKind[]).map((kind) => (
-              <Button
-                key={kind}
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={() => setCol(i, [...col, newLeaf(kind, kind === 'heading' ? 2 : 1)])}
-              >
-                <Plus className="size-3" />
-                {t(`slideForm.block.${kind === 'heading' ? 'subheading' : kind}`)}
-              </Button>
             ))}
+            <div className="flex flex-wrap gap-1">
+              {(['heading', 'text', 'image'] as LeafKind[]).map((kind) => (
+                <Button
+                  key={kind}
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => setCol(i, [...col, newLeaf(kind, kind === 'heading' ? 2 : 1)])}
+                >
+                  <Plus className="size-3" />
+                  {t(`slideForm.block.${kind === 'heading' ? 'subheading' : kind}`)}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

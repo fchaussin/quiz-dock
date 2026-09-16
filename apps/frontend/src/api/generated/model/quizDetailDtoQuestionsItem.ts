@@ -6,8 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { QuizDetailDtoQuestionsItemAcceptedAnswersItem } from './quizDetailDtoQuestionsItemAcceptedAnswersItem';
+import type { QuizDetailDtoQuestionsItemBackgroundGradient } from './quizDetailDtoQuestionsItemBackgroundGradient';
 import type { QuizDetailDtoQuestionsItemOptionsItem } from './quizDetailDtoQuestionsItemOptionsItem';
 import type { QuizDetailDtoQuestionsItemPointsMode } from './quizDetailDtoQuestionsItemPointsMode';
+import type { QuizDetailDtoQuestionsItemTextTone } from './quizDetailDtoQuestionsItemTextTone';
 import type { QuizDetailDtoQuestionsItemType } from './quizDetailDtoQuestionsItemType';
 
 export type QuizDetailDtoQuestionsItem = {
@@ -24,6 +26,12 @@ export type QuizDetailDtoQuestionsItem = {
   mediaId: string | null;
   /** @nullable */
   answerExplanation: string | null;
+  /** @nullable */
+  backgroundMediaId: string | null;
+  /** @nullable */
+  backgroundGradient: QuizDetailDtoQuestionsItemBackgroundGradient;
+  textTone: QuizDetailDtoQuestionsItemTextTone;
+  textOutline: boolean;
   /**
      * @minimum -9007199254740991
      * @maximum 9007199254740991

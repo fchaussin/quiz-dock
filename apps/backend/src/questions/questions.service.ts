@@ -122,6 +122,10 @@ export class QuestionsService {
       prompt: dto.prompt,
       mediaId: dto.mediaId,
       answerExplanation: dto.answerExplanation || null,
+      backgroundMediaId: dto.backgroundMediaId || null,
+      backgroundGradient: dto.backgroundGradient ?? Prisma.JsonNull,
+      textTone: dto.textTone,
+      textOutline: dto.textOutline,
       timeLimitS: dto.timeLimitS,
       revealDelayS: dto.revealDelayS ?? null,
       // Un sondage ne rapporte aucun point (technique §4).

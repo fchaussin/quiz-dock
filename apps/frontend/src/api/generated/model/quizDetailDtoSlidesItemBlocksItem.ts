@@ -97,4 +97,5 @@ export type QuizDetailDtoSlidesItemBlocksItem = {
   size?: 'small' | 'medium' | 'large' | 'full';
   align?: 'left' | 'center' | 'right';
 })[])[];
+  ratio?: '1-1' | '1-2' | '2-1';
 };

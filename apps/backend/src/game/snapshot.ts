@@ -11,6 +11,7 @@ import { basePointsFor } from './scoring';
 import type { QuizSnapshot, SnapshotQuestion, SnapshotSlide } from './game.types';
 import type {
   SlideBlock,
+  SlideGradient,
   SlideLeafBlock,
   SlideShowPayload,
   SlideTextTone,
@@ -23,6 +24,7 @@ const quizWithContent = Prisma.validator<Prisma.QuizDefaultArgs>()({
       orderBy: { orderIndex: 'asc' },
       include: {
         media: true,
+        backgroundMedia: true,
         options: { orderBy: { orderIndex: 'asc' }, include: { media: true } },
         acceptedAnswers: true,
       },
@@ -57,6 +59,13 @@ export function buildSnapshot(quiz: QuizWithContent): QuizSnapshot {
         prompt: q.prompt,
         media: mediaOf(q.media),
         answerExplanation: q.answerExplanation ?? null,
+        background: q.backgroundMedia
+          ? { url: q.backgroundMedia.url }
+          : q.backgroundGradient
+            ? { gradient: q.backgroundGradient as unknown as SlideGradient }
+            : null,
+        textTone: q.textTone as SlideTextTone,
+        textOutline: q.textOutline,
         timeLimitS: q.timeLimitS,
         revealDelayS: q.revealDelayS ?? null,
         basePoints: basePointsFor(q.pointsMode as PointsMode),
@@ -95,7 +104,11 @@ function buildSnapshotSlides(quiz: QuizWithContent): SnapshotSlide[] {
       id: slide.id,
       beforeQuestionIndex: anchor,
       blocks: resolveBlocks(slide.blocks as SlideBlock[]),
-      background: slide.media ? { url: slide.media.url } : null,
+      background: slide.media
+        ? { url: slide.media.url }
+        : slide.gradient
+          ? { gradient: slide.gradient as unknown as SlideGradient }
+          : null,
       textTone: slide.textTone as SlideTextTone,
       textOutline: slide.textOutline,
       displayDelayS: slide.displayDelayS,
@@ -156,5 +169,8 @@ export function buildQuestionStart(
     basePoints: question.basePoints,
     startedAt,
     endsAt,
+    background: question.background,
+    textTone: question.textTone,
+    textOutline: question.textOutline,
   };
 }

@@ -15,6 +15,7 @@ import {
   RevealAnswer,
   SlideView,
 } from '../game/live-components';
+import { Surface } from '../game/surface';
 import { useGameRemaining } from '../game/use-countdown';
 import { useGameSession } from '../game/use-game-session';
 
@@ -188,7 +189,21 @@ export function ScreenPage() {
       )}
     >
       {fullscreenBtn}
-      {body}
+      {view.question?.background && view.state !== 'SLIDE_SHOW' ? (
+        // A question with a background owns the surface like a slide does.
+        <Surface
+          background={view.question.background}
+          textTone={view.question.textTone}
+          textOutline={view.question.textOutline}
+          className="absolute inset-0 flex items-center justify-center p-8"
+        >
+          <div className="flex h-full w-full flex-col items-center justify-center gap-6">
+            {body}
+          </div>
+        </Surface>
+      ) : (
+        body
+      )}
     </div>
   );
 }

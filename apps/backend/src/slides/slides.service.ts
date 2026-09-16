@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { ReorderItemsDto } from './dto/reorder-items.dto';
 import type { SlideContent } from './dto/slide-content.schema';
@@ -111,6 +112,7 @@ export class SlidesService {
     return {
       blocks: dto.blocks,
       mediaId: dto.mediaId || null,
+      gradient: dto.gradient ?? Prisma.JsonNull,
       textTone: dto.textTone,
       textOutline: dto.textOutline,
       displayDelayS: dto.displayDelayS ?? null,
