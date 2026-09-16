@@ -47,12 +47,27 @@ export interface SnapshotQuestion {
   options: SnapshotOption[];
 }
 
+/**
+ * Content slide (#7) in the live sequence. `beforeQuestionIndex` is the index of
+ * the question it precedes (`questions.length` = after the last one).
+ */
+export interface SnapshotSlide {
+  id: string;
+  beforeQuestionIndex: number;
+  title: string | null;
+  body: string | null;
+  media: { url: string; kind: 'image' | 'audio' } | null;
+  displayDelayS: number | null;
+}
+
 export interface QuizSnapshot {
   quizId: string;
   title: string;
   description: string | null;
   language: string;
   questions: SnapshotQuestion[];
+  /** Sorted by (beforeQuestionIndex, orderIndex). */
+  slides: SnapshotSlide[];
 }
 
 /** Enregistrement d'un joueur dans l'état live (Redis hash `:players`). */
@@ -98,6 +113,8 @@ export interface GameMeta {
   clockFrozen: boolean;
   /** Deadline (ms epoch) de l'enchaînement auto en cours sur un reveal (§8), 0 sinon. */
   autoNextAt?: number;
+  /** Index of the slide on screen while `state === SLIDE_SHOW` (#7), -1 otherwise. */
+  slideIndex?: number;
   /** Duration (ms) of the auto-next countdown armed at `autoNextAt` (#6). */
   autoNextMs?: number;
   /** État figé avant `HOST_DISCONNECTED` (pour la reprise §7.3). */

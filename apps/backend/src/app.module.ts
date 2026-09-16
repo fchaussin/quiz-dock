@@ -8,6 +8,7 @@ import { MeController } from './me/me.controller';
 import { MediaModule } from './media/media.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { QuestionsModule } from './questions/questions.module';
+import { SlidesModule } from './slides/slides.module';
 import { QuizzesModule } from './quizzes/quizzes.module';
 import { RedisModule } from './redis/redis.module';
 import { UsersModule } from './users/users.module';
@@ -45,6 +46,7 @@ const serveStatic = process.env.CLIENT_DIR
     UsersModule,
     QuizzesModule,
     QuestionsModule,
+    SlidesModule,
     MediaModule,
     GameModule,
   ],

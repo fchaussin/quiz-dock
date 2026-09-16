@@ -20,6 +20,7 @@ const view = (partial: Partial<GameView>): GameView => ({
   questionIndex: -1,
   totalQuestions: 0,
   question: null,
+  slide: null,
   answerCount: null,
   reveal: null,
   result: null,

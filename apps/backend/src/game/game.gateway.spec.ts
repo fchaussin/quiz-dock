@@ -480,6 +480,87 @@ describe('GameGateway (intégration socket)', () => {
     expect(Date.now() - revealedAt).toBeGreaterThanOrEqual(1000);
   }, 15_000);
 
+  it('slides (#7): intro slide → host:next → question; timed closing slide → podium by itself', async () => {
+    const quiz = await prisma.quiz.create({
+      data: {
+        ownerId: hostUserId,
+        title: 'Quiz with slides',
+        status: 'ready',
+        questionCount: 1,
+        questions: {
+          create: {
+            orderIndex: 0,
+            type: 'single_choice',
+            prompt: 'Capitale ?',
+            timeLimitS: 5,
+            options: {
+              create: [
+                { orderIndex: 0, text: 'Paris', color: 'red', shape: 'triangle', isCorrect: true },
+                { orderIndex: 1, text: 'Lyon', color: 'blue', shape: 'diamond', isCorrect: false },
+              ],
+            },
+          },
+        },
+      },
+      include: { questions: true },
+    });
+    await prisma.slide.createMany({
+      data: [
+        {
+          quizId: quiz.id,
+          beforeQuestionId: quiz.questions[0].id,
+          orderIndex: 0,
+          title: 'Welcome',
+          body: 'Read **this** first.',
+        },
+        { quizId: quiz.id, beforeQuestionId: null, orderIndex: 0, title: 'Bye', displayDelayS: 1 },
+      ],
+    });
+
+    const host = connect({ localUser: 'Animateur' });
+    const { pin } = await host.emitWithAck('host:create', { quizId: quiz.id });
+    const player = connect();
+    await player.emitWithAck('player:join', { pin, nickname: 'Zed' });
+
+    const states: string[] = [];
+    player.on('game:state', (s: { state: string }) => states.push(s.state));
+    const slides: Array<{ slideIndex: number; title: string | null; questionIndex: number }> = [];
+    player.on('slide:show', (s) => slides.push(s as never));
+    const qStart = new Promise<{ startedAt: number; options: Array<{ id: string }> }>((resolve) =>
+      player.on('question:start', (q) => resolve(q as never)),
+    );
+    const podiumP = new Promise<void>((resolve) => player.on('game:podium', () => resolve()));
+
+    // Start shows the intro slide, not the question.
+    host.emit('host:start', { pin });
+    await new Promise((r) => setTimeout(r, 200));
+    expect(states).toEqual(['SLIDE_SHOW']);
+    expect(slides).toEqual(
+      [{ slideIndex: 0, questionIndex: 0, title: 'Welcome' }].map((s) =>
+        expect.objectContaining(s),
+      ),
+    );
+
+    // Untimed slide: only the host moves on.
+    host.emit('host:next', { pin });
+    const q = await qStart;
+    expect(states).toEqual(['SLIDE_SHOW', 'ANSWERING']);
+    await new Promise((r) => setTimeout(r, Math.max(0, q.startedAt - Date.now()) + 50));
+    player.emit('player:submit', { pin, questionIndex: 0, answer: q.options[0].id }); // → REVEAL
+    await new Promise((r) => setTimeout(r, 200));
+
+    // After the last reveal, host:next shows the closing slide, which advances alone after 1 s.
+    host.emit('host:next', { pin });
+    await new Promise((r) => setTimeout(r, 200));
+    expect(states.at(-1)).toBe('SLIDE_SHOW');
+    expect(slides.at(-1)).toEqual(
+      expect.objectContaining({ slideIndex: 1, title: 'Bye', questionIndex: 1 }),
+    );
+    const shownAt = Date.now();
+    await podiumP;
+    expect(Date.now() - shownAt).toBeGreaterThanOrEqual(700);
+  }, 15_000);
+
   it('REVEAL anticipé quand TOUS répondent FAUX (convergence indépendante de la justesse)', async () => {
     const host = connect({ localUser: 'Animateur' });
     const { pin } = await host.emitWithAck('host:create', { quizId });

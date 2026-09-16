@@ -389,6 +389,7 @@ describe('QuizzesService', () => {
               acceptedAnswers: [],
             },
           ],
+          slides: [],
         } as unknown as Quiz),
       );
       prisma.quiz.create.mockResolvedValue(makeQuiz());

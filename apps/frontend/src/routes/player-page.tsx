@@ -14,7 +14,7 @@ import {
   loadPlayerSession,
   saveAvatarSeed,
 } from '../game/game-client';
-import { AnswerExplanation, OptionGrid } from '../game/live-components';
+import { AnswerExplanation, OptionGrid, SlideView } from '../game/live-components';
 import { RatingPanel } from '../game/rating-panel';
 import { useCountdown, useGameRemaining } from '../game/use-countdown';
 import { useGameSession } from '../game/use-game-session';
@@ -282,6 +282,13 @@ export function PlayerPage() {
   }
 
   // ── États de jeu ───────────────────────────────────────────────────────────
+  if (view.state === 'SLIDE_SHOW' && view.slide) {
+    return (
+      <section className="mx-auto flex w-full max-w-md flex-col items-center gap-6 py-6">
+        <SlideView slide={view.slide} />
+      </section>
+    );
+  }
   if (view.state === 'HOST_DISCONNECTED') {
     return wrap(<p className="text-xl font-semibold">{t('player.hostDisconnected')}</p>);
   }

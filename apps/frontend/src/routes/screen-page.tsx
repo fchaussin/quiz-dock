@@ -13,6 +13,7 @@ import {
   OptionGrid,
   Podium,
   RevealAnswer,
+  SlideView,
 } from '../game/live-components';
 import { useGameRemaining } from '../game/use-countdown';
 import { useGameSession } from '../game/use-game-session';
@@ -80,6 +81,8 @@ export function ScreenPage() {
     body = <p className="text-3xl font-semibold">{t('screen.paused')}</p>;
   } else if (view.state === 'ENDED') {
     body = <p className="text-3xl font-semibold">{t('screen.thanks')}</p>;
+  } else if (view.state === 'SLIDE_SHOW' && view.slide) {
+    body = <SlideView slide={view.slide} large />;
   } else if (view.state === 'PODIUM' && view.podium) {
     body = (
       <div className="flex w-full max-w-md flex-col items-center gap-6">

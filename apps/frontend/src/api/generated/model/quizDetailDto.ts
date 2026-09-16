@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { QuizDetailDtoQuestionsItem } from './quizDetailDtoQuestionsItem';
+import type { QuizDetailDtoSlidesItem } from './quizDetailDtoSlidesItem';
 import type { QuizDetailDtoStatus } from './quizDetailDtoStatus';
 import type { QuizDetailDtoVisibility } from './quizDetailDtoVisibility';
 
@@ -30,4 +31,5 @@ export interface QuizDetailDto {
   /** @nullable */
   archivedAt: string | null;
   questions: QuizDetailDtoQuestionsItem[];
+  slides: QuizDetailDtoSlidesItem[];
 }

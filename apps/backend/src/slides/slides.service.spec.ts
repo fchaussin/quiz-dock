@@ -1,0 +1,127 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import type { PrismaService } from '../prisma/prisma.service';
+import { SlidesService } from './slides.service';
+
+const OWNER = 'owner-1';
+const id = (n: string) => n.padEnd(26, '0');
+
+function makePrisma() {
+  return {
+    quiz: { findFirst: jest.fn() },
+    question: { findMany: jest.fn(), update: jest.fn((args: unknown) => args) },
+    slide: {
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+      aggregate: jest.fn(),
+      create: jest.fn((args: unknown) => args),
+      update: jest.fn((args: unknown) => args),
+      delete: jest.fn(),
+    },
+    $transaction: jest.fn((ops: unknown[]) => Promise.all(ops)),
+  };
+}
+
+describe('SlidesService', () => {
+  let prisma: ReturnType<typeof makePrisma>;
+  let service: SlidesService;
+
+  beforeEach(() => {
+    prisma = makePrisma();
+    service = new SlidesService(prisma as unknown as PrismaService);
+    prisma.quiz.findFirst.mockResolvedValue({ id: 'quiz-1' });
+  });
+
+  describe('add', () => {
+    it('appends after the last end-anchored slide, with empty fields as null', async () => {
+      prisma.slide.aggregate.mockResolvedValue({ _max: { orderIndex: 1 } });
+      await service.add(OWNER, 'quiz-1', { title: 'Intro', body: '' });
+      const data = (prisma.slide.create.mock.calls[0][0] as { data: unknown }).data;
+      expect(data).toMatchObject({
+        quizId: 'quiz-1',
+        beforeQuestionId: null,
+        orderIndex: 2,
+        title: 'Intro',
+        body: null,
+        mediaId: null,
+        displayDelayS: null,
+      });
+    });
+
+    it('404 when the quiz is not owned', async () => {
+      prisma.quiz.findFirst.mockResolvedValue(null);
+      await expect(service.add(OWNER, 'quiz-x', { title: 'x' })).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('reorderItems', () => {
+    beforeEach(() => {
+      prisma.question.findMany.mockResolvedValue([{ id: id('q1') }, { id: id('q2') }]);
+      prisma.slide.findMany.mockResolvedValue([{ id: id('s1') }, { id: id('s2') }]);
+    });
+
+    it('rejects an incomplete sequence', async () => {
+      await expect(
+        service.reorderItems(OWNER, 'quiz-1', {
+          items: [{ kind: 'question', id: id('q1') }],
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('rejects an item from another quiz or a duplicate', async () => {
+      await expect(
+        service.reorderItems(OWNER, 'quiz-1', {
+          items: [
+            { kind: 'question', id: id('q1') },
+            { kind: 'question', id: id('q1') },
+            { kind: 'slide', id: id('s1') },
+            { kind: 'slide', id: id('s2') },
+          ],
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('renumbers questions and anchors each slide to the question that follows it', async () => {
+      prisma.slide.findMany.mockResolvedValueOnce([{ id: id('s1') }, { id: id('s2') }]);
+      prisma.slide.findMany.mockResolvedValueOnce([]);
+      // s1, q2, s2, q1  → q2 becomes #0 with s1 before it; q1 becomes #1 with s2 before it.
+      await service.reorderItems(OWNER, 'quiz-1', {
+        items: [
+          { kind: 'slide', id: id('s1') },
+          { kind: 'question', id: id('q2') },
+          { kind: 'slide', id: id('s2') },
+          { kind: 'question', id: id('q1') },
+        ],
+      });
+      const finalQuestionUpdates = prisma.question.update.mock.calls
+        .map((c) => c[0] as { where: { id: string }; data: { orderIndex: number } })
+        .filter((u) => u.data.orderIndex < 1000);
+      expect(finalQuestionUpdates).toEqual([
+        { where: { id: id('q2') }, data: { orderIndex: 0 } },
+        { where: { id: id('q1') }, data: { orderIndex: 1 } },
+      ]);
+      expect(prisma.slide.update.mock.calls.map((c) => c[0])).toEqual([
+        { where: { id: id('s1') }, data: { beforeQuestionId: id('q2'), orderIndex: 0 } },
+        { where: { id: id('s2') }, data: { beforeQuestionId: id('q1'), orderIndex: 0 } },
+      ]);
+    });
+
+    it('slides after the last question are anchored to the end (null)', async () => {
+      prisma.slide.findMany.mockResolvedValueOnce([{ id: id('s1') }, { id: id('s2') }]);
+      prisma.slide.findMany.mockResolvedValueOnce([]);
+      await service.reorderItems(OWNER, 'quiz-1', {
+        items: [
+          { kind: 'question', id: id('q1') },
+          { kind: 'question', id: id('q2') },
+          { kind: 'slide', id: id('s1') },
+          { kind: 'slide', id: id('s2') },
+        ],
+      });
+      expect(prisma.slide.update.mock.calls.map((c) => c[0])).toEqual([
+        { where: { id: id('s1') }, data: { beforeQuestionId: null, orderIndex: 0 } },
+        { where: { id: id('s2') }, data: { beforeQuestionId: null, orderIndex: 1 } },
+      ]);
+    });
+  });
+});

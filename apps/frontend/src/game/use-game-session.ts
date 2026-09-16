@@ -9,6 +9,7 @@ import type {
   PodiumPayload,
   QuestionRevealPayload,
   QuestionStartPayload,
+  SlideShowPayload,
   QuestionTimePayload,
 } from '@quiz-dock/contracts';
 import { useEffect, useRef, useState } from 'react';
@@ -44,6 +45,8 @@ export interface GameView {
   questionIndex: number;
   totalQuestions: number;
   question: QuestionStartPayload | null;
+  /** Content slide on screen while `state === SLIDE_SHOW` (#7). */
+  slide: SlideShowPayload | null;
   answerCount: { answered: number; total: number } | null;
   reveal: QuestionRevealPayload | null;
   result: PersonalResult | null;
@@ -79,6 +82,7 @@ const INITIAL: GameView = {
   questionIndex: -1,
   totalQuestions: 0,
   question: null,
+  slide: null,
   answerCount: null,
   reveal: null,
   result: null,
@@ -167,6 +171,7 @@ export function useGameSession(pin: string, role: LiveRole) {
       );
     const onCount = (p: { answered: number; total: number }) => patch({ answerCount: p });
     const onAck = (p: { accepted: boolean }) => patch({ answerAccepted: p.accepted });
+    const onSlide = (p: SlideShowPayload) => patch({ slide: p });
     const onReveal = (p: QuestionRevealPayload) =>
       patch({ reveal: p, result: p.yourResult ?? null });
     const onLeaderboard = (p: LeaderboardPayload) => patch({ leaderboard: p });
@@ -196,6 +201,7 @@ export function useGameSession(pin: string, role: LiveRole) {
       sock.on('answer:count', onCount);
       sock.on('answer:ack', onAck);
       sock.on('question:reveal', onReveal);
+      sock.on('slide:show', onSlide);
       sock.on('leaderboard', onLeaderboard);
       sock.on('game:podium', onPodium);
       sock.on('game:ended', onEnded);
@@ -245,6 +251,7 @@ export function useGameSession(pin: string, role: LiveRole) {
       s.off('answer:count', onCount);
       s.off('answer:ack', onAck);
       s.off('question:reveal', onReveal);
+      s.off('slide:show', onSlide);
       s.off('leaderboard', onLeaderboard);
       s.off('game:podium', onPodium);
       s.off('game:ended', onEnded);
