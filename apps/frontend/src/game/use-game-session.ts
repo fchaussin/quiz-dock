@@ -52,6 +52,8 @@ export interface GameView {
   result: PersonalResult | null;
   leaderboard: LeaderboardPayload | null;
   podium: PodiumPayload | null;
+  /** End-of-session rating offered (§2.11) — from the podium / ended payloads. */
+  feedbackEnabled: boolean;
   players: RosterPlayer[];
   answerAccepted: boolean | null;
   fullCapture: boolean;
@@ -88,6 +90,7 @@ const INITIAL: GameView = {
   result: null,
   leaderboard: null,
   podium: null,
+  feedbackEnabled: true,
   players: [],
   answerAccepted: null,
   fullCapture: false,
@@ -175,8 +178,14 @@ export function useGameSession(pin: string, role: LiveRole) {
     const onReveal = (p: QuestionRevealPayload) =>
       patch({ reveal: p, result: p.yourResult ?? null });
     const onLeaderboard = (p: LeaderboardPayload) => patch({ leaderboard: p });
-    const onPodium = (p: PodiumPayload) => patch({ podium: p, state: 'PODIUM' as GameState });
-    const onEnded = () => patch({ state: 'ENDED' as GameState });
+    const onPodium = (p: PodiumPayload) =>
+      patch({
+        podium: p,
+        state: 'PODIUM' as GameState,
+        feedbackEnabled: p.feedbackEnabled ?? true,
+      });
+    const onEnded = (p: { feedbackEnabled?: boolean }) =>
+      patch({ state: 'ENDED' as GameState, feedbackEnabled: p?.feedbackEnabled ?? true });
     const onNotice = (p: { fullCapture: boolean }) => patch({ fullCapture: p.fullCapture });
     // Banni par l'hôte : on purge la session locale (pas d'auto-reconnexion) et on
     // bascule la vue en écran d'exclusion.

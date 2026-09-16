@@ -61,9 +61,12 @@ the results never leave your servers.
 - ⚡ **Real-time multiplayer** — Socket.IO engine with authoritative server timing; players join by 6-digit PIN or QR code.
 - 🦄 **Player avatars** — every player gets a unique, generated [Multiavatar](https://multiavatar.com) avatar — no upload, no account.
 - 🖥️ **Projector-ready** — bright, high-contrast light screens built for the big screen, with separate projection and control windows.
-- 🧩 **Quiz builder** — seven question types (single/multi choice, true-false, text, numeric, reorder, poll) with image & audio media.
+- 🧩 **Quiz builder** — seven question types (single/multi choice, true-false, text, numeric, reorder, poll), up to 8 answers with distinct colour/shape pairs, image & audio media, drag-and-drop ordering.
+- 📝 **Rich text** — prompts, options and descriptions in Markdown with a visual editor (bold, lists, code, inline images).
+- 💡 **Answer explanations** — an optional explanation shown at the reveal, with a per-question reveal delay in automatic mode.
+- 🎞️ **Content slides** — interleave slides (headings, text, images, 2–3 columns) between questions; backgrounds (image or gradient) for slides and questions, with a faithful 16:9 preview.
 - 🏆 **Live scoring & podium** — time-weighted points with streak bonuses, leaderboard between questions, final podium; manual or auto pacing.
-- ⭐ **Player feedback** — players rate the quiz (stars + optional comment) at the end; hosts see the aggregated ratings.
+- ⭐ **Player feedback** — players rate the quiz (stars + optional comment) at the end; hosts see the distribution and browse the reviews. Can be switched off per quiz.
 - 💾 **Answer capture** — optionally record every player's individual answers for audit, certification or individual follow-up.
 - 🔎 **History & exploration** — browse archived sessions: per-question success rates, average times, and per-player answer sheets.
 - 📤 **CSV export** — export overall results and per-player answer sheets.
@@ -131,7 +134,16 @@ docker compose -f docker-compose.prod.yml up -d
 open http://localhost:18080
 ```
 
-Pin a version with `QUIZDOCK_TAG=0.3.0 docker compose -f docker-compose.prod.yml up -d`.
+Pin a version with `QUIZDOCK_TAG=0.4.0 docker compose -f docker-compose.prod.yml up -d`.
+
+### Upgrading
+
+Database migrations run **automatically** on every start (the one-shot `migrate`
+service, or the `:standalone` entrypoint): pull the new tag and `up` again. Two rules:
+**back up PostgreSQL first** (`pg_dump`), and **don't roll back** an image once its
+migrations ran — restore the backup instead. Each release lists its schema changes
+under *Upgrading* in the [release notes](https://github.com/quizdock/quiz-dock/releases).
+Full procedure: https://github.com/quizdock/quiz-dock/blob/main/docs/self-hosting/README.md#upgrading
 
 ### Option B — build from source
 

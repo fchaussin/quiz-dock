@@ -2,8 +2,11 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { Prisma, type Quiz, QuizStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateQuizDto } from './dto/create-quiz.dto';
+import type { QuizFeedbackQueryDto } from './dto/quiz-feedback.dto';
 import type { TransitionQuizDto } from './dto/transition-quiz.dto';
 import type { UpdateQuizDto } from './dto/update-quiz.dto';
+
+type QuizFeedbackQuery = Pick<QuizFeedbackQueryDto, 'page' | 'pageSize' | 'rating'>;
 
 /** Transitions de cycle de vie autorisées (RG-02). */
 const ALLOWED_TRANSITIONS: Record<QuizStatus, QuizStatus[]> = {
@@ -33,6 +36,7 @@ export class QuizzesService {
         description: dto.description,
         language: dto.language,
         coverMediaId: dto.coverMediaId,
+        feedbackEnabled: dto.feedbackEnabled,
       },
     });
   }
@@ -63,7 +67,7 @@ export class QuizzesService {
    * `findFirst({ where:{ id, ownerId } })` renvoie 404 pour un non-owner). Renvoie
    * la moyenne, le nombre et la liste (récente d'abord).
    */
-  async feedback(ownerId: string, id: string) {
+  async feedback(ownerId: string, id: string, query: QuizFeedbackQuery) {
     const quiz = await this.prisma.quiz.findFirst({
       where: { id, ownerId },
       select: { id: true },
@@ -71,14 +75,37 @@ export class QuizzesService {
     if (!quiz) {
       throw new NotFoundException('quiz.not_found');
     }
-    const items = await this.prisma.quizFeedback.findMany({
+    // Summary over every review (not just the page), so the header never changes with the filter.
+    const groups = await this.prisma.quizFeedback.groupBy({
+      by: ['rating'],
       where: { quizId: id },
-      orderBy: { createdAt: 'desc' },
-      select: { id: true, rating: true, comment: true, nickname: true, createdAt: true },
+      _count: { _all: true },
     });
-    const count = items.length;
-    const average = count ? items.reduce((sum, f) => sum + f.rating, 0) / count : 0;
-    return { count, average, items };
+    const distribution = [0, 0, 0, 0, 0];
+    for (const g of groups) distribution[g.rating - 1] = g._count._all;
+    const count = distribution.reduce((a, b) => a + b, 0);
+    const average = count ? distribution.reduce((sum, n, i) => sum + n * (i + 1), 0) / count : 0;
+
+    const where = { quizId: id, ...(query.rating ? { rating: query.rating } : {}) };
+    const [total, items] = await Promise.all([
+      this.prisma.quizFeedback.count({ where }),
+      this.prisma.quizFeedback.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: (query.page - 1) * query.pageSize,
+        take: query.pageSize,
+        select: { id: true, rating: true, comment: true, nickname: true, createdAt: true },
+      }),
+    ]);
+    return {
+      count,
+      average,
+      distribution,
+      items,
+      page: query.page,
+      pageSize: query.pageSize,
+      total,
+    };
   }
 
   /**
@@ -241,6 +268,10 @@ export class QuizzesService {
             prompt: q.prompt,
             mediaId: q.mediaId,
             answerExplanation: q.answerExplanation,
+            backgroundMediaId: q.backgroundMediaId,
+            backgroundGradient: q.backgroundGradient ?? Prisma.JsonNull,
+            textTone: q.textTone,
+            textOutline: q.textOutline,
             timeLimitS: q.timeLimitS,
             pointsMode: q.pointsMode,
             revealDelayS: q.revealDelayS,
@@ -280,10 +311,12 @@ export class QuizzesService {
               ? null
               : (newIdByIndex.get(srcIndexById.get(s.beforeQuestionId) ?? -1) ?? null),
           orderIndex: s.orderIndex,
-          title: s.title,
-          body: s.body,
+          blocks: s.blocks as Prisma.InputJsonValue,
           mediaId: s.mediaId,
+          gradient: s.gradient ?? Prisma.JsonNull,
           displayDelayS: s.displayDelayS,
+          textTone: s.textTone,
+          textOutline: s.textOutline,
         })),
       });
     }
@@ -299,6 +332,7 @@ export class QuizzesService {
         description: dto.description,
         language: dto.language,
         coverMediaId: dto.coverMediaId,
+        feedbackEnabled: dto.feedbackEnabled,
       },
     });
   }

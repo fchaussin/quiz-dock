@@ -20,6 +20,7 @@
     "title": "设置",
     "titleLabel": "标题",
     "descriptionLabel": "描述",
+    "descriptionPlaceholder": "描述（可选）…",
     "save": "保存"
   },
   "broadcast": {
@@ -32,12 +33,24 @@
     "backToDraft": "退回草稿",
     "archive": "归档",
     "restore": "恢复",
-    "presentError": "启动会话失败。"
+    "presentError": "启动会话失败。",
+    "archiveTitle": "归档",
+    "archiveHelp": "归档的测验会从主列表中隐藏，可以随时恢复。"
   },
   "feedback": {
+    "enableLabel": "允许参与者评价",
+    "enableHelp": "每场结束时向参与者提供评分面板。",
     "title": "玩家评价",
     "empty": "暂无评价。玩家可在会话结束时为测验评分。",
     "starsAriaLabel": "5 星中的 {{value}} 星",
+    "seeAll_one": "查看评价",
+    "seeAll_other": "查看全部 {{count}} 条评价",
+    "backToEditor": "返回编辑器",
+    "loadError": "无法加载评价。",
+    "noneForFilter": "没有此评分的评价。",
+    "previous": "上一页",
+    "next": "下一页",
+    "pagePosition": "第 {{page}} / {{pages}} 页",
     "count_one": "{{count}} 条评价",
     "count_other": "{{count}} 条评价"
   },
@@ -48,29 +61,89 @@
     "moveDown": "下移",
     "edit": "编辑",
     "deleteQuestion": "删除题目",
-    "empty": "还没有题目。添加一道吧！"
+    "dragHandle": "拖动以排序",
+    "itemsCount_one": "{{count}} 个元素",
+    "itemsCount_other": "{{count}} 个元素",
+    "formTitle": "题目",
+    "empty": "还没有题目。添加一道吧！",
+    "collapseList": "收起列表",
+    "expandList": "展开列表"
   },
   "slides": {
+    "formTitle": "幻灯片",
     "add": "添加幻灯片",
     "kind": "幻灯片",
-    "deleteSlide": "删除幻灯片"
+    "deleteSlide": "删除幻灯片",
+    "durationManual": "手动"
   },
   "slideForm": {
-    "titleLabel": "标题",
-    "titlePlaceholder": "幻灯片标题（可选）",
-    "bodyLabel": "内容",
     "bodyPlaceholder": "要显示的文字…",
-    "displayDelayLabel": "显示时长（秒）",
-    "displayDelayPlaceholder": "手动",
-    "displayDelayHint": "到时后自动进入下一步。留空 = 由主持人点击。",
+    "contrastLegend": "文字对比度",
+    "tone": {
+      "light": "浅色文字，图片压暗",
+      "dark": "深色文字，图片提亮"
+    },
+    "outline": "描边（光晕，如字幕）",
+    "displayLegend": "自动切换（自动模式）",
+    "displayDelayLabel": "时长（秒）",
+    "display": {
+      "default": "默认时长（5 秒）",
+      "manual": "手动：由主持人点击",
+      "custom": "自定义时长…"
+    },
+    "displayHint": "手动模式下，始终由主持人手动进入下一步。",
     "invalidError": "幻灯片需要标题、内容或媒体。",
     "submitAdd": "添加",
-    "submitUpdate": "保存"
+    "submitUpdate": "保存",
+    "blocksLegend": "内容",
+    "block": {
+      "heading": "标题",
+      "subheading": "副标题",
+      "text": "文字",
+      "image": "图片",
+      "columns2": "两栏",
+      "columns3": "三栏"
+    },
+    "dragBlock": "拖动以排序区块",
+    "removeBlock": "移除区块",
+    "headingLevel": "级别",
+    "headingPlaceholder": "标题…",
+    "imageSize": "大小",
+    "imageAlign": "对齐",
+    "size": {
+      "small": "小",
+      "medium": "中",
+      "large": "大",
+      "full": "全宽"
+    },
+    "align": {
+      "left": "左",
+      "center": "居中",
+      "right": "右"
+    },
+    "ratio": "分栏比例",
+    "textAlign": "文字对齐",
+    "previewLegend": "预览",
+    "hidePreview": "隐藏",
+    "showPreview": "显示"
+  },
+  "discardConfirm": {
+    "title": "放弃修改？",
+    "description": "未保存的修改将丢失。",
+    "confirmLabel": "放弃"
+  },
+  "emptyPane": {
+    "emptyTitle": "这个测验还是空的",
+    "emptyHint": "先添加一道题，或一张开场幻灯片。",
+    "selectTitle": "未选择任何项",
+    "selectHint": "在列表中选择一项进行编辑。"
   },
   "deleteConfirm": {
+    "hint": "删除此测验及其全部历史。",
     "title": "删除此测验？",
     "description": "“{{title}}”及其题目将被永久删除。此操作不可撤销。",
-    "confirmLabel": "删除"
+    "confirmLabel": "删除",
+    "zoneTitle": "危险区"
   },
   "gameAccess": {
     "label": "进行中的会话 — PIN",
@@ -95,6 +168,7 @@
     },
     "optionsLegend": "选项",
     "optionAriaLabel": "选项 {{index}}",
+    "dragOption": "拖动以排序选项",
     "optionPlaceholder": "选项 {{index}}",
     "colorAriaLabel": "颜色 {{index}}",
     "shapeAriaLabel": "形状 {{index}}",
@@ -133,5 +207,33 @@
     "add": "添加媒体（图片/音频）",
     "fileInputLabel": "媒体文件",
     "uploadError": "上传失败。"
+  },
+  "background": {
+    "legend": "背景",
+    "kind": {
+      "none": "白色",
+      "image": "图片",
+      "gradient": "渐变"
+    },
+    "color": "颜色 {{index}}",
+    "removeColor": "移除颜色 {{index}}",
+    "addColor": "添加颜色",
+    "angle": "角度"
+  },
+  "status": {
+    "draft": "草稿 — 发布后即可开始演示。",
+    "ready": "可以开始演示。",
+    "archived": "已归档 — 恢复后可编辑或演示。"
+  },
+  "captureConfirm": {
+    "title": "开启完整答题记录？",
+    "description": "将保存每位参与者的每个答案及其昵称：这属于个人数据（GDPR — 请告知参与者并事后清除）。会话归档也会占用大得多的数据库空间。仅在需要个人跟踪（评估、认证）时使用。",
+    "confirmLabel": "开启"
+  },
+  "deleteItemConfirm": {
+    "questionTitle": "删除这道题？",
+    "slideTitle": "删除这张幻灯片？",
+    "description": "“{{label}}”将被永久删除。",
+    "confirmLabel": "删除"
   }
 }

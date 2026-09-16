@@ -17,11 +17,19 @@ describe('Markdown — block profile', () => {
     expect(container.textContent).toContain('lien');
   });
 
-  it('unwraps elements outside the allowlist (headings, images) and keeps their text', () => {
-    const { container } = render(<Markdown>{'# Titre\n\n![alt](https://x.test/i.png)'}</Markdown>);
+  it('unwraps elements outside the allowlist (headings) and keeps their text', () => {
+    const { container } = render(<Markdown>{'# Titre'}</Markdown>);
     expect(container.querySelector('h1')).toBeNull();
-    expect(container.querySelector('img')).toBeNull();
     expect(container.textContent).toContain('Titre');
+  });
+
+  it('renders images served by this app only (no third-party image)', () => {
+    const { container } = render(
+      <Markdown>{'![a](/api/v1/media/abc)\n\n![b](https://x.test/i.png)'}</Markdown>,
+    );
+    const imgs = container.querySelectorAll('img');
+    expect(imgs).toHaveLength(1);
+    expect(imgs[0].getAttribute('src')).toBe('/api/v1/media/abc');
   });
 
   it('drops raw HTML and never emits a link, even a javascript: one', () => {
@@ -52,6 +60,7 @@ describe('Markdown — inline profile', () => {
     expect(container.querySelector('p')).toBeNull();
     expect(container.querySelector('a')).toBeNull();
     expect(container.querySelector('ul')).toBeNull();
+    expect(container.querySelector('img')).toBeNull();
     expect(container.textContent).toContain('l');
     expect(container.textContent).toContain('item');
   });

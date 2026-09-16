@@ -20,6 +20,7 @@
     "title": "Ajustes",
     "titleLabel": "Título",
     "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Descripción (opcional)…",
     "save": "Guardar"
   },
   "broadcast": {
@@ -32,12 +33,24 @@
     "backToDraft": "Volver a borrador",
     "archive": "Archivar",
     "restore": "Restaurar",
-    "presentError": "No se pudo iniciar la sesión."
+    "presentError": "No se pudo iniciar la sesión.",
+    "archiveTitle": "Archivo",
+    "archiveHelp": "Un cuestionario archivado sale de la lista principal; se puede restaurar."
   },
   "feedback": {
+    "enableLabel": "Permitir opiniones de los participantes",
+    "enableHelp": "Se ofrece un panel de valoración al final de cada sesión.",
     "title": "Opiniones de los jugadores",
     "empty": "Aún no hay opiniones. Los jugadores pueden valorar el quiz al final de la sesión.",
     "starsAriaLabel": "{{value}} de 5",
+    "seeAll_one": "Ver la opinión",
+    "seeAll_other": "Ver las {{count}} opiniones",
+    "backToEditor": "Volver al editor",
+    "loadError": "No se pudieron cargar las opiniones.",
+    "noneForFilter": "Ninguna opinión con esta nota.",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pagePosition": "Página {{page}} / {{pages}}",
     "count_one": "{{count}} opinión",
     "count_other": "{{count}} opiniones"
   },
@@ -48,29 +61,89 @@
     "moveDown": "Bajar",
     "edit": "Editar",
     "deleteQuestion": "Eliminar la pregunta",
-    "empty": "No hay preguntas. ¡Añade una!"
+    "dragHandle": "Arrastrar para reordenar",
+    "itemsCount_one": "{{count}} elemento",
+    "itemsCount_other": "{{count}} elementos",
+    "formTitle": "Pregunta",
+    "empty": "No hay preguntas. ¡Añade una!",
+    "collapseList": "Reducir la lista",
+    "expandList": "Desplegar la lista"
   },
   "slides": {
+    "formTitle": "Diapositiva",
     "add": "Añadir una diapositiva",
     "kind": "Diapositiva",
-    "deleteSlide": "Eliminar la diapositiva"
+    "deleteSlide": "Eliminar la diapositiva",
+    "durationManual": "manual"
   },
   "slideForm": {
-    "titleLabel": "Título",
-    "titlePlaceholder": "Título de la diapositiva (opcional)",
-    "bodyLabel": "Contenido",
     "bodyPlaceholder": "Texto a mostrar…",
-    "displayDelayLabel": "Tiempo de visualización (s)",
-    "displayDelayPlaceholder": "manual",
-    "displayDelayHint": "Avanza sola tras este tiempo. Vacío = el presentador hace clic.",
+    "contrastLegend": "Contraste del texto",
+    "tone": {
+      "light": "Texto claro sobre imagen oscurecida",
+      "dark": "Texto oscuro sobre imagen aclarada"
+    },
+    "outline": "Contorno (halo, como subtítulos)",
+    "displayLegend": "Avance (modo automático)",
+    "displayDelayLabel": "Duración (s)",
+    "display": {
+      "default": "Duración por defecto (5 s)",
+      "manual": "Manual: el presentador hace clic",
+      "custom": "Duración personalizada…"
+    },
+    "displayHint": "En modo manual, el presentador siempre avanza a mano.",
     "invalidError": "La diapositiva necesita un título, un contenido o un medio.",
     "submitAdd": "Añadir",
-    "submitUpdate": "Guardar"
+    "submitUpdate": "Guardar",
+    "blocksLegend": "Contenido",
+    "block": {
+      "heading": "Título",
+      "subheading": "Subtítulo",
+      "text": "Texto",
+      "image": "Imagen",
+      "columns2": "2 columnas",
+      "columns3": "3 columnas"
+    },
+    "dragBlock": "Arrastrar para reordenar el bloque",
+    "removeBlock": "Quitar el bloque",
+    "headingLevel": "Nivel",
+    "headingPlaceholder": "Título…",
+    "imageSize": "Tamaño",
+    "imageAlign": "Alineación",
+    "size": {
+      "small": "Pequeña",
+      "medium": "Mediana",
+      "large": "Grande",
+      "full": "Ancho completo"
+    },
+    "align": {
+      "left": "Izquierda",
+      "center": "Centro",
+      "right": "Derecha"
+    },
+    "ratio": "Reparto de columnas",
+    "textAlign": "Alineación del texto",
+    "previewLegend": "Vista previa",
+    "hidePreview": "Ocultar",
+    "showPreview": "Mostrar"
+  },
+  "discardConfirm": {
+    "title": "¿Descartar los cambios?",
+    "description": "Los cambios no guardados se perderán.",
+    "confirmLabel": "Descartar"
+  },
+  "emptyPane": {
+    "emptyTitle": "Este cuestionario está vacío",
+    "emptyHint": "Empieza con una pregunta o con una diapositiva de introducción.",
+    "selectTitle": "Nada seleccionado",
+    "selectHint": "Elige un elemento de la lista para editarlo."
   },
   "deleteConfirm": {
+    "hint": "Eliminar este cuestionario y todo su historial.",
     "title": "¿Eliminar este quiz?",
     "description": "«{{title}}» y sus preguntas se eliminarán definitivamente. Esta acción es irreversible.",
-    "confirmLabel": "Eliminar"
+    "confirmLabel": "Eliminar",
+    "zoneTitle": "Zona peligrosa"
   },
   "gameAccess": {
     "label": "Sesión en curso — PIN",
@@ -95,6 +168,7 @@
     },
     "optionsLegend": "Opciones",
     "optionAriaLabel": "opción {{index}}",
+    "dragOption": "Arrastrar para reordenar la opción",
     "optionPlaceholder": "Opción {{index}}",
     "colorAriaLabel": "color {{index}}",
     "shapeAriaLabel": "forma {{index}}",
@@ -133,5 +207,33 @@
     "add": "Añadir un medio (imagen/audio)",
     "fileInputLabel": "Archivo multimedia",
     "uploadError": "Error al subir."
+  },
+  "background": {
+    "legend": "Fondo",
+    "kind": {
+      "none": "Blanco",
+      "image": "Imagen",
+      "gradient": "Degradado"
+    },
+    "color": "Color {{index}}",
+    "removeColor": "Quitar el color {{index}}",
+    "addColor": "Añadir un color",
+    "angle": "Ángulo"
+  },
+  "status": {
+    "draft": "Borrador — publica el cuestionario para presentarlo.",
+    "ready": "Listo para presentar.",
+    "archived": "Archivado — restáuralo para editarlo o presentarlo."
+  },
+  "captureConfirm": {
+    "title": "¿Activar la captura completa de respuestas?",
+    "description": "Se guardará cada respuesta de cada participante con su apodo: son datos personales (RGPD — informa a los participantes, purga después). Los archivos de sesión también pesan mucho más en la base de datos. Resérvalo para el seguimiento individual (evaluación, certificación).",
+    "confirmLabel": "Activar"
+  },
+  "deleteItemConfirm": {
+    "questionTitle": "¿Eliminar esta pregunta?",
+    "slideTitle": "¿Eliminar esta diapositiva?",
+    "description": "«{{label}}» se eliminará definitivamente.",
+    "confirmLabel": "Eliminar"
   }
 }

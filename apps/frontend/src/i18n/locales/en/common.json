@@ -2,6 +2,7 @@
   "loading": "Loading…",
   "confirm": "Confirm",
   "cancel": "Cancel",
+  "close": "Close",
   "quizStatus": {
     "draft": "Draft",
     "ready": "Ready",
@@ -14,6 +15,8 @@
     "italic": "Italic",
     "code": "Code",
     "codeBlock": "Code block",
+    "image": "Insert an image",
+    "uploading": "Uploading…",
     "bulletList": "Bulleted list",
     "orderedList": "Numbered list"
   }

@@ -2,6 +2,7 @@
   "loading": "加载中…",
   "confirm": "确认",
   "cancel": "取消",
+  "close": "关闭",
   "quizStatus": {
     "draft": "草稿",
     "ready": "就绪",
@@ -14,6 +15,8 @@
     "italic": "斜体",
     "code": "代码",
     "codeBlock": "代码块",
+    "image": "插入图片",
+    "uploading": "上传中…",
     "bulletList": "无序列表",
     "orderedList": "有序列表"
   }

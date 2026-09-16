@@ -120,10 +120,11 @@ describe('buildSnapshot', () => {
       id,
       beforeQuestionId,
       orderIndex,
-      title: id,
-      body: null,
+      blocks: [{ type: 'heading', id: 'h', text: id, level: 1 }],
       media: null,
       displayDelayS: null,
+      textTone: 'light',
+      textOutline: false,
     });
     const snap = buildSnapshot(
       quiz({
@@ -144,5 +145,42 @@ describe('buildSnapshot', () => {
       ['orphan', 2],
       ['end-1', 2],
     ]);
+  });
+
+  it('slides (#7): image blocks get their served URL, columns included; the background keeps its url', () => {
+    const snap = buildSnapshot(
+      quiz({
+        questions: [] as never,
+        slides: [
+          {
+            id: 's',
+            beforeQuestionId: null,
+            orderIndex: 0,
+            blocks: [
+              { type: 'image', id: 'i1', mediaId: 'M1', size: 'large', align: 'center' },
+              {
+                type: 'columns',
+                id: 'c',
+                columns: [
+                  [{ type: 'image', id: 'i2', mediaId: 'M2', size: 'full', align: 'left' }],
+                  [{ type: 'text', id: 't', md: 'hi' }],
+                ],
+              },
+            ],
+            media: { url: '/api/v1/media/BG', kind: 'image' },
+            displayDelayS: null,
+            textTone: 'dark',
+            textOutline: true,
+          },
+        ] as never,
+      }),
+    );
+    const [img, cols] = snap.slides[0].blocks;
+    expect(img).toMatchObject({ type: 'image', url: '/api/v1/media/M1' });
+    expect(cols.type === 'columns' && cols.columns[0][0]).toMatchObject({
+      url: '/api/v1/media/M2',
+    });
+    expect(snap.slides[0].background).toEqual({ url: '/api/v1/media/BG' });
+    expect(snap.slides[0]).toMatchObject({ textTone: 'dark', textOutline: true });
   });
 });

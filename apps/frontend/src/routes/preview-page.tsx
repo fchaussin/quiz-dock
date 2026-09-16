@@ -1,3 +1,4 @@
+import type { SlideBlock, SlideGradient } from '@quiz-dock/contracts';
 import { ChevronLeft, ChevronRight, Maximize, Minimize } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +8,7 @@ import { COLOR_BG, OPTION_BG_FALLBACK, SHAPE_GLYPH } from '@/lib/option-style';
 import { cn } from '@/lib/utils';
 import { quizItems } from '@/lib/quiz-items';
 import { useFullscreen } from '@/lib/use-fullscreen';
-import { SlideView } from '../game/live-components';
+import { SlideStage } from '../game/slide-stage';
 import type { QuizDetailDto, QuizDetailDtoQuestionsItem } from '../api/generated/model';
 import { useQuizzesControllerGet } from '../api/generated/quizzes/quizzes';
 import { previewRoute } from '../router';
@@ -35,7 +36,7 @@ function QuizPreview({ quiz }: { quiz: QuizDetailDto }) {
     <div
       ref={ref}
       className={cn(
-        'mx-auto flex w-full max-w-3xl flex-col gap-4',
+        'mx-auto flex w-full max-w-4xl flex-col gap-4',
         // En plein écran : occupe tout l'écran (projeté / grand écran), contenu centré.
         isFullscreen && 'max-w-none justify-center overflow-auto bg-background p-6 sm:p-12',
       )}
@@ -62,21 +63,22 @@ function QuizPreview({ quiz }: { quiz: QuizDetailDto }) {
           {item.kind === 'question' ? (
             <QuestionPreview question={item.question} large={isFullscreen} />
           ) : (
-            <div className="rounded-xl border p-6">
-              <SlideView
-                large={isFullscreen}
-                slide={{
-                  slideIndex: index,
-                  questionIndex: 0,
-                  title: item.slide.title,
-                  body: item.slide.body,
-                  media: item.slide.mediaId
-                    ? { url: `/api/v1/media/${item.slide.mediaId}`, kind: 'image' }
+            <SlideStage
+              className="rounded-xl border"
+              slide={{
+                slideIndex: index,
+                questionIndex: 0,
+                blocks: item.slide.blocks as SlideBlock[],
+                background: item.slide.mediaId
+                  ? { url: `/api/v1/media/${item.slide.mediaId}` }
+                  : item.slide.gradient
+                    ? { gradient: item.slide.gradient as SlideGradient }
                     : null,
-                  displayDelayS: item.slide.displayDelayS,
-                }}
-              />
-            </div>
+                textTone: item.slide.textTone,
+                textOutline: item.slide.textOutline,
+                displayDelayS: item.slide.displayDelayS,
+              }}
+            />
           )}
           <nav className="flex items-center justify-between">
             <Button

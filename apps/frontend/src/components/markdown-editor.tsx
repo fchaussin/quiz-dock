@@ -1,9 +1,11 @@
 import { Node } from '@tiptap/core';
+import Image from '@tiptap/extension-image';
 import { Markdown as MarkdownExt } from '@tiptap/markdown';
 import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Bold, Code, Italic, List, ListOrdered, SquareCode } from 'lucide-react';
-import { useEffect, useState, type ReactNode } from 'react';
+import { Bold, Code, ImagePlus, Italic, List, ListOrdered, SquareCode } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useMediaControllerUpload } from '../api/generated/media/media';
 import { useTranslation } from 'react-i18next';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -15,8 +17,8 @@ import type { MarkdownProfile } from './markdown';
  * storage, API and rendering (`Markdown` component) stay unchanged.
  *
  * The allowed formatting mirrors the rendering profile of `Markdown`:
- * `block` = bold, italic, lists, inline/block code; `inline` = bold, italic,
- * inline code in a single paragraph. No links: content is displayed live, on a
+ * `block` = bold, italic, lists, inline/block code, block images; `inline` = bold,
+ * italic, inline code in a single paragraph. No links: content is displayed live, on a
  * projected screen or a phone mid-answer, where a link is unusable at best.
  */
 export interface MarkdownEditorProps {
@@ -60,7 +62,10 @@ export function extensionsFor(profile: MarkdownProfile) {
           hardBreak: false,
         })
       : StarterKit.configure(common);
-  return profile === 'inline' ? [InlineDocument, kit, MarkdownExt] : [kit, MarkdownExt];
+  // Block fields accept images (uploaded media, inserted as Markdown `![](url)`).
+  return profile === 'inline'
+    ? [InlineDocument, kit, MarkdownExt]
+    : [kit, Image.configure({ inline: false, allowBase64: false }), MarkdownExt];
 }
 
 export function MarkdownEditor({
@@ -80,10 +85,8 @@ export function MarkdownEditor({
     contentType: 'markdown',
     editorProps: {
       attributes: {
-        class: cn(
-          'w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-          profile === 'inline' ? 'min-h-9' : 'min-h-24',
-        ),
+        // The frame (border, resize handle) is on the wrapper; the surface just fills it.
+        class: 'min-h-full w-full px-3 py-2 text-sm focus-visible:outline-none',
         ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
       },
     },
@@ -101,11 +104,11 @@ export function MarkdownEditor({
 
   return (
     <div data-markdown-editor className={cn('group flex flex-col gap-1', className)}>
-      {/* Inline fields (option labels) keep their row compact: tools appear on focus. */}
+      {/* The toolbar stays out of the way until the field has focus (source mode keeps its toggle). */}
       <div
         className={cn(
           'flex flex-wrap items-center gap-1',
-          profile === 'inline' && !source && 'hidden group-focus-within:flex',
+          !source && 'hidden group-focus-within:flex',
         )}
       >
         {editor && !source ? <Toolbar editor={editor} profile={profile} /> : null}
@@ -122,13 +125,19 @@ export function MarkdownEditor({
         <Textarea
           aria-label={ariaLabel}
           rows={profile === 'inline' ? 1 : 4}
-          className={cn('font-mono', profile === 'inline' && 'min-h-9')}
+          className={cn('font-mono resize-y', profile === 'inline' ? 'min-h-9' : 'min-h-24')}
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
         />
       ) : (
-        <div className="relative">
+        <div
+          className={cn(
+            'border-input bg-background focus-within:ring-ring relative rounded-md border shadow-sm focus-within:ring-1',
+            // Block fields are resizable vertically, like a textarea.
+            profile === 'inline' ? 'min-h-9' : 'min-h-24 resize-y overflow-auto',
+          )}
+        >
           {isEmpty && placeholder ? (
             <span className="text-muted-foreground pointer-events-none absolute top-2 left-3 text-sm">
               {placeholder}
@@ -202,6 +211,7 @@ function Toolbar({ editor, profile }: { editor: Editor; profile: MarkdownProfile
           >
             <SquareCode className="size-4" />
           </ToolButton>
+          <ImageButton editor={editor} />
         </>
       ) : null}
     </>
@@ -234,5 +244,41 @@ function ToolButton({
     >
       {children}
     </button>
+  );
+}
+
+/** Uploads a picture (same endpoint as question media) and inserts it as a block image. */
+function ImageButton({ editor }: { editor: Editor }) {
+  const { t } = useTranslation('common');
+  const upload = useMediaControllerUpload();
+  const input = useRef<HTMLInputElement>(null);
+  const onFile = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      const res = await upload.mutateAsync({ data: { file } });
+      editor.chain().focus().setImage({ src: res.data.url }).run();
+    } catch {
+      // The upload endpoint reports its own error; nothing is inserted.
+    }
+    if (input.current) input.current.value = '';
+  };
+  return (
+    <>
+      <ToolButton
+        label={upload.isPending ? t('markdownEditor.uploading') : t('markdownEditor.image')}
+        active={false}
+        onClick={() => input.current?.click()}
+      >
+        <ImagePlus className="size-4" />
+      </ToolButton>
+      <input
+        ref={input}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        aria-label={t('markdownEditor.image')}
+        onChange={(e) => void onFile(e.target.files?.[0])}
+      />
+    </>
   );
 }

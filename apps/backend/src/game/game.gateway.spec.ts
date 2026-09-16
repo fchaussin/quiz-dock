@@ -480,7 +480,7 @@ describe('GameGateway (intégration socket)', () => {
     expect(Date.now() - revealedAt).toBeGreaterThanOrEqual(1000);
   }, 15_000);
 
-  it('slides (#7): intro slide → host:next → question; timed closing slide → podium by itself', async () => {
+  it('slides (#7): manual mode = host clicks through; auto mode honours displayDelayS (1 s closing slide)', async () => {
     const quiz = await prisma.quiz.create({
       data: {
         ownerId: hostUserId,
@@ -510,10 +510,18 @@ describe('GameGateway (intégration socket)', () => {
           quizId: quiz.id,
           beforeQuestionId: quiz.questions[0].id,
           orderIndex: 0,
-          title: 'Welcome',
-          body: 'Read **this** first.',
+          blocks: [
+            { type: 'heading', id: 'h', text: 'Welcome', level: 1 },
+            { type: 'text', id: 't', md: 'Read **this** first.' },
+          ],
         },
-        { quizId: quiz.id, beforeQuestionId: null, orderIndex: 0, title: 'Bye', displayDelayS: 1 },
+        {
+          quizId: quiz.id,
+          beforeQuestionId: null,
+          orderIndex: 0,
+          blocks: [{ type: 'heading', id: 'h', text: 'Bye', level: 1 }],
+          displayDelayS: 1,
+        },
       ],
     });
 
@@ -524,7 +532,11 @@ describe('GameGateway (intégration socket)', () => {
 
     const states: string[] = [];
     player.on('game:state', (s: { state: string }) => states.push(s.state));
-    const slides: Array<{ slideIndex: number; title: string | null; questionIndex: number }> = [];
+    const slides: Array<{
+      slideIndex: number;
+      blocks: Array<{ text?: string }>;
+      questionIndex: number;
+    }> = [];
     player.on('slide:show', (s) => slides.push(s as never));
     const qStart = new Promise<{ startedAt: number; options: Array<{ id: string }> }>((resolve) =>
       player.on('question:start', (q) => resolve(q as never)),
@@ -536,12 +548,11 @@ describe('GameGateway (intégration socket)', () => {
     await new Promise((r) => setTimeout(r, 200));
     expect(states).toEqual(['SLIDE_SHOW']);
     expect(slides).toEqual(
-      [{ slideIndex: 0, questionIndex: 0, title: 'Welcome' }].map((s) =>
-        expect.objectContaining(s),
-      ),
+      [{ slideIndex: 0, questionIndex: 0 }].map((s) => expect.objectContaining(s)),
     );
+    expect(slides[0].blocks[0]).toMatchObject({ type: 'heading', text: 'Welcome' });
 
-    // Untimed slide: only the host moves on.
+    // Manual mode: nothing advances by itself, the host moves on.
     host.emit('host:next', { pin });
     const q = await qStart;
     expect(states).toEqual(['SLIDE_SHOW', 'ANSWERING']);
@@ -549,13 +560,13 @@ describe('GameGateway (intégration socket)', () => {
     player.emit('player:submit', { pin, questionIndex: 0, answer: q.options[0].id }); // → REVEAL
     await new Promise((r) => setTimeout(r, 200));
 
-    // After the last reveal, host:next shows the closing slide, which advances alone after 1 s.
+    // Auto mode from here: host:next shows the closing slide, whose 1 s delay then fires alone.
+    host.emit('host:mode', { pin, mode: 'auto' });
+    await new Promise((r) => setTimeout(r, 100));
     host.emit('host:next', { pin });
     await new Promise((r) => setTimeout(r, 200));
     expect(states.at(-1)).toBe('SLIDE_SHOW');
-    expect(slides.at(-1)).toEqual(
-      expect.objectContaining({ slideIndex: 1, title: 'Bye', questionIndex: 1 }),
-    );
+    expect(slides.at(-1)).toEqual(expect.objectContaining({ slideIndex: 1, questionIndex: 1 }));
     const shownAt = Date.now();
     await podiumP;
     expect(Date.now() - shownAt).toBeGreaterThanOrEqual(700);

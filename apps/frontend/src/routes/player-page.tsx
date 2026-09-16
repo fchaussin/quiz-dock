@@ -15,6 +15,8 @@ import {
   saveAvatarSeed,
 } from '../game/game-client';
 import { AnswerExplanation, OptionGrid, SlideView } from '../game/live-components';
+import { cn } from '@/lib/utils';
+import { Surface } from '../game/surface';
 import { RatingPanel } from '../game/rating-panel';
 import { useCountdown, useGameRemaining } from '../game/use-countdown';
 import { useGameSession } from '../game/use-game-session';
@@ -221,9 +223,19 @@ export function PlayerPage() {
   };
 
   const wrap = (children: React.ReactNode) => (
-    <section className="mx-auto flex w-full max-w-sm flex-col items-center gap-6 py-8 text-center">
-      {children}
-    </section>
+    <Surface
+      background={view.question?.background}
+      textTone={view.question?.textTone}
+      textOutline={view.question?.textOutline}
+      className={cn(
+        '-mx-4 -my-4 min-h-[calc(100dvh-4rem)] px-4 py-4',
+        !view.question?.background && 'bg-transparent',
+      )}
+    >
+      <section className="mx-auto flex w-full max-w-sm flex-col items-center gap-6 py-8 text-center">
+        {children}
+      </section>
+    </Surface>
   );
 
   // ── Écran « Rejoindre » (pas de session locale valide) ─────────────────────
@@ -284,7 +296,7 @@ export function PlayerPage() {
   // ── États de jeu ───────────────────────────────────────────────────────────
   if (view.state === 'SLIDE_SHOW' && view.slide) {
     return (
-      <section className="mx-auto flex w-full max-w-md flex-col items-center gap-6 py-6">
+      <section className="flex w-full flex-col py-4">
         <SlideView slide={view.slide} />
       </section>
     );
@@ -323,7 +335,7 @@ export function PlayerPage() {
             <p className="text-xl font-semibold">{t('player.thanks')}</p>
           </>
         )}
-        <RatingPanel pin={pin} socket={socket} />
+        {view.feedbackEnabled ? <RatingPanel pin={pin} socket={socket} /> : null}
       </>,
     );
   }

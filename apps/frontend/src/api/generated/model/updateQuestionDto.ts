@@ -6,8 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { UpdateQuestionDtoAcceptedAnswersItem } from './updateQuestionDtoAcceptedAnswersItem';
+import type { UpdateQuestionDtoBackgroundGradient } from './updateQuestionDtoBackgroundGradient';
 import type { UpdateQuestionDtoOptionsItem } from './updateQuestionDtoOptionsItem';
 import type { UpdateQuestionDtoPointsMode } from './updateQuestionDtoPointsMode';
+import type { UpdateQuestionDtoTextTone } from './updateQuestionDtoTextTone';
 import type { UpdateQuestionDtoType } from './updateQuestionDtoType';
 
 export interface UpdateQuestionDto {
@@ -22,6 +24,16 @@ export interface UpdateQuestionDto {
      * @nullable
      */
   answerExplanation?: string | null;
+  /**
+     * @minLength 26
+     * @maxLength 26
+     * @nullable
+     */
+  backgroundMediaId?: string | null;
+  /** @nullable */
+  backgroundGradient?: UpdateQuestionDtoBackgroundGradient;
+  textTone?: UpdateQuestionDtoTextTone;
+  textOutline?: boolean;
   /**
      * @minLength 26
      * @maxLength 26
@@ -42,7 +54,7 @@ export interface UpdateQuestionDto {
   numericValue?: number;
   /** @minimum 0 */
   numericTolerance?: number;
-  /** @maxItems 6 */
+  /** @maxItems 8 */
   options?: UpdateQuestionDtoOptionsItem[];
   /** @maxItems 20 */
   acceptedAnswers?: UpdateQuestionDtoAcceptedAnswersItem[];

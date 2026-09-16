@@ -2,6 +2,7 @@
   "loading": "Cargando…",
   "confirm": "Confirmar",
   "cancel": "Cancelar",
+  "close": "Cerrar",
   "quizStatus": {
     "draft": "Borrador",
     "ready": "Listo",
@@ -14,6 +15,8 @@
     "italic": "Cursiva",
     "code": "Código",
     "codeBlock": "Bloque de código",
+    "image": "Insertar una imagen",
+    "uploading": "Subiendo…",
     "bulletList": "Lista con viñetas",
     "orderedList": "Lista numerada"
   }

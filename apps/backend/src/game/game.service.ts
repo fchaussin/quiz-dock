@@ -280,6 +280,10 @@ export class GameService {
     if (!meta || (meta.state !== GameState.Podium && meta.state !== GameState.Ended)) {
       return { ok: false };
     }
+    const snapshot = await this.getSnapshot(pin);
+    if (snapshot && !snapshot.feedbackEnabled) {
+      return { ok: false }; // rating switched off on this quiz
+    }
     const raw = await this.redis.hget(gameKeys.players(pin), playerId);
     if (!raw) {
       return { ok: false };

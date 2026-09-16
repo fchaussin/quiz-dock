@@ -13,6 +13,10 @@ export const SHAPE_GLYPH: Record<string, string> = {
   diamond: '◆',
   circle: '●',
   square: '■',
+  star: '★',
+  hexagon: '⬢',
+  heart: '♥',
+  cross: '✚',
 };
 
 /** Couleur de fond par option. */
@@ -21,6 +25,10 @@ export const COLOR_BG: Record<string, string> = {
   blue: 'bg-blue-600',
   yellow: 'bg-amber-500',
   green: 'bg-green-600',
+  purple: 'bg-purple-600',
+  orange: 'bg-orange-500',
+  pink: 'bg-pink-600',
+  teal: 'bg-teal-600',
 };
 
 /** Repli quand l'option n'a pas de couleur connue. */

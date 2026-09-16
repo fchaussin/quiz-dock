@@ -9,7 +9,13 @@ import type {
 } from '@quiz-dock/contracts';
 import { basePointsFor } from './scoring';
 import type { QuizSnapshot, SnapshotQuestion, SnapshotSlide } from './game.types';
-import type { SlideShowPayload } from '@quiz-dock/contracts';
+import type {
+  SlideBlock,
+  SlideGradient,
+  SlideLeafBlock,
+  SlideShowPayload,
+  SlideTextTone,
+} from '@quiz-dock/contracts';
 
 /** Forme Prisma attendue par le constructeur de snapshot (relations incluses). */
 const quizWithContent = Prisma.validator<Prisma.QuizDefaultArgs>()({
@@ -18,6 +24,7 @@ const quizWithContent = Prisma.validator<Prisma.QuizDefaultArgs>()({
       orderBy: { orderIndex: 'asc' },
       include: {
         media: true,
+        backgroundMedia: true,
         options: { orderBy: { orderIndex: 'asc' }, include: { media: true } },
         acceptedAnswers: true,
       },
@@ -43,6 +50,7 @@ export function buildSnapshot(quiz: QuizWithContent): QuizSnapshot {
     title: quiz.title,
     description: quiz.description,
     language: quiz.language,
+    feedbackEnabled: quiz.feedbackEnabled,
     questions: quiz.questions.map(
       (q): SnapshotQuestion => ({
         id: q.id,
@@ -51,6 +59,13 @@ export function buildSnapshot(quiz: QuizWithContent): QuizSnapshot {
         prompt: q.prompt,
         media: mediaOf(q.media),
         answerExplanation: q.answerExplanation ?? null,
+        background: q.backgroundMedia
+          ? { url: q.backgroundMedia.url }
+          : q.backgroundGradient
+            ? { gradient: q.backgroundGradient as unknown as SlideGradient }
+            : null,
+        textTone: q.textTone as SlideTextTone,
+        textOutline: q.textOutline,
         timeLimitS: q.timeLimitS,
         revealDelayS: q.revealDelayS ?? null,
         basePoints: basePointsFor(q.pointsMode as PointsMode),
@@ -88,11 +103,25 @@ function buildSnapshotSlides(quiz: QuizWithContent): SnapshotSlide[] {
     .map(({ slide, anchor }) => ({
       id: slide.id,
       beforeQuestionIndex: anchor,
-      title: slide.title,
-      body: slide.body,
-      media: mediaOf(slide.media),
+      blocks: resolveBlocks(slide.blocks as SlideBlock[]),
+      background: slide.media
+        ? { url: slide.media.url }
+        : slide.gradient
+          ? { gradient: slide.gradient as unknown as SlideGradient }
+          : null,
+      textTone: slide.textTone as SlideTextTone,
+      textOutline: slide.textOutline,
       displayDelayS: slide.displayDelayS,
     }));
+}
+
+/** Image blocks get their served URL so the clients never build one from an id. */
+function resolveBlocks(blocks: SlideBlock[]): SlideBlock[] {
+  const leaf = (b: SlideLeafBlock): SlideLeafBlock =>
+    b.type === 'image' ? { ...b, url: `/api/v1/media/${b.mediaId}` } : b;
+  return blocks.map((b) =>
+    b.type === 'columns' ? { ...b, columns: b.columns.map((c) => c.map(leaf)) } : leaf(b),
+  );
 }
 
 /** Public `slide:show` payload (#7): everything in a slide is meant to be shown. */
@@ -100,9 +129,10 @@ export function buildSlideShow(slide: SnapshotSlide, slideIndex: number): SlideS
   return {
     slideIndex,
     questionIndex: slide.beforeQuestionIndex,
-    title: slide.title,
-    body: slide.body,
-    media: slide.media,
+    blocks: slide.blocks,
+    background: slide.background,
+    textTone: slide.textTone,
+    textOutline: slide.textOutline,
     displayDelayS: slide.displayDelayS,
   };
 }
@@ -139,5 +169,8 @@ export function buildQuestionStart(
     basePoints: question.basePoints,
     startedAt,
     endsAt,
+    background: question.background,
+    textTone: question.textTone,
+    textOutline: question.textOutline,
   };
 }

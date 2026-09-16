@@ -32,6 +32,8 @@ needed. Where you set them depends on how you run it:
 | `REDIS_URL` | — | app | Redis connection string, e.g. `redis://host:6379`. Live-game state only. |
 | `MEDIA_DIR` | `/data/media` | app | Where uploaded images/audio are stored. Mount a volume here to persist. |
 | `MEDIA_MAX_BYTES` | `10485760` | app | Max upload size per file (bytes). Default 10 MiB. |
+| `GAME_AUTO_ADVANCE_MS` | `5000` | app | Automatic mode: time spent on a reveal or a content slide before moving on, unless the question/slide sets its own. |
+| `GAME_READ_DELAY_MS` | `3000` | app | Reading window shown before a question's timer starts. |
 | `OIDC_ISSUER` | — | app | `iss` expected in tokens (your IdP realm URL). Required when `AUTH_MODE=oidc`. |
 | `OIDC_JWKS_URI` | `${issuer}/protocol/openid-connect/certs` | app | JWKS endpoint. May target an internal host in Docker (see §3). |
 | `OIDC_CLIENT_ID` | `quiz-dock-frontend` | app | Public SPA client id (sent to the browser via `GET /auth/config`). |
@@ -43,7 +45,7 @@ The multi-service `docker-compose.prod.yml` also exposes:
 | Variable | Default | Description |
 |---|---|---|
 | `HTTP_PORT` | `18080` | Host port mapped to the app. |
-| `QUIZDOCK_TAG` | `latest` | Image tag to run (`0.3.0` to pin). |
+| `QUIZDOCK_TAG` | `latest` | Image tag to run (`0.4.0` to pin). |
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `live` / `live` / `quizdock` | Bundled Postgres credentials (used to build `DATABASE_URL`). |
 
 ### Ports & volumes

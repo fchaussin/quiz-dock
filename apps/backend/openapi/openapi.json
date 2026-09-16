@@ -275,6 +275,38 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "rating",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 5,
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -1074,6 +1106,9 @@
           "language": {
             "type": "string"
           },
+          "feedbackEnabled": {
+            "type": "boolean"
+          },
           "questionCount": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -1099,6 +1134,7 @@
           "status",
           "visibility",
           "language",
+          "feedbackEnabled",
           "questionCount",
           "createdAt",
           "updatedAt",
@@ -1122,6 +1158,9 @@
             "type": "string",
             "minLength": 2,
             "maxLength": 5
+          },
+          "feedbackEnabled": {
+            "type": "boolean"
           },
           "coverMediaId": {
             "type": "string",
@@ -1170,6 +1209,9 @@
           },
           "language": {
             "type": "string"
+          },
+          "feedbackEnabled": {
+            "type": "boolean"
           },
           "questionCount": {
             "type": "integer",
@@ -1225,6 +1267,44 @@
                   "type": "string",
                   "nullable": true
                 },
+                "backgroundMediaId": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "backgroundGradient": {
+                  "type": "object",
+                  "properties": {
+                    "angle": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 360
+                    },
+                    "colors": {
+                      "minItems": 2,
+                      "maxItems": 4,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "angle",
+                    "colors"
+                  ],
+                  "nullable": true
+                },
+                "textTone": {
+                  "type": "string",
+                  "enum": [
+                    "light",
+                    "dark"
+                  ]
+                },
+                "textOutline": {
+                  "type": "boolean"
+                },
                 "timeLimitS": {
                   "type": "integer",
                   "minimum": -9007199254740991,
@@ -1279,7 +1359,11 @@
                           "red",
                           "blue",
                           "yellow",
-                          "green"
+                          "green",
+                          "purple",
+                          "orange",
+                          "pink",
+                          "teal"
                         ]
                       },
                       "shape": {
@@ -1288,7 +1372,11 @@
                           "triangle",
                           "diamond",
                           "circle",
-                          "square"
+                          "square",
+                          "star",
+                          "hexagon",
+                          "heart",
+                          "cross"
                         ]
                       },
                       "isCorrect": {
@@ -1344,6 +1432,10 @@
                 "prompt",
                 "mediaId",
                 "answerExplanation",
+                "backgroundMediaId",
+                "backgroundGradient",
+                "textTone",
+                "textOutline",
                 "timeLimitS",
                 "revealDelayS",
                 "pointsMode",
@@ -1374,17 +1466,356 @@
                   "minimum": -9007199254740991,
                   "maximum": 9007199254740991
                 },
-                "title": {
-                  "type": "string",
-                  "nullable": true
-                },
-                "body": {
-                  "type": "string",
-                  "nullable": true
+                "blocks": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "heading"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 64
+                              },
+                              "text": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 200
+                              },
+                              "level": {
+                                "default": 1,
+                                "anyOf": [
+                                  {
+                                    "type": "number",
+                                    "enum": [
+                                      1
+                                    ]
+                                  },
+                                  {
+                                    "type": "number",
+                                    "enum": [
+                                      2
+                                    ]
+                                  }
+                                ]
+                              },
+                              "align": {
+                                "type": "string",
+                                "enum": [
+                                  "left",
+                                  "center",
+                                  "right"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "id",
+                              "text"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "text"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 64
+                              },
+                              "md": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 5000
+                              },
+                              "align": {
+                                "type": "string",
+                                "enum": [
+                                  "left",
+                                  "center",
+                                  "right"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "id",
+                              "md"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "image"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 64
+                              },
+                              "mediaId": {
+                                "type": "string",
+                                "minLength": 26,
+                                "maxLength": 26
+                              },
+                              "size": {
+                                "default": "large",
+                                "type": "string",
+                                "enum": [
+                                  "small",
+                                  "medium",
+                                  "large",
+                                  "full"
+                                ]
+                              },
+                              "align": {
+                                "default": "center",
+                                "type": "string",
+                                "enum": [
+                                  "left",
+                                  "center",
+                                  "right"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "id",
+                              "mediaId"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "columns"
+                            ]
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "columns": {
+                            "minItems": 2,
+                            "maxItems": 3,
+                            "type": "array",
+                            "items": {
+                              "maxItems": 10,
+                              "type": "array",
+                              "items": {
+                                "oneOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "heading"
+                                        ]
+                                      },
+                                      "id": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 64
+                                      },
+                                      "text": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 200
+                                      },
+                                      "level": {
+                                        "default": 1,
+                                        "anyOf": [
+                                          {
+                                            "type": "number",
+                                            "enum": [
+                                              1
+                                            ]
+                                          },
+                                          {
+                                            "type": "number",
+                                            "enum": [
+                                              2
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "align": {
+                                        "type": "string",
+                                        "enum": [
+                                          "left",
+                                          "center",
+                                          "right"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "id",
+                                      "text"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "text"
+                                        ]
+                                      },
+                                      "id": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 64
+                                      },
+                                      "md": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 5000
+                                      },
+                                      "align": {
+                                        "type": "string",
+                                        "enum": [
+                                          "left",
+                                          "center",
+                                          "right"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "id",
+                                      "md"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "type": {
+                                        "type": "string",
+                                        "enum": [
+                                          "image"
+                                        ]
+                                      },
+                                      "id": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 64
+                                      },
+                                      "mediaId": {
+                                        "type": "string",
+                                        "minLength": 26,
+                                        "maxLength": 26
+                                      },
+                                      "size": {
+                                        "default": "large",
+                                        "type": "string",
+                                        "enum": [
+                                          "small",
+                                          "medium",
+                                          "large",
+                                          "full"
+                                        ]
+                                      },
+                                      "align": {
+                                        "default": "center",
+                                        "type": "string",
+                                        "enum": [
+                                          "left",
+                                          "center",
+                                          "right"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "type",
+                                      "id",
+                                      "mediaId"
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          "ratio": {
+                            "type": "string",
+                            "enum": [
+                              "1-1",
+                              "1-2",
+                              "2-1"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "id",
+                          "columns"
+                        ]
+                      }
+                    ]
+                  }
                 },
                 "mediaId": {
                   "type": "string",
                   "nullable": true
+                },
+                "gradient": {
+                  "type": "object",
+                  "properties": {
+                    "angle": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 360
+                    },
+                    "colors": {
+                      "minItems": 2,
+                      "maxItems": 4,
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    }
+                  },
+                  "required": [
+                    "angle",
+                    "colors"
+                  ],
+                  "nullable": true
+                },
+                "textTone": {
+                  "type": "string",
+                  "enum": [
+                    "light",
+                    "dark"
+                  ]
+                },
+                "textOutline": {
+                  "type": "boolean"
                 },
                 "displayDelayS": {
                   "type": "integer",
@@ -1398,9 +1829,11 @@
                 "quizId",
                 "beforeQuestionId",
                 "orderIndex",
-                "title",
-                "body",
+                "blocks",
                 "mediaId",
+                "gradient",
+                "textTone",
+                "textOutline",
                 "displayDelayS"
               ]
             }
@@ -1415,6 +1848,7 @@
           "status",
           "visibility",
           "language",
+          "feedbackEnabled",
           "questionCount",
           "createdAt",
           "updatedAt",
@@ -1433,6 +1867,16 @@
           },
           "average": {
             "type": "number"
+          },
+          "distribution": {
+            "minItems": 5,
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
           },
           "items": {
             "type": "array",
@@ -1466,12 +1910,31 @@
                 "createdAt"
               ]
             }
+          },
+          "page": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "pageSize": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           }
         },
         "required": [
           "count",
           "average",
-          "items"
+          "distribution",
+          "items",
+          "page",
+          "pageSize",
+          "total"
         ]
       },
       "SessionListDto": {
@@ -1814,6 +2277,9 @@
             "minLength": 2,
             "maxLength": 5
           },
+          "feedbackEnabled": {
+            "type": "boolean"
+          },
           "coverMediaId": {
             "type": "string",
             "minLength": 26,
@@ -1863,6 +2329,48 @@
             "maxLength": 2000,
             "nullable": true
           },
+          "backgroundMediaId": {
+            "type": "string",
+            "minLength": 26,
+            "maxLength": 26,
+            "nullable": true
+          },
+          "backgroundGradient": {
+            "type": "object",
+            "properties": {
+              "angle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "colors": {
+                "minItems": 2,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$"
+                }
+              }
+            },
+            "required": [
+              "angle",
+              "colors"
+            ],
+            "nullable": true
+          },
+          "textTone": {
+            "default": "light",
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "textOutline": {
+            "default": false,
+            "type": "boolean"
+          },
           "mediaId": {
             "type": "string",
             "minLength": 26,
@@ -1898,7 +2406,7 @@
           },
           "options": {
             "default": [],
-            "maxItems": 6,
+            "maxItems": 8,
             "type": "array",
             "items": {
               "type": "object",
@@ -1918,7 +2426,11 @@
                     "red",
                     "blue",
                     "yellow",
-                    "green"
+                    "green",
+                    "purple",
+                    "orange",
+                    "pink",
+                    "teal"
                   ]
                 },
                 "shape": {
@@ -1927,7 +2439,11 @@
                     "triangle",
                     "diamond",
                     "circle",
-                    "square"
+                    "square",
+                    "star",
+                    "hexagon",
+                    "heart",
+                    "cross"
                   ]
                 },
                 "isCorrect": {
@@ -2007,6 +2523,44 @@
             "type": "string",
             "nullable": true
           },
+          "backgroundMediaId": {
+            "type": "string",
+            "nullable": true
+          },
+          "backgroundGradient": {
+            "type": "object",
+            "properties": {
+              "angle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "colors": {
+                "minItems": 2,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$"
+                }
+              }
+            },
+            "required": [
+              "angle",
+              "colors"
+            ],
+            "nullable": true
+          },
+          "textTone": {
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "textOutline": {
+            "type": "boolean"
+          },
           "timeLimitS": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -2061,7 +2615,11 @@
                     "red",
                     "blue",
                     "yellow",
-                    "green"
+                    "green",
+                    "purple",
+                    "orange",
+                    "pink",
+                    "teal"
                   ]
                 },
                 "shape": {
@@ -2070,7 +2628,11 @@
                     "triangle",
                     "diamond",
                     "circle",
-                    "square"
+                    "square",
+                    "star",
+                    "hexagon",
+                    "heart",
+                    "cross"
                   ]
                 },
                 "isCorrect": {
@@ -2126,6 +2688,10 @@
           "prompt",
           "mediaId",
           "answerExplanation",
+          "backgroundMediaId",
+          "backgroundGradient",
+          "textTone",
+          "textOutline",
           "timeLimitS",
           "revealDelayS",
           "pointsMode",
@@ -2191,6 +2757,48 @@
             "maxLength": 2000,
             "nullable": true
           },
+          "backgroundMediaId": {
+            "type": "string",
+            "minLength": 26,
+            "maxLength": 26,
+            "nullable": true
+          },
+          "backgroundGradient": {
+            "type": "object",
+            "properties": {
+              "angle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "colors": {
+                "minItems": 2,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$"
+                }
+              }
+            },
+            "required": [
+              "angle",
+              "colors"
+            ],
+            "nullable": true
+          },
+          "textTone": {
+            "default": "light",
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "textOutline": {
+            "default": false,
+            "type": "boolean"
+          },
           "mediaId": {
             "type": "string",
             "minLength": 26,
@@ -2226,7 +2834,7 @@
           },
           "options": {
             "default": [],
-            "maxItems": 6,
+            "maxItems": 8,
             "type": "array",
             "items": {
               "type": "object",
@@ -2246,7 +2854,11 @@
                     "red",
                     "blue",
                     "yellow",
-                    "green"
+                    "green",
+                    "purple",
+                    "orange",
+                    "pink",
+                    "teal"
                   ]
                 },
                 "shape": {
@@ -2255,7 +2867,11 @@
                     "triangle",
                     "diamond",
                     "circle",
-                    "square"
+                    "square",
+                    "star",
+                    "hexagon",
+                    "heart",
+                    "cross"
                   ]
                 },
                 "isCorrect": {
@@ -2301,15 +2917,320 @@
       "CreateSlideDto": {
         "type": "object",
         "properties": {
-          "title": {
-            "type": "string",
-            "maxLength": 200,
-            "nullable": true
-          },
-          "body": {
-            "type": "string",
-            "maxLength": 5000,
-            "nullable": true
+          "blocks": {
+            "default": [],
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "heading"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "level": {
+                          "default": 1,
+                          "anyOf": [
+                            {
+                              "type": "number",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "type": "number",
+                              "enum": [
+                                2
+                              ]
+                            }
+                          ]
+                        },
+                        "align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "text"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "md": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 5000
+                        },
+                        "align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "md"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "image"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "mediaId": {
+                          "type": "string",
+                          "minLength": 26,
+                          "maxLength": 26
+                        },
+                        "size": {
+                          "default": "large",
+                          "type": "string",
+                          "enum": [
+                            "small",
+                            "medium",
+                            "large",
+                            "full"
+                          ]
+                        },
+                        "align": {
+                          "default": "center",
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "mediaId"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "columns"
+                      ]
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "columns": {
+                      "minItems": 2,
+                      "maxItems": 3,
+                      "type": "array",
+                      "items": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "heading"
+                                  ]
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 64
+                                },
+                                "text": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 200
+                                },
+                                "level": {
+                                  "default": 1,
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                      "enum": [
+                                        1
+                                      ]
+                                    },
+                                    {
+                                      "type": "number",
+                                      "enum": [
+                                        2
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "align": {
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "id",
+                                "text"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "text"
+                                  ]
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 64
+                                },
+                                "md": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 5000
+                                },
+                                "align": {
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "id",
+                                "md"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "image"
+                                  ]
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 64
+                                },
+                                "mediaId": {
+                                  "type": "string",
+                                  "minLength": 26,
+                                  "maxLength": 26
+                                },
+                                "size": {
+                                  "default": "large",
+                                  "type": "string",
+                                  "enum": [
+                                    "small",
+                                    "medium",
+                                    "large",
+                                    "full"
+                                  ]
+                                },
+                                "align": {
+                                  "default": "center",
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "id",
+                                "mediaId"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "ratio": {
+                      "type": "string",
+                      "enum": [
+                        "1-1",
+                        "1-2",
+                        "2-1"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "columns"
+                  ]
+                }
+              ]
+            }
           },
           "mediaId": {
             "type": "string",
@@ -2317,9 +3238,45 @@
             "maxLength": 26,
             "nullable": true
           },
+          "gradient": {
+            "type": "object",
+            "properties": {
+              "angle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "colors": {
+                "minItems": 2,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$"
+                }
+              }
+            },
+            "required": [
+              "angle",
+              "colors"
+            ],
+            "nullable": true
+          },
+          "textTone": {
+            "default": "light",
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "textOutline": {
+            "default": false,
+            "type": "boolean"
+          },
           "displayDelayS": {
             "type": "integer",
-            "minimum": 1,
+            "minimum": 0,
             "maximum": 600,
             "nullable": true
           }
@@ -2343,17 +3300,356 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "body": {
-            "type": "string",
-            "nullable": true
+          "blocks": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "heading"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "level": {
+                          "default": 1,
+                          "anyOf": [
+                            {
+                              "type": "number",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "type": "number",
+                              "enum": [
+                                2
+                              ]
+                            }
+                          ]
+                        },
+                        "align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "text"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "md": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 5000
+                        },
+                        "align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "md"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "image"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "mediaId": {
+                          "type": "string",
+                          "minLength": 26,
+                          "maxLength": 26
+                        },
+                        "size": {
+                          "default": "large",
+                          "type": "string",
+                          "enum": [
+                            "small",
+                            "medium",
+                            "large",
+                            "full"
+                          ]
+                        },
+                        "align": {
+                          "default": "center",
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "mediaId"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "columns"
+                      ]
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "columns": {
+                      "minItems": 2,
+                      "maxItems": 3,
+                      "type": "array",
+                      "items": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "heading"
+                                  ]
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 64
+                                },
+                                "text": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 200
+                                },
+                                "level": {
+                                  "default": 1,
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                      "enum": [
+                                        1
+                                      ]
+                                    },
+                                    {
+                                      "type": "number",
+                                      "enum": [
+                                        2
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "align": {
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "id",
+                                "text"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "text"
+                                  ]
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 64
+                                },
+                                "md": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 5000
+                                },
+                                "align": {
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "id",
+                                "md"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "image"
+                                  ]
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 64
+                                },
+                                "mediaId": {
+                                  "type": "string",
+                                  "minLength": 26,
+                                  "maxLength": 26
+                                },
+                                "size": {
+                                  "default": "large",
+                                  "type": "string",
+                                  "enum": [
+                                    "small",
+                                    "medium",
+                                    "large",
+                                    "full"
+                                  ]
+                                },
+                                "align": {
+                                  "default": "center",
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "id",
+                                "mediaId"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "ratio": {
+                      "type": "string",
+                      "enum": [
+                        "1-1",
+                        "1-2",
+                        "2-1"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "columns"
+                  ]
+                }
+              ]
+            }
           },
           "mediaId": {
             "type": "string",
             "nullable": true
+          },
+          "gradient": {
+            "type": "object",
+            "properties": {
+              "angle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "colors": {
+                "minItems": 2,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$"
+                }
+              }
+            },
+            "required": [
+              "angle",
+              "colors"
+            ],
+            "nullable": true
+          },
+          "textTone": {
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "textOutline": {
+            "type": "boolean"
           },
           "displayDelayS": {
             "type": "integer",
@@ -2367,9 +3663,11 @@
           "quizId",
           "beforeQuestionId",
           "orderIndex",
-          "title",
-          "body",
+          "blocks",
           "mediaId",
+          "gradient",
+          "textTone",
+          "textOutline",
           "displayDelayS"
         ]
       },
@@ -2409,15 +3707,320 @@
       "UpdateSlideDto": {
         "type": "object",
         "properties": {
-          "title": {
-            "type": "string",
-            "maxLength": 200,
-            "nullable": true
-          },
-          "body": {
-            "type": "string",
-            "maxLength": 5000,
-            "nullable": true
+          "blocks": {
+            "default": [],
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "heading"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "text": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "level": {
+                          "default": 1,
+                          "anyOf": [
+                            {
+                              "type": "number",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "type": "number",
+                              "enum": [
+                                2
+                              ]
+                            }
+                          ]
+                        },
+                        "align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "text"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "md": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 5000
+                        },
+                        "align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "md"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "image"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 64
+                        },
+                        "mediaId": {
+                          "type": "string",
+                          "minLength": 26,
+                          "maxLength": 26
+                        },
+                        "size": {
+                          "default": "large",
+                          "type": "string",
+                          "enum": [
+                            "small",
+                            "medium",
+                            "large",
+                            "full"
+                          ]
+                        },
+                        "align": {
+                          "default": "center",
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "id",
+                        "mediaId"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "columns"
+                      ]
+                    },
+                    "id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "columns": {
+                      "minItems": 2,
+                      "maxItems": 3,
+                      "type": "array",
+                      "items": {
+                        "maxItems": 10,
+                        "type": "array",
+                        "items": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "heading"
+                                  ]
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 64
+                                },
+                                "text": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 200
+                                },
+                                "level": {
+                                  "default": 1,
+                                  "anyOf": [
+                                    {
+                                      "type": "number",
+                                      "enum": [
+                                        1
+                                      ]
+                                    },
+                                    {
+                                      "type": "number",
+                                      "enum": [
+                                        2
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "align": {
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "id",
+                                "text"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "text"
+                                  ]
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 64
+                                },
+                                "md": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 5000
+                                },
+                                "align": {
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "id",
+                                "md"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "image"
+                                  ]
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 64
+                                },
+                                "mediaId": {
+                                  "type": "string",
+                                  "minLength": 26,
+                                  "maxLength": 26
+                                },
+                                "size": {
+                                  "default": "large",
+                                  "type": "string",
+                                  "enum": [
+                                    "small",
+                                    "medium",
+                                    "large",
+                                    "full"
+                                  ]
+                                },
+                                "align": {
+                                  "default": "center",
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "id",
+                                "mediaId"
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "ratio": {
+                      "type": "string",
+                      "enum": [
+                        "1-1",
+                        "1-2",
+                        "2-1"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "columns"
+                  ]
+                }
+              ]
+            }
           },
           "mediaId": {
             "type": "string",
@@ -2425,9 +4028,45 @@
             "maxLength": 26,
             "nullable": true
           },
+          "gradient": {
+            "type": "object",
+            "properties": {
+              "angle": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 360
+              },
+              "colors": {
+                "minItems": 2,
+                "maxItems": 4,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#[0-9a-fA-F]{6}$"
+                }
+              }
+            },
+            "required": [
+              "angle",
+              "colors"
+            ],
+            "nullable": true
+          },
+          "textTone": {
+            "default": "light",
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "textOutline": {
+            "default": false,
+            "type": "boolean"
+          },
           "displayDelayS": {
             "type": "integer",
-            "minimum": 1,
+            "minimum": 0,
             "maximum": 600,
             "nullable": true
           }

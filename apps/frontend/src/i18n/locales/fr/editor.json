@@ -20,6 +20,7 @@
     "title": "Réglages",
     "titleLabel": "Titre",
     "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Description (facultative)…",
     "save": "Enregistrer"
   },
   "broadcast": {
@@ -32,12 +33,24 @@
     "backToDraft": "Repasser en brouillon",
     "archive": "Archiver",
     "restore": "Restaurer",
-    "presentError": "Échec du lancement de la session."
+    "presentError": "Échec du lancement de la session.",
+    "archiveTitle": "Archivage",
+    "archiveHelp": "Un quiz archivé disparaît de la liste principale ; il reste restaurable."
   },
   "feedback": {
+    "enableLabel": "Autoriser les avis des participants",
+    "enableHelp": "Un panneau de notation est proposé à la fin de chaque session.",
     "title": "Avis des participants",
     "empty": "Aucun avis pour l’instant. Les participants peuvent noter le quiz en fin de session.",
     "starsAriaLabel": "{{value}} sur 5",
+    "seeAll_one": "Voir l’avis",
+    "seeAll_other": "Voir les {{count}} avis",
+    "backToEditor": "Retour à l’éditeur",
+    "loadError": "Impossible de charger les avis.",
+    "noneForFilter": "Aucun avis avec cette note.",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "pagePosition": "Page {{page}} / {{pages}}",
     "count_one": "{{count}} avis",
     "count_other": "{{count}} avis"
   },
@@ -48,29 +61,89 @@
     "moveDown": "Descendre",
     "edit": "Éditer",
     "deleteQuestion": "Supprimer la question",
-    "empty": "Aucune question. Ajoutez-en une !"
+    "dragHandle": "Glisser pour réordonner",
+    "itemsCount_one": "{{count}} élément",
+    "itemsCount_other": "{{count}} éléments",
+    "formTitle": "Question",
+    "empty": "Aucune question. Ajoutez-en une !",
+    "collapseList": "Réduire la liste",
+    "expandList": "Déplier la liste"
   },
   "slides": {
+    "formTitle": "Slide",
     "add": "Ajouter une slide",
     "kind": "Slide",
-    "deleteSlide": "Supprimer la slide"
+    "deleteSlide": "Supprimer la slide",
+    "durationManual": "manuel"
   },
   "slideForm": {
-    "titleLabel": "Titre",
-    "titlePlaceholder": "Titre de la slide (facultatif)",
-    "bodyLabel": "Contenu",
     "bodyPlaceholder": "Texte à afficher…",
-    "displayDelayLabel": "Durée d’affichage (s)",
-    "displayDelayPlaceholder": "manuel",
-    "displayDelayHint": "Passe à la suite automatiquement après ce délai. Vide = l’animateur clique.",
+    "contrastLegend": "Contraste du texte",
+    "tone": {
+      "light": "Texte clair sur image assombrie",
+      "dark": "Texte sombre sur image éclaircie"
+    },
+    "outline": "Contour (halo, comme des sous-titres)",
+    "displayLegend": "Enchaînement (mode automatique)",
+    "displayDelayLabel": "Durée (s)",
+    "display": {
+      "default": "Durée par défaut (5 s)",
+      "manual": "Manuel : l’animateur clique",
+      "custom": "Durée personnalisée…"
+    },
+    "displayHint": "En mode manuel, l’animateur passe toujours à la suite lui-même.",
     "invalidError": "La slide doit avoir un titre, un contenu ou un média.",
     "submitAdd": "Ajouter",
-    "submitUpdate": "Enregistrer"
+    "submitUpdate": "Enregistrer",
+    "blocksLegend": "Contenu",
+    "block": {
+      "heading": "Titre",
+      "subheading": "Sous-titre",
+      "text": "Texte",
+      "image": "Image",
+      "columns2": "2 colonnes",
+      "columns3": "3 colonnes"
+    },
+    "dragBlock": "Glisser pour réordonner le bloc",
+    "removeBlock": "Retirer le bloc",
+    "headingLevel": "Niveau",
+    "headingPlaceholder": "Titre…",
+    "imageSize": "Taille",
+    "imageAlign": "Alignement",
+    "size": {
+      "small": "Petite",
+      "medium": "Moyenne",
+      "large": "Grande",
+      "full": "Pleine largeur"
+    },
+    "align": {
+      "left": "Gauche",
+      "center": "Centre",
+      "right": "Droite"
+    },
+    "ratio": "Répartition des colonnes",
+    "textAlign": "Alignement du texte",
+    "previewLegend": "Aperçu",
+    "hidePreview": "Masquer",
+    "showPreview": "Afficher"
+  },
+  "discardConfirm": {
+    "title": "Abandonner les modifications ?",
+    "description": "Les modifications non enregistrées seront perdues.",
+    "confirmLabel": "Abandonner"
+  },
+  "emptyPane": {
+    "emptyTitle": "Ce quiz est vide",
+    "emptyHint": "Commencez par une question, ou par une slide d’introduction.",
+    "selectTitle": "Rien de sélectionné",
+    "selectHint": "Choisissez un élément dans la liste pour l’éditer."
   },
   "deleteConfirm": {
+    "hint": "Supprimer ce quiz et tout son historique.",
     "title": "Supprimer ce quiz ?",
     "description": "« {{title}} » et ses questions seront définitivement supprimés. Cette action est irréversible.",
-    "confirmLabel": "Supprimer"
+    "confirmLabel": "Supprimer",
+    "zoneTitle": "Zone dangereuse"
   },
   "gameAccess": {
     "label": "Session en cours — PIN",
@@ -95,6 +168,7 @@
     },
     "optionsLegend": "Options",
     "optionAriaLabel": "option {{index}}",
+    "dragOption": "Glisser pour réordonner l’option",
     "optionPlaceholder": "Option {{index}}",
     "colorAriaLabel": "couleur {{index}}",
     "shapeAriaLabel": "forme {{index}}",
@@ -133,5 +207,33 @@
     "add": "Ajouter un média (image/audio)",
     "fileInputLabel": "Fichier média",
     "uploadError": "Échec de l’upload."
+  },
+  "background": {
+    "legend": "Fond",
+    "kind": {
+      "none": "Blanc",
+      "image": "Image",
+      "gradient": "Dégradé"
+    },
+    "color": "Couleur {{index}}",
+    "removeColor": "Retirer la couleur {{index}}",
+    "addColor": "Ajouter une couleur",
+    "angle": "Angle"
+  },
+  "status": {
+    "draft": "Brouillon — publiez le quiz pour pouvoir le présenter.",
+    "ready": "Prêt à présenter.",
+    "archived": "Archivé — restaurez-le pour le modifier ou le présenter."
+  },
+  "captureConfirm": {
+    "title": "Activer la capture intégrale ?",
+    "description": "Chaque réponse de chaque participant sera conservée, avec son pseudo : ce sont des données personnelles (RGPD — informez les participants, purgez à la fin). L’archive de session est aussi bien plus lourde en base. À réserver au suivi individuel (évaluation, certification).",
+    "confirmLabel": "Activer"
+  },
+  "deleteItemConfirm": {
+    "questionTitle": "Supprimer cette question ?",
+    "slideTitle": "Supprimer cette slide ?",
+    "description": "« {{label}} » sera définitivement supprimé.",
+    "confirmLabel": "Supprimer"
   }
 }

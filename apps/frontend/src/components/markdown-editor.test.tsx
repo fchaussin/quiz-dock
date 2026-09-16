@@ -1,8 +1,13 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Editor } from '@tiptap/core';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
 import { MarkdownEditor, extensionsFor, type MarkdownEditorProps } from './markdown-editor';
+
+// The toolbar's image button uses the upload mutation, hence a QueryClient.
+const render = (ui: React.ReactElement) =>
+  rtlRender(<QueryClientProvider client={new QueryClient()}>{ui}</QueryClientProvider>);
 
 function Harness(props: Partial<MarkdownEditorProps> & { initial?: string }) {
   const [value, setValue] = useState(props.initial ?? '');

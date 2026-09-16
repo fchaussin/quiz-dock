@@ -1,6 +1,6 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockApi, renderApp } from '../test/harness';
+import { mockApi, renderApp, setMarkdownField } from '../test/harness';
 
 vi.mock('../game/game-client', () => ({
   createSession: vi.fn().mockResolvedValue({ pin: '482913' }),
@@ -64,9 +64,9 @@ describe('EditorPage', () => {
     mockApi([{ method: 'GET', path: '/quizzes/q1', body: detail() }]);
     renderApp('/quizzes/q1');
 
-    expect(await screen.findByText('Éditeur de quiz')).toBeInTheDocument();
     expect(await screen.findByDisplayValue('Mon quiz')).toBeInTheDocument();
-    expect(screen.getByText('Capitale de la France ?')).toBeInTheDocument();
+    // Listed in the sequence and opened in the editing pane (first item is auto-selected).
+    expect(screen.getAllByText('Capitale de la France ?').length).toBeGreaterThanOrEqual(1);
   });
 
   it('affiche les avis des joueurs (moyenne + commentaires) côté propriétaire', async () => {
@@ -79,20 +79,26 @@ describe('EditorPage', () => {
         body: {
           count: 2,
           average: 4.5,
+          distribution: [0, 0, 0, 1, 1],
           items: [
             { id: 'f1', rating: 5, comment: 'Génial', nickname: 'Zoé', createdAt: '2026-01-02' },
-            { id: 'f2', rating: 4, comment: null, nickname: 'Tom', createdAt: '2026-01-01' },
           ],
+          page: 1,
+          pageSize: 1,
+          total: 2,
         },
       },
       { method: 'GET', path: '/quizzes/q1', body: detail() },
     ]);
     renderApp('/quizzes/q1');
 
-    expect(await screen.findByText('Avis des participants')).toBeInTheDocument();
+    // The summary lives in the Settings sheet (average + count + link); the list has its own page.
+    fireEvent.click(await screen.findByRole('button', { name: 'Réglages' }));
     expect(await screen.findByText('4.5')).toBeInTheDocument();
-    expect(screen.getByText('Génial')).toBeInTheDocument();
-    expect(screen.getByText('Zoé')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Voir les 2 avis/ })).toHaveAttribute(
+      'href',
+      '/quizzes/q1/feedback',
+    );
   });
 
   it('expose un lien Aperçu ouvrant le quiz dans un nouvel onglet', async () => {
@@ -144,17 +150,17 @@ describe('EditorPage', () => {
     expect(screen.getByRole('button', { name: /invitation/i })).toBeInTheDocument();
   });
 
-  it('« Enregistrer » est inactif sans modification, actif dès qu’on édite', async () => {
+  it('title is edited in place: « Enregistrer » only appears once something changed', async () => {
     mockApi([{ method: 'GET', path: '/quizzes/q1', body: detail() }]);
     renderApp('/quizzes/q1');
 
-    const save = await screen.findByRole('button', { name: /Enregistrer/ });
-    expect(save).toBeDisabled();
+    const title = await screen.findByDisplayValue('Mon quiz');
+    // The header form is the first form on the page (the item form has its own Save).
+    const header = within(title.closest('form') as HTMLElement);
+    expect(header.queryByRole('button', { name: /Enregistrer/ })).toBeNull();
 
-    fireEvent.change(await screen.findByDisplayValue('Mon quiz'), {
-      target: { value: 'Mon quiz révisé' },
-    });
-    await waitFor(() => expect(save).not.toBeDisabled());
+    fireEvent.change(title, { target: { value: 'Mon quiz révisé' } });
+    expect(await header.findByRole('button', { name: /Enregistrer/ })).toBeEnabled();
   });
 
   it('supprimer le quiz demande confirmation (modal) avant le DELETE', async () => {
@@ -170,6 +176,8 @@ describe('EditorPage', () => {
           String(url).includes('/quizzes/q1') && (opts as RequestInit)?.method === 'DELETE',
       );
 
+    // Deleting lives in the Settings sheet's danger zone.
+    fireEvent.click(await screen.findByRole('button', { name: 'Réglages' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Supprimer le quiz' }));
     expect(deleted()).toBe(false); // la modal s'ouvre, rien n'est supprimé encore
 
@@ -220,9 +228,10 @@ describe('EditorPage', () => {
               quizId: 'q1',
               beforeQuestionId: 'b',
               orderIndex: 0,
-              title: 'Interlude',
-              body: null,
+              blocks: [{ type: 'heading', id: 'h', text: 'Interlude', level: 1 }],
               mediaId: null,
+              textTone: 'light',
+              textOutline: false,
               displayDelayS: null,
             },
           ],
@@ -251,5 +260,41 @@ describe('EditorPage', () => {
         { kind: 'question', id: 'b' },
       ]);
     });
+  });
+
+  it('guards unsaved edits: leaving a dirty item form asks before discarding', async () => {
+    mockApi([
+      {
+        method: 'GET',
+        path: '/quizzes/q1',
+        body: detail({
+          questionCount: 2,
+          questions: [q('a', 'Première', 0), q('b', 'Seconde', 1)],
+        }),
+      },
+    ]);
+    renderApp('/quizzes/q1');
+
+    fireEvent.click(await screen.findByRole('button', { name: /Première/ }));
+    // Two « Enregistrer »: the settings one (folded details, first in DOM) and the item form's.
+    const save = (await screen.findAllByRole('button', { name: 'Enregistrer' })).at(-1)!;
+    expect(save).toBeDisabled(); // nothing changed yet
+    setMarkdownField('Énoncé', 'Première (modifiée)');
+    expect(save).toBeEnabled();
+
+    // Opening another item while dirty → confirm dialog, the form stays until confirmed.
+    fireEvent.click(screen.getByRole('button', { name: /Seconde/ }));
+    // The editing sheet is a <dialog> too (and nests the form's own closed confirm);
+    // the editor-level confirm is the last open dialog in the DOM.
+    const openDialog = await waitFor(() => {
+      const d = [...document.querySelectorAll('dialog[open]')]
+        .filter((x) => x.textContent?.includes('Abandonner les modifications ?'))
+        .at(-1);
+      if (!d) throw new Error('no open confirm dialog');
+      return d as HTMLElement;
+    });
+    expect(openDialog.textContent).toContain('Abandonner les modifications ?');
+    fireEvent.click(within(openDialog).getByRole('button', { name: 'Abandonner' }));
+    await waitFor(() => expect(screen.getByLabelText('Énoncé').textContent).toContain('Seconde'));
   });
 });

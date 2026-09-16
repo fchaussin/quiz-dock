@@ -32,16 +32,19 @@ describe('SlidesService', () => {
   });
 
   describe('add', () => {
-    it('appends after the last end-anchored slide, with empty fields as null', async () => {
+    it('appends after the last end-anchored slide, with the blocks and no background', async () => {
       prisma.slide.aggregate.mockResolvedValue({ _max: { orderIndex: 1 } });
-      await service.add(OWNER, 'quiz-1', { title: 'Intro', body: '' });
+      await service.add(OWNER, 'quiz-1', {
+        blocks: [{ type: 'heading', id: 'h', text: 'Intro', level: 1 }],
+        textTone: 'light',
+        textOutline: false,
+      });
       const data = (prisma.slide.create.mock.calls[0][0] as { data: unknown }).data;
       expect(data).toMatchObject({
         quizId: 'quiz-1',
         beforeQuestionId: null,
         orderIndex: 2,
-        title: 'Intro',
-        body: null,
+        blocks: [{ type: 'heading', id: 'h', text: 'Intro', level: 1 }],
         mediaId: null,
         displayDelayS: null,
       });
@@ -49,9 +52,13 @@ describe('SlidesService', () => {
 
     it('404 when the quiz is not owned', async () => {
       prisma.quiz.findFirst.mockResolvedValue(null);
-      await expect(service.add(OWNER, 'quiz-x', { title: 'x' })).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.add(OWNER, 'quiz-x', {
+          blocks: [{ type: 'heading', id: 'h', text: 'x', level: 1 }],
+          textTone: 'light',
+          textOutline: false,
+        }),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 

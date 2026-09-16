@@ -5,6 +5,9 @@
  * API REST du builder de quiz et des restitutions
  * OpenAPI spec version: 0.1.0
  */
+import type { QuizDetailDtoSlidesItemBlocksItem } from './quizDetailDtoSlidesItemBlocksItem';
+import type { QuizDetailDtoSlidesItemGradient } from './quizDetailDtoSlidesItemGradient';
+import type { QuizDetailDtoSlidesItemTextTone } from './quizDetailDtoSlidesItemTextTone';
 
 export type QuizDetailDtoSlidesItem = {
   id: string;
@@ -16,12 +19,13 @@ export type QuizDetailDtoSlidesItem = {
      * @maximum 9007199254740991
      */
   orderIndex: number;
-  /** @nullable */
-  title: string | null;
-  /** @nullable */
-  body: string | null;
+  blocks: QuizDetailDtoSlidesItemBlocksItem[];
   /** @nullable */
   mediaId: string | null;
+  /** @nullable */
+  gradient: QuizDetailDtoSlidesItemGradient;
+  textTone: QuizDetailDtoSlidesItemTextTone;
+  textOutline: boolean;
   /**
      * @minimum -9007199254740991
      * @maximum 9007199254740991

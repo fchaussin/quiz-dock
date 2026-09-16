@@ -3,13 +3,18 @@ import type {
   PublicOption,
   QuestionRevealPayload,
   QuestionStartPayload,
+  SlideColumnsRatio,
+  SlideImageSize,
+  SlideLeafBlock,
   SlideShowPayload,
+  SlideTextAlign,
 } from '@quiz-dock/contracts';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
 import { COLOR_BG, OPTION_BG_FALLBACK, SHAPE_GLYPH } from '@/lib/option-style';
 import { cn } from '@/lib/utils';
 import { Avatar } from './avatar';
+import { Surface } from './surface';
 
 /**
  * Grille d'options colorées + formes. `onPick` la rend interactive (joueur) ;
@@ -190,38 +195,119 @@ export function AnswerExplanation({
 }
 
 /**
- * A content slide (#7): title, Markdown body and media. Same block on the projected
- * screen (`large`), the host console and the participant's phone.
+ * A content slide (#7): a composition of blocks on the whole surface — no
+ * max-width, the projected screen is a slide, not a document. Optional
+ * full-cover background with light/dark text and a subtitle-like outline.
  */
 export function SlideView({ slide, large }: { slide: SlideShowPayload; large?: boolean }) {
   return (
-    <article
-      className={cn(
-        'flex w-full flex-col items-center gap-4 text-center',
-        large ? 'max-w-4xl' : 'max-w-3xl',
-      )}
+    <Surface
+      background={slide.background}
+      textTone={slide.textTone}
+      textOutline={slide.textOutline}
+      className="h-full min-h-full w-full"
     >
-      {slide.title ? (
-        <h1 className={cn('font-bold text-balance', large ? 'text-4xl md:text-5xl' : 'text-2xl')}>
-          {slide.title}
-        </h1>
-      ) : null}
-      {slide.media?.kind === 'image' ? (
-        <img
-          src={slide.media.url}
-          alt=""
-          className={cn('self-center object-contain', large ? 'max-h-[45vh]' : 'max-h-64')}
-        />
-      ) : slide.media?.kind === 'audio' ? (
-        <audio controls src={slide.media.url} className="w-full max-w-md" />
-      ) : null}
-      {slide.body ? (
-        <Markdown className={cn('w-full text-left', large ? 'text-2xl' : 'text-base')}>
-          {slide.body}
-        </Markdown>
-      ) : null}
-    </article>
+      <article
+        className={cn(
+          'flex h-full min-h-full w-full flex-col justify-center',
+          large ? 'gap-8 p-12' : 'gap-4 p-4',
+        )}
+      >
+        {slide.blocks.map((b) =>
+          b.type === 'columns' ? (
+            <div
+              key={b.id}
+              className={cn('grid items-start', large ? 'gap-12' : 'gap-4')}
+              style={{ gridTemplateColumns: columnsTemplate(b.columns.length, b.ratio) }}
+            >
+              {b.columns.map((col, i) => (
+                <div key={i} className={cn('flex min-w-0 flex-col', large ? 'gap-6' : 'gap-3')}>
+                  {col.map((leaf) => (
+                    <SlideBlockView key={leaf.id} block={leaf} large={large} />
+                  ))}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <SlideBlockView key={b.id} block={b} large={large} />
+          ),
+        )}
+      </article>
+    </Surface>
   );
+}
+
+/** Grid template for a columns block: equal columns, or a 1-2 / 2-1 split for two. */
+export function columnsTemplate(count: number, ratio?: SlideColumnsRatio): string {
+  if (count === 2 && ratio === '1-2') return 'minmax(0, 1fr) minmax(0, 2fr)';
+  if (count === 2 && ratio === '2-1') return 'minmax(0, 2fr) minmax(0, 1fr)';
+  return `repeat(${count}, minmax(0, 1fr))`;
+}
+
+/** Text blocks are centred unless the author says otherwise (a slide, not a document). */
+const TEXT_ALIGN: Record<SlideTextAlign, string> = {
+  left: 'text-left [&_ul]:text-left [&_ol]:text-left',
+  center: 'text-center [&_ul]:inline-block [&_ul]:text-left [&_ol]:inline-block [&_ol]:text-left',
+  right: 'text-right [&_ul]:text-left [&_ol]:text-left',
+};
+
+const IMAGE_WIDTH: Record<SlideImageSize, string> = {
+  small: 'w-1/3',
+  medium: 'w-1/2',
+  large: 'w-3/4',
+  full: 'w-full',
+};
+
+function SlideBlockView({ block, large }: { block: SlideLeafBlock; large?: boolean }) {
+  switch (block.type) {
+    case 'heading':
+      return block.level === 1 ? (
+        <h1
+          className={cn(
+            'font-bold text-balance',
+            TEXT_ALIGN[block.align ?? 'center'],
+            large ? 'text-6xl leading-tight' : 'text-2xl',
+          )}
+        >
+          {block.text}
+        </h1>
+      ) : (
+        <h2
+          className={cn(
+            'font-semibold text-balance',
+            TEXT_ALIGN[block.align ?? 'center'],
+            large ? 'text-4xl' : 'text-xl',
+          )}
+        >
+          {block.text}
+        </h2>
+      );
+    case 'text':
+      return (
+        <Markdown
+          className={cn(
+            'w-full',
+            TEXT_ALIGN[block.align ?? 'center'],
+            large ? 'text-3xl leading-relaxed' : 'text-base',
+          )}
+        >
+          {block.md}
+        </Markdown>
+      );
+    case 'image':
+      return (
+        <img
+          src={block.url ?? `/api/v1/media/${block.mediaId}`}
+          alt=""
+          className={cn(
+            'rounded-lg object-contain',
+            IMAGE_WIDTH[block.size],
+            block.align === 'center' ? 'mx-auto' : block.align === 'right' ? 'ml-auto' : 'mr-auto',
+            large ? 'max-h-[70vh]' : 'max-h-72',
+          )}
+        />
+      );
+  }
 }
 
 /**

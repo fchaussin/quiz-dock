@@ -19,6 +19,7 @@ export interface QuizDto {
   status: QuizDtoStatus;
   visibility: QuizDtoVisibility;
   language: string;
+  feedbackEnabled: boolean;
   /**
      * @minimum -9007199254740991
      * @maximum 9007199254740991

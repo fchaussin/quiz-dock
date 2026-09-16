@@ -1,3 +1,4 @@
+import type { SlideBlock } from '@quiz-dock/contracts';
 import type { QuizDetailDtoQuestionsItem, QuizDetailDtoSlidesItem } from '../api/generated/model';
 
 /**
@@ -39,4 +40,16 @@ export function moveItem(items: QuizItem[], index: number, direction: -1 | 1): Q
   const next = [...items];
   [next[index], next[target]] = [next[target], next[index]];
   return next;
+}
+
+/** What to call a slide in a list: its first heading, else its first text, else nothing. */
+export function slideLabel(slide: Pick<QuizDetailDtoSlidesItem, 'blocks'>): string {
+  const leaves = (slide.blocks as SlideBlock[]).flatMap((b) =>
+    b.type === 'columns' ? b.columns.flat() : [b],
+  );
+  return (
+    leaves.find((b) => b.type === 'heading')?.text ??
+    leaves.find((b) => b.type === 'text')?.md ??
+    ''
+  );
 }

@@ -9,7 +9,7 @@
  * (maps `ClientToServerEvents`/`ServerToClientEvents`) du contrat temps réel.
  */
 
-export const CONTRACTS_VERSION = '0.2.0' as const;
+export const CONTRACTS_VERSION = '0.3.0' as const;
 
 /** États de la partie (machine à états — technique §8). */
 export enum GameState {
@@ -18,7 +18,7 @@ export enum GameState {
   Answering = 'ANSWERING',
   Reveal = 'REVEAL',
   Leaderboard = 'LEADERBOARD',
-  /** A content slide (#7) is on screen: no answer, no timer — host click or `displayDelayS`. */
+  /** A content slide (#7) is on screen: no answer; advances on host click or, in auto mode, by `displayDelayS`. */
   SlideShow = 'SLIDE_SHOW',
   Podium = 'PODIUM',
   Ended = 'ENDED',
@@ -53,6 +53,10 @@ export enum OptionColor {
   Blue = 'blue',
   Yellow = 'yellow',
   Green = 'green',
+  Purple = 'purple',
+  Orange = 'orange',
+  Pink = 'pink',
+  Teal = 'teal',
 }
 
 export enum OptionShape {
@@ -60,6 +64,10 @@ export enum OptionShape {
   Diamond = 'diamond',
   Circle = 'circle',
   Square = 'square',
+  Star = 'star',
+  Hexagon = 'hexagon',
+  Heart = 'heart',
+  Cross = 'cross',
 }
 
 /** Noms des événements WebSocket (technique §9). */
@@ -141,7 +149,55 @@ export interface QuestionStartPayload {
   basePoints: number;
   startedAt: number; // ms epoch serveur (§6)
   endsAt: number;
+  /** Optional full-cover background (image or gradient), like a slide's. */
+  background?: SlideBackground | null;
+  textTone?: SlideTextTone;
+  textOutline?: boolean;
 }
+
+/** Text over a full-cover background: light text on a darkened image, or dark text on a lightened one. */
+export type SlideTextTone = 'light' | 'dark';
+
+/** Horizontal alignment of a text-like block; centred when absent. */
+export type SlideTextAlign = 'left' | 'center' | 'right';
+
+/** Width of an image block on the slide surface. */
+export type SlideImageSize = 'small' | 'medium' | 'large' | 'full';
+
+/**
+ * Slide content (#7) is a composition of blocks, top to bottom; `columns` lays
+ * leaf blocks side by side. `id` is a stable client key (reorder, edit).
+ */
+export type SlideLeafBlock =
+  | { type: 'heading'; id: string; text: string; level: 1 | 2; align?: SlideTextAlign }
+  | { type: 'text'; id: string; md: string; align?: SlideTextAlign }
+  | {
+      type: 'image';
+      id: string;
+      /** Media id when stored/edited; the live payload also carries the resolved `url`. */
+      mediaId: string;
+      url?: string;
+      size: SlideImageSize;
+      align: 'left' | 'center' | 'right';
+    };
+export type SlideBlock =
+  | SlideLeafBlock
+  | {
+      type: 'columns';
+      id: string;
+      columns: SlideLeafBlock[][];
+      /** Width split for two columns; equal when absent (and always for three). */
+      ratio?: SlideColumnsRatio;
+    };
+export type SlideColumnsRatio = '1-1' | '1-2' | '2-1';
+
+/** A CSS linear gradient built by the author: 2–4 colours along an angle. */
+export interface SlideGradient {
+  angle: number;
+  colors: string[];
+}
+/** Full-cover background: an uploaded image, or a generated gradient. */
+export type SlideBackground = { url: string } | { gradient: SlideGradient };
 
 /**
  * A content slide on screen (#7). `questionIndex` is the question that follows
@@ -151,11 +207,13 @@ export interface QuestionStartPayload {
 export interface SlideShowPayload {
   slideIndex: number;
   questionIndex: number;
-  title: string | null;
-  /** Markdown, block profile. */
-  body: string | null;
-  media?: { url: string; kind: 'image' | 'audio' } | null;
-  /** Seconds before the engine advances by itself; null = the host clicks. */
+  blocks: SlideBlock[];
+  /** Optional full-cover background (image or gradient). */
+  background: SlideBackground | null;
+  textTone: SlideTextTone;
+  /** Subtitle-like halo around the text (contrast over any background). */
+  textOutline: boolean;
+  /** Auto-mode display time: null = engine default, 0 = the host clicks, else seconds. */
   displayDelayS: number | null;
 }
 
@@ -239,6 +297,8 @@ export interface LeaderboardPayload {
 export interface PodiumPayload {
   podium: LeaderboardRow[];
   you?: { score: number; rank: number };
+  /** Whether the end-of-session rating panel is offered (§2.11); absent = yes. */
+  feedbackEnabled?: boolean;
 }
 
 /** Map des events client → serveur (avec accusés de réception typés). */
@@ -319,7 +379,7 @@ export interface ServerToClientEvents {
   'question:reveal': (p: QuestionRevealPayload) => void;
   leaderboard: (p: LeaderboardPayload) => void;
   'game:podium': (p: PodiumPayload) => void;
-  'game:ended': (p: Record<string, never>) => void;
+  'game:ended': (p: { feedbackEnabled?: boolean }) => void;
   /** Mode/pause courants (à chaque changement et au (ré)attache). */
   'game:mode': (p: GameModePayload) => void;
   /** Sommaire des questions — émis aux seules fenêtres de contrôle hôte. */

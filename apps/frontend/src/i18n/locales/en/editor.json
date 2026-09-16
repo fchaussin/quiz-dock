@@ -20,6 +20,7 @@
     "title": "Settings",
     "titleLabel": "Title",
     "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Description (optional)…",
     "save": "Save"
   },
   "broadcast": {
@@ -32,12 +33,24 @@
     "backToDraft": "Back to draft",
     "archive": "Archive",
     "restore": "Restore",
-    "presentError": "Failed to start the session."
+    "presentError": "Failed to start the session.",
+    "archiveTitle": "Archiving",
+    "archiveHelp": "An archived quiz leaves the main list; it can be restored."
   },
   "feedback": {
+    "enableLabel": "Allow player feedback",
+    "enableHelp": "A rating panel is offered at the end of every session.",
     "title": "Player feedback",
     "empty": "No feedback yet. Players can rate the quiz at the end of a session.",
     "starsAriaLabel": "{{value}} out of 5",
+    "seeAll_one": "See the review",
+    "seeAll_other": "See all {{count}} reviews",
+    "backToEditor": "Back to the editor",
+    "loadError": "Could not load the reviews.",
+    "noneForFilter": "No review with this rating.",
+    "previous": "Previous",
+    "next": "Next",
+    "pagePosition": "Page {{page}} / {{pages}}",
     "count_one": "{{count}} review",
     "count_other": "{{count}} reviews"
   },
@@ -48,29 +61,89 @@
     "moveDown": "Move down",
     "edit": "Edit",
     "deleteQuestion": "Delete question",
-    "empty": "No questions. Add one!"
+    "dragHandle": "Drag to reorder",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items",
+    "formTitle": "Question",
+    "empty": "No questions. Add one!",
+    "collapseList": "Collapse the list",
+    "expandList": "Expand the list"
   },
   "slides": {
+    "formTitle": "Slide",
     "add": "Add a slide",
     "kind": "Slide",
-    "deleteSlide": "Delete the slide"
+    "deleteSlide": "Delete the slide",
+    "durationManual": "manual"
   },
   "slideForm": {
-    "titleLabel": "Title",
-    "titlePlaceholder": "Slide title (optional)",
-    "bodyLabel": "Content",
     "bodyPlaceholder": "Text to display…",
-    "displayDelayLabel": "Display time (s)",
-    "displayDelayPlaceholder": "manual",
-    "displayDelayHint": "Moves on by itself after this delay. Empty = the host clicks.",
+    "contrastLegend": "Text contrast",
+    "tone": {
+      "light": "Light text on a darkened image",
+      "dark": "Dark text on a lightened image"
+    },
+    "outline": "Outline (halo, like subtitles)",
+    "displayLegend": "Auto-advance (automatic mode)",
+    "displayDelayLabel": "Duration (s)",
+    "display": {
+      "default": "Default duration (5 s)",
+      "manual": "Manual: the host clicks",
+      "custom": "Custom duration…"
+    },
+    "displayHint": "In manual mode the host always moves on by hand.",
     "invalidError": "A slide needs a title, some content or a media.",
     "submitAdd": "Add",
-    "submitUpdate": "Save"
+    "submitUpdate": "Save",
+    "blocksLegend": "Content",
+    "block": {
+      "heading": "Heading",
+      "subheading": "Subheading",
+      "text": "Text",
+      "image": "Image",
+      "columns2": "2 columns",
+      "columns3": "3 columns"
+    },
+    "dragBlock": "Drag to reorder the block",
+    "removeBlock": "Remove the block",
+    "headingLevel": "Level",
+    "headingPlaceholder": "Heading…",
+    "imageSize": "Size",
+    "imageAlign": "Alignment",
+    "size": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "full": "Full width"
+    },
+    "align": {
+      "left": "Left",
+      "center": "Centre",
+      "right": "Right"
+    },
+    "ratio": "Column split",
+    "textAlign": "Text alignment",
+    "previewLegend": "Preview",
+    "hidePreview": "Hide",
+    "showPreview": "Show"
+  },
+  "discardConfirm": {
+    "title": "Discard changes?",
+    "description": "Unsaved changes will be lost.",
+    "confirmLabel": "Discard"
+  },
+  "emptyPane": {
+    "emptyTitle": "This quiz is empty",
+    "emptyHint": "Start with a question, or with an intro slide.",
+    "selectTitle": "Nothing selected",
+    "selectHint": "Pick an item in the list to edit it."
   },
   "deleteConfirm": {
+    "hint": "Delete this quiz and all its history.",
     "title": "Delete this quiz?",
     "description": "“{{title}}” and its questions will be permanently deleted. This action cannot be undone.",
-    "confirmLabel": "Delete"
+    "confirmLabel": "Delete",
+    "zoneTitle": "Danger zone"
   },
   "gameAccess": {
     "label": "Active session — PIN",
@@ -95,6 +168,7 @@
     },
     "optionsLegend": "Options",
     "optionAriaLabel": "option {{index}}",
+    "dragOption": "Drag to reorder the option",
     "optionPlaceholder": "Option {{index}}",
     "colorAriaLabel": "color {{index}}",
     "shapeAriaLabel": "shape {{index}}",
@@ -133,5 +207,33 @@
     "add": "Add media (image/audio)",
     "fileInputLabel": "Media file",
     "uploadError": "Upload failed."
+  },
+  "background": {
+    "legend": "Background",
+    "kind": {
+      "none": "White",
+      "image": "Image",
+      "gradient": "Gradient"
+    },
+    "color": "Colour {{index}}",
+    "removeColor": "Remove colour {{index}}",
+    "addColor": "Add a colour",
+    "angle": "Angle"
+  },
+  "status": {
+    "draft": "Draft — publish the quiz to present it.",
+    "ready": "Ready to present.",
+    "archived": "Archived — restore it to edit or present it."
+  },
+  "captureConfirm": {
+    "title": "Turn on full answer capture?",
+    "description": "Every answer of every participant will be kept, with their nickname: that is personal data (GDPR — inform the participants, purge afterwards). Session archives also get much heavier in the database. Reserve it for individual tracking (assessment, certification).",
+    "confirmLabel": "Turn on"
+  },
+  "deleteItemConfirm": {
+    "questionTitle": "Delete this question?",
+    "slideTitle": "Delete this slide?",
+    "description": "“{{label}}” will be permanently deleted.",
+    "confirmLabel": "Delete"
   }
 }

@@ -14,4 +14,8 @@ export const QuestionDtoOptionsItemShape = {
   diamond: 'diamond',
   circle: 'circle',
   square: 'square',
+  star: 'star',
+  hexagon: 'hexagon',
+  heart: 'heart',
+  cross: 'cross',
 } as const;

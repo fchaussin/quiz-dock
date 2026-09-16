@@ -4,6 +4,9 @@ import type {
   OptionColor,
   OptionShape,
   QuestionType,
+  SlideBackground,
+  SlideBlock,
+  SlideTextTone,
 } from '@quiz-dock/contracts';
 
 /**
@@ -37,6 +40,10 @@ export interface SnapshotQuestion {
   revealDelayS: number | null;
   /** Markdown shown at REVEAL only (#5) — never part of `question:start`. */
   answerExplanation: string | null;
+  /** Optional full-cover background (image or gradient) with its text contrast. */
+  background: SlideBackground | null;
+  textTone: SlideTextTone;
+  textOutline: boolean;
   /** Points de base déjà résolus depuis `pointsMode` (1000 / 2000 / 0 — §5). */
   basePoints: number;
   /** Cible numérique (type `numeric`) — secret serveur. */
@@ -54,9 +61,11 @@ export interface SnapshotQuestion {
 export interface SnapshotSlide {
   id: string;
   beforeQuestionIndex: number;
-  title: string | null;
-  body: string | null;
-  media: { url: string; kind: 'image' | 'audio' } | null;
+  /** Blocks with image URLs resolved (the client never needs a media id). */
+  blocks: SlideBlock[];
+  background: SlideBackground | null;
+  textTone: SlideTextTone;
+  textOutline: boolean;
   displayDelayS: number | null;
 }
 
@@ -65,6 +74,8 @@ export interface QuizSnapshot {
   title: string;
   description: string | null;
   language: string;
+  /** End-of-session rating allowed (§2.11). */
+  feedbackEnabled: boolean;
   questions: SnapshotQuestion[];
   /** Sorted by (beforeQuestionIndex, orderIndex). */
   slides: SnapshotSlide[];

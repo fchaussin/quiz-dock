@@ -20,10 +20,10 @@ export function RootLayout() {
         <nav className="flex items-center gap-3 text-sm">
           {user ? (
             <>
-              <Link to="/dashboard" className="hover:underline">
+              <Link to="/dashboard" className="whitespace-nowrap hover:underline">
                 {t('nav.myQuizzes')}
               </Link>
-              <span className="text-muted-foreground">{user}</span>
+              <span className="text-muted-foreground hidden sm:inline">{user}</span>
               <Button
                 variant="outline"
                 size="sm"
@@ -42,7 +42,8 @@ export function RootLayout() {
           )}
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 p-6">
+      {/* Wide but bounded: ~1440px, the usual ceiling for app layouts; pages narrow themselves when reading matters. */}
+      <main className="mx-auto w-full max-w-[90rem] flex-1 px-6 py-6 lg:px-10">
         <Outlet />
       </main>
     </div>
