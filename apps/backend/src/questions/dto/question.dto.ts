@@ -37,6 +37,7 @@ export const questionSchema = z.object({
   ]),
   prompt: z.string(),
   mediaId: z.string().nullable(),
+  answerExplanation: z.string().nullable(),
   timeLimitS: z.number().int(),
   pointsMode: z.enum(['standard', 'double', 'none']),
   numericValue: z.string().nullable(),

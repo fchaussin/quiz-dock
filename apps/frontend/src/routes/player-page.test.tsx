@@ -181,4 +181,24 @@ describe('PlayerPage (client participant)', () => {
     expect(screen.getByText(/\+850 points/)).toBeInTheDocument();
     expect(screen.getByText(/Rang : 3/)).toBeInTheDocument();
   });
+
+  it('REVEAL: renders the answer explanation as Markdown when the payload carries one (#5)', async () => {
+    hookState.value = view({
+      state: GameState.Reveal,
+      result: { correct: false, points: 0, totalScore: 0, rank: 5 },
+      reveal: { distribution: {}, answerExplanation: 'Paris is the **capital**.' },
+    });
+    renderApp('/join/771122');
+
+    const box = await screen.findByRole('region', { name: 'Explication' });
+    expect(box.querySelector('strong')?.textContent).toBe('capital');
+  });
+
+  it('REVEAL: no explanation block when the payload has none', async () => {
+    hookState.value = view({ state: GameState.Reveal, reveal: { distribution: {} } });
+    renderApp('/join/771122');
+
+    await screen.findByText(/réponses/i);
+    expect(screen.queryByRole('region', { name: 'Explication' })).toBeNull();
+  });
 });

@@ -132,6 +132,7 @@
     "unsupportedType": "Unsupported question type."
   },
   "reveal": {
+    "explanation": "Explanation",
     "goodOrder": "Correct order:",
     "goodAnswer": "Correct answer:"
   },

@@ -22,6 +22,7 @@ const question = (over: Partial<SnapshotQuestion> = {}): SnapshotQuestion => ({
   type: QuestionType.SingleChoice,
   prompt: 'Q ?',
   media: null,
+  answerExplanation: null,
   timeLimitS: 20,
   basePoints: 1000,
   numericValue: null,

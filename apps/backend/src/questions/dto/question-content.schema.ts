@@ -53,6 +53,8 @@ export const questionContentSchema = z
   .object({
     type: z.enum(QUESTION_TYPES),
     prompt: z.string().trim().min(1).max(1000),
+    // Markdown, shown at REVEAL only (#5). `null` clears it.
+    answerExplanation: z.string().trim().max(2000).nullable().optional(),
     mediaId: z.string().length(26).optional(),
     timeLimitS: z.number().int().min(5).max(120).default(20),
     pointsMode: z.enum(['standard', 'double', 'none']).default('standard'),

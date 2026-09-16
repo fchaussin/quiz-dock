@@ -156,4 +156,17 @@ describe('questionContentSchema — validation par type (§4)', () => {
     expect(ok(q(4))).toBe(false);
     expect(ok(q(121))).toBe(false);
   });
+
+  it('answerExplanation: optional, nullable, capped at 2000 chars (#5)', () => {
+    const q = (answerExplanation?: string | null) => ({
+      ...base,
+      type: 'single_choice',
+      options: [opt({ isCorrect: true }), opt()],
+      ...(answerExplanation === undefined ? {} : { answerExplanation }),
+    });
+    expect(ok(q())).toBe(true);
+    expect(ok(q(null))).toBe(true);
+    expect(ok(q('Because **Paris**.'))).toBe(true);
+    expect(ok(q('x'.repeat(2001)))).toBe(false);
+  });
 });

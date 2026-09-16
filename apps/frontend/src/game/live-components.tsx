@@ -162,6 +162,33 @@ export function RevealAnswer({
 }
 
 /**
+ * Explanation of the answer (#5): Markdown, present in the reveal payload only
+ * when the question has one. Same block on the projected screen, the host
+ * console and the participant's phone.
+ */
+export function AnswerExplanation({
+  reveal,
+  className,
+}: {
+  reveal: QuestionRevealPayload;
+  className?: string;
+}) {
+  const { t } = useTranslation('live');
+  if (!reveal.answerExplanation) return null;
+  return (
+    <section
+      aria-label={t('reveal.explanation')}
+      className={cn('w-full rounded-lg border bg-muted/40 px-4 py-3 text-left', className)}
+    >
+      <h3 className="text-muted-foreground mb-1 text-sm font-semibold uppercase tracking-wide">
+        {t('reveal.explanation')}
+      </h3>
+      <Markdown>{reveal.answerExplanation}</Markdown>
+    </section>
+  );
+}
+
+/**
  * Classement en liste (une ligne par participant, top `max`) avec **barre de
  * progression** proportionnelle au score du leader. Surligne le joueur courant si
  * `highlightRank` est fourni. Utilisé à l'affichage de la réponse (entre questions).

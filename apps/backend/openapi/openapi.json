@@ -1057,6 +1057,10 @@
                   "type": "string",
                   "nullable": true
                 },
+                "answerExplanation": {
+                  "type": "string",
+                  "nullable": true
+                },
                 "timeLimitS": {
                   "type": "integer",
                   "minimum": -9007199254740991,
@@ -1169,6 +1173,7 @@
                 "type",
                 "prompt",
                 "mediaId",
+                "answerExplanation",
                 "timeLimitS",
                 "pointsMode",
                 "numericValue",
@@ -1630,6 +1635,11 @@
             "minLength": 1,
             "maxLength": 1000
           },
+          "answerExplanation": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
+          },
           "mediaId": {
             "type": "string",
             "minLength": 26,
@@ -1764,6 +1774,10 @@
             "type": "string",
             "nullable": true
           },
+          "answerExplanation": {
+            "type": "string",
+            "nullable": true
+          },
           "timeLimitS": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -1876,6 +1890,7 @@
           "type",
           "prompt",
           "mediaId",
+          "answerExplanation",
           "timeLimitS",
           "pointsMode",
           "numericValue",
@@ -1934,6 +1949,11 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 1000
+          },
+          "answerExplanation": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true
           },
           "mediaId": {
             "type": "string",

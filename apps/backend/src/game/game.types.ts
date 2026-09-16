@@ -33,6 +33,8 @@ export interface SnapshotQuestion {
   prompt: string;
   media: { url: string; kind: 'image' | 'audio' } | null;
   timeLimitS: number;
+  /** Markdown shown at REVEAL only (#5) — never part of `question:start`. */
+  answerExplanation: string | null;
   /** Points de base déjà résolus depuis `pointsMode` (1000 / 2000 / 0 — §5). */
   basePoints: number;
   /** Cible numérique (type `numeric`) — secret serveur. */
