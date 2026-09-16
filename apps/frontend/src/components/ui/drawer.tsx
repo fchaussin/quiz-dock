@@ -33,6 +33,9 @@ export function Drawer({
     if (!d) return;
     if (open) {
       try {
+        // A dialog left open non-modally (e.g. after a hot reload) must be closed first,
+        // otherwise showModal() throws and the sheet would render in the page flow.
+        if (d.open && !d.matches(':modal')) d.close();
         if (!d.open) d.showModal();
       } catch {
         d.setAttribute('open', ''); // jsdom: showModal not implemented
@@ -61,7 +64,12 @@ export function Drawer({
       )}
     >
       <div className="flex items-center justify-between gap-3 px-5 pt-3 pb-2">
-        <span className="bg-muted-foreground/30 absolute top-2 left-1/2 h-1 w-10 -translate-x-1/2 rounded-full " />
+        <span
+          className={cn(
+            'bg-muted-foreground/30 absolute top-2 left-1/2 h-1 w-10 -translate-x-1/2 rounded-full',
+            side === 'right' && 'lg:hidden',
+          )}
+        />
         <span className="text-sm font-semibold">{title}</span>
         <button
           type="button"
