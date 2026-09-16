@@ -38,7 +38,7 @@ import authZh from './locales/zh/auth.json';
 import errorsZh from './locales/zh/errors.json';
 import validationZh from './locales/zh/validation.json';
 import commonZhTW from './locales/zh-TW/common.json';
-import dashboardZhTW from './locales/zh/dashboard.json';
+import dashboardZhTW from './locales/zh-TW/dashboard.json';
 import editorZhTW from './locales/zh-TW/editor.json';
 import liveZhTW from './locales/zh-TW/live.json';
 import joinZhTW from './locales/zh-TW/join.json';
