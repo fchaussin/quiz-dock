@@ -224,5 +224,10 @@
     "draft": "Draft — publish the quiz to present it.",
     "ready": "Ready to present.",
     "archived": "Archived — restore it to edit or present it."
+  },
+  "captureConfirm": {
+    "title": "Turn on full answer capture?",
+    "description": "Every answer of every participant will be kept, with their nickname: that is personal data (GDPR — inform the participants, purge afterwards). Session archives also get much heavier in the database. Reserve it for individual tracking (assessment, certification).",
+    "confirmLabel": "Turn on"
   }
 }

@@ -224,5 +224,10 @@
     "draft": "Borrador — publica el cuestionario para presentarlo.",
     "ready": "Listo para presentar.",
     "archived": "Archivado — restáuralo para editarlo o presentarlo."
+  },
+  "captureConfirm": {
+    "title": "¿Activar la captura completa de respuestas?",
+    "description": "Se guardará cada respuesta de cada participante con su apodo: son datos personales (RGPD — informa a los participantes, purga después). Los archivos de sesión también pesan mucho más en la base de datos. Resérvalo para el seguimiento individual (evaluación, certificación).",
+    "confirmLabel": "Activar"
   }
 }

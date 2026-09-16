@@ -224,5 +224,10 @@
     "draft": "Brouillon — publiez le quiz pour pouvoir le présenter.",
     "ready": "Prêt à présenter.",
     "archived": "Archivé — restaurez-le pour le modifier ou le présenter."
+  },
+  "captureConfirm": {
+    "title": "Activer la capture intégrale ?",
+    "description": "Chaque réponse de chaque participant sera conservée, avec son pseudo : ce sont des données personnelles (RGPD — informez les participants, purgez à la fin). L’archive de session est aussi bien plus lourde en base. À réserver au suivi individuel (évaluation, certification).",
+    "confirmLabel": "Activer"
   }
 }

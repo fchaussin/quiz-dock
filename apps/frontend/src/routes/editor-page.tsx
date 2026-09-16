@@ -931,6 +931,9 @@ function StatusBar({
 }) {
   const { t } = useTranslation('editor');
   const open = (path: string) => window.open(path, '_blank', 'noopener,noreferrer');
+  // Full capture keeps every answer per participant: personal data (GDPR) and a
+  // heavier archive — it is switched on knowingly, through an explanation.
+  const [confirmCapture, setConfirmCapture] = useState(false);
 
   if (livePin) {
     return (
@@ -993,10 +996,21 @@ function StatusBar({
             <input
               type="checkbox"
               checked={fullCapture}
-              onChange={(e) => onFullCapture(e.target.checked)}
+              onChange={(e) => (e.target.checked ? setConfirmCapture(true) : onFullCapture(false))}
             />
             {t('broadcast.fullCaptureLabel')}
           </label>
+          <ConfirmDialog
+            open={confirmCapture}
+            title={t('captureConfirm.title')}
+            description={t('captureConfirm.description')}
+            confirmLabel={t('captureConfirm.confirmLabel')}
+            onCancel={() => setConfirmCapture(false)}
+            onConfirm={() => {
+              setConfirmCapture(false);
+              onFullCapture(true);
+            }}
+          />
           <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={onBackToDraft}>
             {t('broadcast.backToDraft')}
           </Button>
