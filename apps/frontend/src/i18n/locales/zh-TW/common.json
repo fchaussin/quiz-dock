@@ -2,9 +2,44 @@
   "loading": "載入中…",
   "confirm": "確認",
   "cancel": "取消",
+  "close": "關閉",
   "quizStatus": {
     "draft": "草稿",
     "ready": "就緒",
     "archived": "已歸檔"
+  },
+  "markdownEditor": {
+    "visual": "視覺化編輯器",
+    "source": "Markdown",
+    "bold": "粗體",
+    "italic": "斜體",
+    "code": "程式碼",
+    "codeBlock": "程式碼區塊",
+    "image": "插入圖片",
+    "uploading": "上傳中…",
+    "bulletList": "項目符號清單",
+    "orderedList": "編號清單"
+  },
+  "captureConfirm": {
+    "title": "開啟完整作答紀錄？",
+    "description": "將儲存每位參與者的每個答案及其暱稱：這屬於個人資料（GDPR — 請告知參與者並於事後清除）。會話歸檔也會佔用大得多的資料庫空間。僅在需要個人追蹤（評量、認證）時使用。",
+    "confirmLabel": "開啟"
+  },
+  "draft": {
+    "restored": "已還原草稿 — 找回了你未儲存的修改。",
+    "discard": "放棄草稿"
+  },
+  "titles": {
+    "login": "登入",
+    "dashboard": "我的測驗",
+    "editor": "編輯器",
+    "preview": "預覽",
+    "feedback": "評價",
+    "sessions": "歷史",
+    "session": "會話",
+    "player": "參與者",
+    "control": "控制台",
+    "screen": "投影",
+    "join": "加入"
   }
 }

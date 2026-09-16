@@ -26,6 +26,7 @@
     "leaderboard": "排行榜",
     "autoPaused": "自動模式已暫停 — 連續推進已暫停。",
     "nextQuestion": "下一題",
+    "continue": "繼續",
     "endSession": "結束會話",
     "questionProgress": "第 {{current}} / {{total}} 題",
     "freeAnswer": "自由作答（數字或文字）。",
@@ -47,7 +48,7 @@
     "banTooltip": "移除 {{nickname}}",
     "banAria": "停權 {{nickname}}",
     "banConfirmTitle": "停權 {{nickname}}？",
-    "banConfirmDescription": "該玩家將被立即移除，且在所選時長內無法以此匿稱重新加入。",
+    "banConfirmDescription": "該玩家將被立即移除，且在所選時長內無法以此暱稱重新加入。",
     "banConfirm": "停權",
     "banDuration": "停權時長",
     "banMinutes": "分鐘",
@@ -72,7 +73,11 @@
       "numeric": "數字",
       "ordering": "排序",
       "poll": "投票"
-    }
+    },
+    "breadcrumb": "導覽路徑",
+    "myQuizzes": "我的測驗",
+    "sessionCrumb": "會話 {{pin}}",
+    "backToEditorHint": "返回編輯器 — 會話繼續進行"
   },
   "screen": {
     "sessionUnavailable": "會話不可用。",
@@ -93,10 +98,10 @@
   },
   "player": {
     "joinFailed": "無法加入會話。",
-    "yourNickname": "你的匿稱",
+    "yourNickname": "你的暱稱",
     "randomAvatar": "隨機頭像",
-    "nickname": "匿稱",
-    "nicknamePlaceholder": "你的匿稱",
+    "nickname": "暱稱",
+    "nicknamePlaceholder": "你的暱稱",
     "connecting": "連線中…",
     "letsGo": "開始吧！",
     "connectingToSession": "正在連接會話…",
@@ -129,9 +134,14 @@
     "submitAnswer": "提交我的回答",
     "moveUp": "上移",
     "moveDown": "下移",
-    "unsupportedType": "不支援的題目類型。"
+    "unsupportedType": "不支援的題目類型。",
+    "leave": "離開",
+    "leaveConfirmTitle": "離開本場會話？",
+    "leaveConfirmDescription": "你將失去你的位置和分數。要回來需要再次用 PIN 加入。",
+    "joinAnother": "加入另一場遊戲"
   },
   "reveal": {
+    "explanation": "解析",
     "goodOrder": "正確順序：",
     "goodAnswer": "正確答案："
   },
