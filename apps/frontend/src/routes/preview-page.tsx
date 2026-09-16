@@ -36,7 +36,7 @@ function QuizPreview({ quiz }: { quiz: QuizDetailDto }) {
     <div
       ref={ref}
       className={cn(
-        'mx-auto flex w-full max-w-3xl flex-col gap-4',
+        'mx-auto flex w-full max-w-4xl flex-col gap-4',
         // En plein écran : occupe tout l'écran (projeté / grand écran), contenu centré.
         isFullscreen && 'max-w-none justify-center overflow-auto bg-background p-6 sm:p-12',
       )}

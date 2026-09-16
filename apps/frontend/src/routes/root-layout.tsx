@@ -42,7 +42,8 @@ export function RootLayout() {
           )}
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 p-6">
+      {/* Wide but bounded: ~1440px, the usual ceiling for app layouts; pages narrow themselves when reading matters. */}
+      <main className="mx-auto w-full max-w-[90rem] flex-1 px-6 py-6 lg:px-10">
         <Outlet />
       </main>
     </div>

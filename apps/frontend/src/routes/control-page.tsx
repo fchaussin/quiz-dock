@@ -140,7 +140,7 @@ export function ControlPage() {
   // ── LOBBY ────────────────────────────────────────────────────────────────
   if (view.state === 'LOBBY' || view.state === null) {
     return (
-      <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 py-6">
+      <section className="mx-auto flex w-full max-w-4xl flex-col gap-6 py-6">
         <RecapHeader view={view} pin={pin} />
 
         {/* Invitation discrète : simple info, pas le grand écran de projection. */}
@@ -241,7 +241,7 @@ export function ControlPage() {
   // ── SLIDE_SHOW (#7) ────────────────────────────────────────────────────────
   if (view.state === 'SLIDE_SHOW' && view.slide) {
     return (
-      <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 py-6">
+      <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 py-6">
         {controlBar}
         <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
         <div className="bg-card rounded-xl border p-5 sm:p-6">
@@ -267,7 +267,7 @@ export function ControlPage() {
   // ── REVEAL / LEADERBOARD ───────────────────────────────────────────────────
   if (view.state === 'REVEAL' || view.state === 'LEADERBOARD') {
     return (
-      <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 py-6">
+      <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 py-6">
         {controlBar}
         <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
         {view.question && view.reveal ? (
@@ -300,7 +300,7 @@ export function ControlPage() {
   // ── PODIUM ──────────────────────────────────────────────────────────────────
   if (view.state === 'PODIUM') {
     return (
-      <section className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 py-8">
+      <section className="mx-auto flex w-full max-w-4xl flex-col items-center gap-6 py-8">
         <h2 className="text-2xl font-bold">{t('control.podium')}</h2>
         {view.podium ? <Podium rows={view.podium.podium} /> : null}
         <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
@@ -325,7 +325,7 @@ export function ControlPage() {
   const correctIds = view.outline.find((q) => q.index === view.questionIndex)?.correctOptionIds;
 
   return (
-    <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 py-6">
+    <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 py-6">
       {controlBar}
 
       {/* Question en cours — panneau principal agrandi (énoncé + réponses + chrono). */}

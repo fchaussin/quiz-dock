@@ -60,7 +60,7 @@ export function SessionsPage() {
   const sessions = data?.data.sessions;
 
   return (
-    <section className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+    <section className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">{t('list.title')}</h1>
         <Link
@@ -175,7 +175,7 @@ export function SessionDetailPage() {
   };
 
   return (
-    <section className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+    <section className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <header className="flex flex-wrap items-center gap-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-bold">{s.quizTitle || t('detail.fallbackTitle')}</h1>
@@ -340,7 +340,7 @@ export function SessionPlayerPage() {
   };
 
   return (
-    <section className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+    <section className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <header className="flex flex-wrap items-center gap-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-bold">{p.nickname}</h1>
