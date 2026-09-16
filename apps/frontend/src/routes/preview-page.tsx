@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight, Maximize, Minimize } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
 import { COLOR_BG, OPTION_BG_FALLBACK, SHAPE_GLYPH } from '@/lib/option-style';
 import { cn } from '@/lib/utils';
@@ -46,6 +47,8 @@ function QuizPreview({ quiz }: { quiz: QuizDetailDto }) {
           )}
         </div>
       </header>
+
+      <Markdown className="text-muted-foreground text-sm">{quiz.description}</Markdown>
 
       {total === 0 ? (
         <p className="text-muted-foreground">{t('preview.noQuestions')}</p>
@@ -106,9 +109,13 @@ function QuestionPreview({
           alt=""
         />
       )}
-      <h2 className={cn('font-semibold', large ? 'text-3xl md:text-5xl' : 'text-xl sm:text-2xl')}>
+      <Markdown
+        role="heading"
+        aria-level={2}
+        className={cn('font-semibold', large ? 'text-3xl md:text-5xl' : 'text-xl sm:text-2xl')}
+      >
         {question.prompt}
-      </h2>
+      </Markdown>
       <div className={cn('text-muted-foreground', large && 'text-2xl')}>
         ⏱ {question.timeLimitS} s
       </div>

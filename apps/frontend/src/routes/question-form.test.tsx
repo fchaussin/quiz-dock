@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { mockApi } from '../test/harness';
+import { mockApi, setMarkdownField } from '../test/harness';
 import { QuestionForm } from './question-form';
 
 function renderForm(onClose = vi.fn()) {
@@ -32,9 +32,7 @@ describe('QuestionForm', () => {
     ]);
     const { onClose } = renderForm();
 
-    fireEvent.change(screen.getByLabelText('Énoncé'), {
-      target: { value: 'Capitale ?' },
-    });
+    setMarkdownField('Énoncé', 'Capitale ?');
     expect(screen.getByLabelText('option 1')).toBeInTheDocument();
     expect(screen.getByLabelText('option 2')).toBeInTheDocument();
     // marque la 1re option correcte (radio pour single_choice)
@@ -80,9 +78,7 @@ describe('QuestionForm', () => {
       },
     ]);
     renderForm();
-    fireEvent.change(screen.getByLabelText('Énoncé'), {
-      target: { value: 'X' },
-    });
+    setMarkdownField('Énoncé', 'X');
     fireEvent.click(screen.getByText('Ajouter'));
     expect(await screen.findByText('Certains champs sont invalides.')).toBeInTheDocument();
   });

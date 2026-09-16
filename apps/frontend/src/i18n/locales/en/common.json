@@ -6,5 +6,15 @@
     "draft": "Draft",
     "ready": "Ready",
     "archived": "Archived"
+  },
+  "markdownEditor": {
+    "visual": "Visual editor",
+    "source": "Markdown",
+    "bold": "Bold",
+    "italic": "Italic",
+    "code": "Code",
+    "codeBlock": "Code block",
+    "bulletList": "Bulleted list",
+    "orderedList": "Numbered list"
   }
 }

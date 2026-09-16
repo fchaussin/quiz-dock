@@ -19,13 +19,14 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MarkdownEditor } from '@/components/markdown-editor';
+import { Markdown } from '@/components/markdown';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { createSession } from '../game/game-client';
 import type { QuizDetailDto } from '../api/generated/model';
@@ -216,15 +217,16 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
               </form.Field>
               <form.Field name="description">
                 {(field) => (
-                  <Label>
-                    {t('settings.descriptionLabel')}
-                    <Textarea
-                      rows={4}
-                      className="lg:min-h-48"
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-sm font-medium leading-none">
+                      {t('settings.descriptionLabel')}
+                    </span>
+                    <MarkdownEditor
+                      aria-label={t('settings.descriptionLabel')}
                       value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={field.handleChange}
                     />
-                  </Label>
+                  </div>
                 )}
               </form.Field>
               <Button type="submit" disabled={!isDirty || update.isPending} className="self-start">
@@ -345,7 +347,9 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
                       {i + 1}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium">{q.prompt}</p>
+                      <Markdown profile="inline" className="block truncate font-medium">
+                        {q.prompt}
+                      </Markdown>
                       <p className="text-muted-foreground text-xs">
                         {t(`questionType.${q.type}`, { defaultValue: q.type })}
                       </p>

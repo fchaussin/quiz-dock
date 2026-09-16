@@ -2,6 +2,7 @@ import { useParams } from '@tanstack/react-router';
 import { ArrowDown, ArrowUp, Check, LogIn, Shuffle } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -374,7 +375,9 @@ export function PlayerPage() {
           </span>
         ) : null}
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <h1 className="text-xl font-semibold text-balance">{question.prompt}</h1>
+          <Markdown role="heading" aria-level={1} className="text-xl font-semibold text-balance">
+            {question.prompt}
+          </Markdown>
         </div>
         <div className="flex w-full shrink-0 flex-col items-center gap-3 pb-2">
           {reading ? (

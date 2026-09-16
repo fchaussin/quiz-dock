@@ -6,5 +6,15 @@
     "draft": "Borrador",
     "ready": "Listo",
     "archived": "Archivado"
+  },
+  "markdownEditor": {
+    "visual": "Editor visual",
+    "source": "Markdown",
+    "bold": "Negrita",
+    "italic": "Cursiva",
+    "code": "Código",
+    "codeBlock": "Bloque de código",
+    "bulletList": "Lista con viñetas",
+    "orderedList": "Lista numerada"
   }
 }

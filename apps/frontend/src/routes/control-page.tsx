@@ -17,6 +17,7 @@ import {
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Tooltip } from '@/components/ui/tooltip';
@@ -315,7 +316,9 @@ export function ControlPage() {
           />
         ) : null}
 
-        <h1 className="text-2xl font-semibold sm:text-3xl">{view.question?.prompt}</h1>
+        <Markdown role="heading" aria-level={1} className="text-2xl font-semibold sm:text-3xl">
+          {view.question?.prompt}
+        </Markdown>
 
         {view.question?.options?.length ? (
           <OptionGrid options={view.question.options} highlightIds={correctIds} />
@@ -765,7 +768,9 @@ function QuestionCarousel({
                   />
                 ) : null}
               </div>
-              <p className="line-clamp-2">{q.prompt}</p>
+              <Markdown profile="inline" className="line-clamp-2">
+                {q.prompt}
+              </Markdown>
               <span className="text-muted-foreground text-xs">
                 ⏱ {q.timeLimitS}s · {t(`control.types.${q.type}`, { defaultValue: q.type })}
               </span>

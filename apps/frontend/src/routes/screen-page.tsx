@@ -2,6 +2,7 @@ import { useParams } from '@tanstack/react-router';
 import { Maximize, Minimize, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
+import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useFullscreen } from '@/lib/use-fullscreen';
@@ -91,7 +92,9 @@ export function ScreenPage() {
   } else if ((view.state === 'REVEAL' || view.state === 'LEADERBOARD') && view.question) {
     body = (
       <div className="flex w-full max-w-3xl flex-col items-center gap-6">
-        <h1 className="text-center text-3xl font-semibold">{view.question.prompt}</h1>
+        <Markdown role="heading" aria-level={1} className="text-center text-3xl font-semibold">
+          {view.question.prompt}
+        </Markdown>
         {view.reveal ? <RevealAnswer question={view.question} reveal={view.reveal} /> : null}
         {view.leaderboard ? (
           <div className="flex w-full max-w-md flex-col gap-2 text-lg">
@@ -105,7 +108,9 @@ export function ScreenPage() {
     body = (
       <div className="flex w-full max-w-3xl flex-col items-center gap-6">
         <div className="flex w-full items-start justify-between gap-4">
-          <h1 className="text-3xl font-semibold">{view.question.prompt}</h1>
+          <Markdown role="heading" aria-level={1} className="text-3xl font-semibold">
+            {view.question.prompt}
+          </Markdown>
           {remaining !== null ? (
             <span
               className={cn('text-4xl font-bold tabular-nums', view.paused && 'opacity-50')}
