@@ -9,7 +9,7 @@
  * (maps `ClientToServerEvents`/`ServerToClientEvents`) du contrat temps réel.
  */
 
-export const CONTRACTS_VERSION = '0.2.0' as const;
+export const CONTRACTS_VERSION = '0.3.0' as const;
 
 /** États de la partie (machine à états — technique §8). */
 export enum GameState {
