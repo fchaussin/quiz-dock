@@ -280,7 +280,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
           </ul>
         </main>
 
-        <aside className="divide-border flex flex-col divide-y lg:sticky lg:top-6">
+        <aside className="divide-border bg-muted/50 flex flex-col divide-y rounded-2xl p-6 lg:sticky lg:top-6">
           <Section title={t('settings.title')} className="pb-6">
             <form
               className="flex flex-col gap-4"
