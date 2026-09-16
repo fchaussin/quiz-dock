@@ -68,6 +68,9 @@
     "answerExplanationLabel": "Explication de la réponse (affichée après la révélation)",
     "answerExplanationPlaceholder": "Pourquoi cette réponse est la bonne… (facultatif)",
     "timeLimitLabel": "Temps (s)",
+    "revealDelayLabel": "Délai de révélation (s)",
+    "revealDelayPlaceholder": "auto",
+    "revealDelayHint": "En mode automatique : temps laissé sur la réponse avant la question suivante. Vide = réglage par défaut.",
     "pointsLabel": "Points",
     "pointsMode": {
       "standard": "Standard",

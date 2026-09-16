@@ -33,6 +33,8 @@ export interface SnapshotQuestion {
   prompt: string;
   media: { url: string; kind: 'image' | 'audio' } | null;
   timeLimitS: number;
+  /** Auto-mode delay on this REVEAL in seconds (#6); null = engine default. */
+  revealDelayS: number | null;
   /** Markdown shown at REVEAL only (#5) — never part of `question:start`. */
   answerExplanation: string | null;
   /** Points de base déjà résolus depuis `pointsMode` (1000 / 2000 / 0 — §5). */
@@ -96,6 +98,8 @@ export interface GameMeta {
   clockFrozen: boolean;
   /** Deadline (ms epoch) de l'enchaînement auto en cours sur un reveal (§8), 0 sinon. */
   autoNextAt?: number;
+  /** Duration (ms) of the auto-next countdown armed at `autoNextAt` (#6). */
+  autoNextMs?: number;
   /** État figé avant `HOST_DISCONNECTED` (pour la reprise §7.3). */
   prevState?: string;
   /** ms de question restantes, figées quand `clockFrozen` (pause ou §7.1). */

@@ -32,6 +32,12 @@ export interface UpdateQuestionDto {
      * @maximum 120
      */
   timeLimitS?: number;
+  /**
+     * @minimum 1
+     * @maximum 300
+     * @nullable
+     */
+  revealDelayS?: number | null;
   pointsMode?: UpdateQuestionDtoPointsMode;
   numericValue?: number;
   /** @minimum 0 */

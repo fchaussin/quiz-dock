@@ -60,6 +60,7 @@ interface FormValues {
   mediaId: string | null;
   answerExplanation: string;
   timeLimitS: number;
+  revealDelayS: number | null;
   pointsMode: 'standard' | 'double' | 'none';
   numericValue: number;
   numericTolerance: number;
@@ -85,6 +86,7 @@ function initialValues(q?: QuizDetailDtoQuestionsItem): FormValues {
       mediaId: null,
       answerExplanation: '',
       timeLimitS: 20,
+      revealDelayS: null,
       pointsMode: 'standard',
       numericValue: 0,
       numericTolerance: 0,
@@ -98,6 +100,7 @@ function initialValues(q?: QuizDetailDtoQuestionsItem): FormValues {
     mediaId: q.mediaId ?? null,
     answerExplanation: q.answerExplanation ?? '',
     timeLimitS: q.timeLimitS,
+    revealDelayS: q.revealDelayS ?? null,
     pointsMode: q.pointsMode as FormValues['pointsMode'],
     numericValue: q.numericValue ? Number(q.numericValue) : 0,
     numericTolerance: q.numericTolerance ? Number(q.numericTolerance) : 0,
@@ -228,6 +231,24 @@ export function QuestionForm({
                 className="w-24"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(Number(e.target.value))}
+              />
+            </Label>
+          )}
+        </form.Field>
+        <form.Field name="revealDelayS">
+          {(field) => (
+            <Label title={t('questionForm.revealDelayHint')}>
+              {t('questionForm.revealDelayLabel')}
+              <Input
+                type="number"
+                min={1}
+                max={300}
+                className="w-24"
+                placeholder={t('questionForm.revealDelayPlaceholder')}
+                value={field.state.value ?? ''}
+                onChange={(e) =>
+                  field.handleChange(e.target.value === '' ? null : Number(e.target.value))
+                }
               />
             </Label>
           )}
@@ -470,6 +491,7 @@ function buildPayload(v: FormValues) {
     type: v.type,
     prompt: v.prompt,
     timeLimitS: v.timeLimitS,
+    revealDelayS: v.revealDelayS,
     pointsMode: v.type === 'poll' ? ('none' as const) : v.pointsMode,
     ...(v.mediaId ? { mediaId: v.mediaId } : {}),
     answerExplanation: v.answerExplanation.trim() || null,

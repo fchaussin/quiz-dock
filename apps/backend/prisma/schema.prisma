@@ -154,6 +154,8 @@ model Question {
   /// Markdown shown at REVEAL only (#5) — never sent before.
   answerExplanation String?      @map("answer_explanation")
   timeLimitS        Int          @default(20) @map("time_limit_s")
+  /// Auto-mode delay on this question's REVEAL, seconds (#6); null = engine default.
+  revealDelayS      Int?         @map("reveal_delay_s")
   pointsMode        PointsMode   @default(standard) @map("points_mode")
   numericValue      Decimal?     @map("numeric_value")
   numericTolerance  Decimal?     @map("numeric_tolerance")

@@ -241,6 +241,7 @@ export class QuizzesService {
             answerExplanation: q.answerExplanation,
             timeLimitS: q.timeLimitS,
             pointsMode: q.pointsMode,
+            revealDelayS: q.revealDelayS,
             numericValue: q.numericValue,
             numericTolerance: q.numericTolerance,
             options: {

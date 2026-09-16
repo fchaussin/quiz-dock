@@ -46,6 +46,24 @@ describe('QuestionForm', () => {
     expect(payload.options).toHaveLength(2);
     expect(payload.options[0].isCorrect).toBe(true);
     expect(payload.options[1].isCorrect).toBe(false);
+    // #5 / #6: optional fields left empty are sent as null (= defaults)
+    expect(payload.answerExplanation).toBeNull();
+    expect(payload.revealDelayS).toBeNull();
+  });
+
+  it('sends the per-question reveal delay when set (#6)', async () => {
+    const fetchMock = mockApi([
+      { method: 'POST', path: '/quizzes/q1/questions', status: 201, body: {} },
+    ]);
+    const { onClose } = renderForm();
+
+    setMarkdownField('Énoncé', 'Q ?');
+    fireEvent.change(screen.getByLabelText('Délai de révélation (s)'), { target: { value: '12' } });
+    fireEvent.click(screen.getAllByRole('radio')[0]);
+    fireEvent.click(screen.getByText('Ajouter'));
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(lastPost(fetchMock).revealDelayS).toBe(12);
   });
 
   it('bascule les champs selon le type (texte → réponses acceptées)', () => {

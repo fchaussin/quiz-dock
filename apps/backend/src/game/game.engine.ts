@@ -30,6 +30,9 @@ import { buildQuestionStart } from './snapshot';
 
 type GameServer = Server<Record<string, never>, ServerToClientEvents>;
 
+/** Auto-mode delay on a REVEAL when the question sets none (#6): env override, else constant. */
+const defaultAutoAdvanceMs = () => Number(process.env.GAME_AUTO_ADVANCE_MS ?? AUTO_ADVANCE_MS);
+
 /**
  * Cible d'émission unitaire : satisfaite à la fois par un `Socket` local (gateway)
  * et un `RemoteSocket` (`fetchSockets()`). Permet de partager le calcul du reveal
@@ -778,7 +781,7 @@ export class GameEngine {
       ...(autoNextActive
         ? {
             autoNextAt: meta.autoNextAt,
-            autoNextMs: Number(process.env.GAME_AUTO_ADVANCE_MS ?? AUTO_ADVANCE_MS),
+            autoNextMs: meta.autoNextMs || defaultAutoAdvanceMs(),
           }
         : {}),
     };
@@ -853,11 +856,18 @@ export class GameEngine {
     const m = meta ?? (await this.game.getMeta(pin));
     if (!m || m.mode !== 'auto' || m.paused || m.state !== GameState.Reveal) return;
     this.cancelTimer(this.autoNextTimers, pin);
-    const delay = Number(process.env.GAME_AUTO_ADVANCE_MS ?? AUTO_ADVANCE_MS);
+    // Per-question override (#6), else the engine default.
+    const snapshot = await this.game.getSnapshot(pin);
+    const perQuestion = snapshot?.questions[m.currentIndex]?.revealDelayS;
+    const delay = perQuestion ? perQuestion * 1000 : defaultAutoAdvanceMs();
     // Deadline diffusée à la console (compte à rebours + barre de progression).
     const autoNextAt = Date.now() + delay;
     m.autoNextAt = autoNextAt;
-    await this.redis.hset(gameKeys.game(pin), { autoNextAt: String(autoNextAt) });
+    m.autoNextMs = delay;
+    await this.redis.hset(gameKeys.game(pin), {
+      autoNextAt: String(autoNextAt),
+      autoNextMs: String(delay),
+    });
     const hostUserId = m.hostUserId;
     const index = m.currentIndex;
     const timer = setTimeout(

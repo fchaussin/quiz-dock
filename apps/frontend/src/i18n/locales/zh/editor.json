@@ -68,6 +68,9 @@
     "answerExplanationLabel": "答案解析（揭晓后显示）",
     "answerExplanationPlaceholder": "为什么这是正确答案…（可选）",
     "timeLimitLabel": "时间（秒）",
+    "revealDelayLabel": "揭晓停留（秒）",
+    "revealDelayPlaceholder": "自动",
+    "revealDelayHint": "自动模式下：进入下一题前在答案上停留的时间。留空 = 默认设置。",
     "pointsLabel": "分数",
     "pointsMode": {
       "standard": "标准",

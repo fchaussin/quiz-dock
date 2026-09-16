@@ -68,6 +68,9 @@
     "answerExplanationLabel": "Answer explanation (shown after the reveal)",
     "answerExplanationPlaceholder": "Why this is the right answer… (optional)",
     "timeLimitLabel": "Time (s)",
+    "revealDelayLabel": "Reveal delay (s)",
+    "revealDelayPlaceholder": "auto",
+    "revealDelayHint": "In automatic mode: time spent on the answer before the next question. Empty = default setting.",
     "pointsLabel": "Points",
     "pointsMode": {
       "standard": "Standard",

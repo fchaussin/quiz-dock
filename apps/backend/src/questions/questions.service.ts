@@ -123,6 +123,7 @@ export class QuestionsService {
       mediaId: dto.mediaId,
       answerExplanation: dto.answerExplanation || null,
       timeLimitS: dto.timeLimitS,
+      revealDelayS: dto.revealDelayS ?? null,
       // Un sondage ne rapporte aucun point (technique §4).
       pointsMode: dto.type === 'poll' ? 'none' : dto.pointsMode,
       numericValue: isNumeric ? dto.numericValue : null,

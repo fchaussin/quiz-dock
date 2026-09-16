@@ -29,6 +29,12 @@ export interface QuestionDto {
      * @maximum 9007199254740991
      */
   timeLimitS: number;
+  /**
+     * @minimum -9007199254740991
+     * @maximum 9007199254740991
+     * @nullable
+     */
+  revealDelayS: number | null;
   pointsMode: QuestionDtoPointsMode;
   /** @nullable */
   numericValue: string | null;
