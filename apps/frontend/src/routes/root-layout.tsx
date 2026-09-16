@@ -34,16 +34,39 @@ export function RootLayout() {
   }, [matches, t]);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  // Three shells: the projected screen has no chrome at all; participants (guests on a
+  // phone) get the brand only; hosts and editors get the full app navigation.
+  const routeId = matches[matches.length - 1]?.routeId ?? '';
+  const shell = routeId.startsWith('/present/$pin/screen')
+    ? 'bare'
+    : routeId.startsWith('/join')
+      ? 'participant'
+      : 'app';
+
+  if (shell === 'bare') {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Outlet />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between gap-4 border-b px-6 py-3">
-        <Link to="/" className="flex items-center gap-2 text-lg font-bold">
-          <img src={appConfig.logoUrl} alt="" className="h-7 w-auto rounded-md" />
-          <span>{APP_NAME}</span>
-        </Link>
+        {shell === 'participant' ? (
+          <span className="flex items-center gap-2 text-lg font-bold">
+            <img src={appConfig.logoUrl} alt="" className="h-7 w-auto rounded-md" />
+            <span>{APP_NAME}</span>
+          </span>
+        ) : (
+          <Link to="/" className="flex items-center gap-2 text-lg font-bold">
+            <img src={appConfig.logoUrl} alt="" className="h-7 w-auto rounded-md" />
+            <span>{APP_NAME}</span>
+          </Link>
+        )}
         <nav className="flex items-center gap-3 text-sm">
-          {user ? (
+          {shell === 'participant' ? null : user ? (
             <>
               <Link to="/dashboard" className="whitespace-nowrap hover:underline">
                 {t('nav.myQuizzes')}
@@ -68,7 +91,13 @@ export function RootLayout() {
         </nav>
       </header>
       {/* Wide but bounded: ~1440px, the usual ceiling for app layouts; pages narrow themselves when reading matters. */}
-      <main className="mx-auto w-full max-w-[90rem] flex-1 px-6 py-6 lg:px-10">
+      <main
+        className={
+          shell === 'participant'
+            ? 'mx-auto w-full max-w-lg flex-1 px-4 py-4'
+            : 'mx-auto w-full max-w-[90rem] flex-1 px-6 py-6 lg:px-10'
+        }
+      >
         <Outlet />
       </main>
     </div>

@@ -175,6 +175,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect {
     const snapshot = await this.game.getSnapshot(pin);
     if (!snapshot) return;
     socket.emit('game:outline', {
+      quizId: snapshot.quizId,
       title: snapshot.title,
       description: snapshot.description,
       questions: snapshot.questions.map((q, index) => ({

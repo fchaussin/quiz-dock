@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import { useEffect, useRef, useState } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
@@ -129,14 +130,17 @@ export function ControlPage() {
   }
 
   const controlBar = (
-    <ControlBar
-      view={view}
-      pin={pin}
-      onMode={setMode}
-      onPause={setPaused}
-      onBan={banPlayer}
-      screenButton={screenButton}
-    />
+    <>
+      <HostBreadcrumb view={view} pin={pin} />
+      <ControlBar
+        view={view}
+        pin={pin}
+        onMode={setMode}
+        onPause={setPaused}
+        onBan={banPlayer}
+        screenButton={screenButton}
+      />
+    </>
   );
 
   // ── LOBBY ────────────────────────────────────────────────────────────────
@@ -828,5 +832,40 @@ function QuestionCarousel({
         })}
       </ol>
     </div>
+  );
+}
+
+/**
+ * Where the host is: My quizzes › quiz › this session. The editor link is safe —
+ * the session keeps running on the server while the host is elsewhere.
+ */
+function HostBreadcrumb({ view, pin }: { view: GameView; pin: string }) {
+  const { t } = useTranslation('live');
+  return (
+    <nav
+      aria-label={t('control.breadcrumb')}
+      className="text-muted-foreground flex flex-wrap items-center gap-1 text-sm"
+    >
+      <Link to="/dashboard" className="hover:text-foreground hover:underline">
+        {t('control.myQuizzes')}
+      </Link>
+      <ChevronRight className="size-3.5" />
+      {view.quizId ? (
+        <Link
+          to="/quizzes/$quizId"
+          params={{ quizId: view.quizId }}
+          className="hover:text-foreground max-w-[16rem] truncate hover:underline"
+          title={t('control.backToEditorHint')}
+        >
+          {view.quizTitle ?? t('control.sessionInProgress')}
+        </Link>
+      ) : (
+        <span className="max-w-[16rem] truncate">
+          {view.quizTitle ?? t('control.sessionInProgress')}
+        </span>
+      )}
+      <ChevronRight className="size-3.5" />
+      <span className="text-foreground font-medium">{t('control.sessionCrumb', { pin })}</span>
+    </nav>
   );
 }

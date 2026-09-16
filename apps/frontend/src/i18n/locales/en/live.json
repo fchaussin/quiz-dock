@@ -73,7 +73,11 @@
       "numeric": "Numeric",
       "ordering": "Order",
       "poll": "Poll"
-    }
+    },
+    "breadcrumb": "Breadcrumb",
+    "myQuizzes": "My quizzes",
+    "sessionCrumb": "Session {{pin}}",
+    "backToEditorHint": "Back to the editor — the session keeps running"
   },
   "screen": {
     "sessionUnavailable": "Session unavailable.",
@@ -130,7 +134,11 @@
     "submitAnswer": "Submit my answer",
     "moveUp": "Move up",
     "moveDown": "Move down",
-    "unsupportedType": "Unsupported question type."
+    "unsupportedType": "Unsupported question type.",
+    "leave": "Leave",
+    "leaveConfirmTitle": "Leave the session?",
+    "leaveConfirmDescription": "You will lose your seat and your score. To come back you will have to join again with the PIN.",
+    "joinAnother": "Join another game"
   },
   "reveal": {
     "explanation": "Explanation",

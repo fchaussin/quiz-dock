@@ -21,6 +21,7 @@ vi.mock('../game/game-client', () => ({
   loadAvatarSeed: () => null,
   loadNickname: () => '',
   saveNickname: () => undefined,
+  clearPlayerSession: () => undefined,
   saveAvatarSeed: () => undefined,
 }));
 
@@ -48,6 +49,7 @@ const view = (partial: Partial<GameView>): GameView => ({
   autoNextAt: null,
   autoNextMs: null,
   quizTitle: null,
+  quizId: null,
   quizDescription: null,
   outline: [],
   ...partial,
