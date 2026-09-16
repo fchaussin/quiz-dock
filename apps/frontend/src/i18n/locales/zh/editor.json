@@ -76,6 +76,13 @@
     "titlePlaceholder": "幻灯片标题（可选）",
     "bodyLabel": "内容",
     "bodyPlaceholder": "要显示的文字…",
+    "layoutLegend": "版式",
+    "layout": {
+      "auto": "图片在文字上方",
+      "media_left": "图片在左",
+      "media_right": "图片在右",
+      "media_full": "全屏图片，文字覆盖"
+    },
     "displayDelayLabel": "显示时长（秒）",
     "displayDelayPlaceholder": "手动",
     "displayDelayHint": "到时后自动进入下一步。留空 = 由主持人点击。",

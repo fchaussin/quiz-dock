@@ -9,7 +9,7 @@ import type {
 } from '@quiz-dock/contracts';
 import { basePointsFor } from './scoring';
 import type { QuizSnapshot, SnapshotQuestion, SnapshotSlide } from './game.types';
-import type { SlideShowPayload } from '@quiz-dock/contracts';
+import type { SlideLayout, SlideShowPayload } from '@quiz-dock/contracts';
 
 /** Forme Prisma attendue par le constructeur de snapshot (relations incluses). */
 const quizWithContent = Prisma.validator<Prisma.QuizDefaultArgs>()({
@@ -93,6 +93,7 @@ function buildSnapshotSlides(quiz: QuizWithContent): SnapshotSlide[] {
       body: slide.body,
       media: mediaOf(slide.media),
       displayDelayS: slide.displayDelayS,
+      layout: slide.layout as SlideLayout,
     }));
 }
 
@@ -105,6 +106,7 @@ export function buildSlideShow(slide: SnapshotSlide, slideIndex: number): SlideS
     body: slide.body,
     media: slide.media,
     displayDelayS: slide.displayDelayS,
+    layout: slide.layout,
   };
 }
 

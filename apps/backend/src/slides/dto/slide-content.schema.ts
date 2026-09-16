@@ -11,6 +11,8 @@ export const slideContentSchema = z
     body: z.string().trim().max(5000).nullable().optional(),
     mediaId: z.string().length(26).nullable().optional(),
     displayDelayS: z.number().int().min(1).max(600).nullable().optional(),
+    // Composition on screen; `auto` = media above the text.
+    layout: z.enum(['auto', 'media_left', 'media_right', 'media_full']).default('auto'),
   })
   .refine((d) => Boolean(d.title || d.body || d.mediaId), {
     message: 'slide.empty',

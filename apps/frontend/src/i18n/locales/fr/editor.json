@@ -76,6 +76,13 @@
     "titlePlaceholder": "Titre de la slide (facultatif)",
     "bodyLabel": "Contenu",
     "bodyPlaceholder": "Texte à afficher…",
+    "layoutLegend": "Mise en page",
+    "layout": {
+      "auto": "Image au-dessus du texte",
+      "media_left": "Image à gauche",
+      "media_right": "Image à droite",
+      "media_full": "Image plein écran, texte par-dessus"
+    },
     "displayDelayLabel": "Durée d’affichage (s)",
     "displayDelayPlaceholder": "manuel",
     "displayDelayHint": "Passe à la suite automatiquement après ce délai. Vide = l’animateur clique.",

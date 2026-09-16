@@ -4,6 +4,7 @@ import type {
   OptionColor,
   OptionShape,
   QuestionType,
+  SlideLayout,
 } from '@quiz-dock/contracts';
 
 /**
@@ -58,6 +59,7 @@ export interface SnapshotSlide {
   body: string | null;
   media: { url: string; kind: 'image' | 'audio' } | null;
   displayDelayS: number | null;
+  layout: SlideLayout;
 }
 
 export interface QuizSnapshot {

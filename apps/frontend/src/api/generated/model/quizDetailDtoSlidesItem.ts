@@ -5,6 +5,7 @@
  * API REST du builder de quiz et des restitutions
  * OpenAPI spec version: 0.1.0
  */
+import type { QuizDetailDtoSlidesItemLayout } from './quizDetailDtoSlidesItemLayout';
 
 export type QuizDetailDtoSlidesItem = {
   id: string;
@@ -28,4 +29,5 @@ export type QuizDetailDtoSlidesItem = {
      * @nullable
      */
   displayDelayS: number | null;
+  layout: QuizDetailDtoSlidesItemLayout;
 };

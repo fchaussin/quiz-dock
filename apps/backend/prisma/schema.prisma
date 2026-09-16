@@ -219,22 +219,33 @@ model AcceptedAnswer {
   @@map("accepted_answer")
 }
 
+/// How a slide composes text and media on screen (#7).
+enum SlideLayout {
+  auto
+  media_left
+  media_right
+  media_full
+
+  @@map("slide_layout")
+}
+
 /// Content slide (#7): a `quiz_item` of kind `slide` — shown in the live sequence,
 /// no answer, no score. Positioned **before** a question (`before_question_id`),
 /// or at the end of the quiz when null; `order_index` orders slides sharing an anchor.
 model Slide {
-  id               String   @id @default(ulid()) @db.Char(26)
-  quizId           String   @map("quiz_id") @db.Char(26)
-  beforeQuestionId String?  @map("before_question_id") @db.Char(26)
-  orderIndex       Int      @map("order_index")
+  id               String      @id @default(ulid()) @db.Char(26)
+  quizId           String      @map("quiz_id") @db.Char(26)
+  beforeQuestionId String?     @map("before_question_id") @db.Char(26)
+  orderIndex       Int         @map("order_index")
   title            String?
   /// Markdown (block profile).
   body             String?
-  mediaId          String?  @map("media_id") @db.Char(26)
+  mediaId          String?     @map("media_id") @db.Char(26)
   /// Seconds before auto-advancing; null = the host clicks.
-  displayDelayS    Int?     @map("display_delay_s")
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  displayDelayS    Int?        @map("display_delay_s")
+  layout           SlideLayout @default(auto)
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   quiz           Quiz        @relation(fields: [quizId], references: [id], onDelete: Cascade)
   beforeQuestion Question?   @relation(fields: [beforeQuestionId], references: [id], onDelete: SetNull)

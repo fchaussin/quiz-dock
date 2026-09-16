@@ -76,6 +76,13 @@
     "titlePlaceholder": "Título de la diapositiva (opcional)",
     "bodyLabel": "Contenido",
     "bodyPlaceholder": "Texto a mostrar…",
+    "layoutLegend": "Disposición",
+    "layout": {
+      "auto": "Imagen encima del texto",
+      "media_left": "Imagen a la izquierda",
+      "media_right": "Imagen a la derecha",
+      "media_full": "Imagen a pantalla completa, texto encima"
+    },
     "displayDelayLabel": "Tiempo de visualización (s)",
     "displayDelayPlaceholder": "manual",
     "displayDelayHint": "Avanza sola tras este tiempo. Vacío = el presentador hace clic.",

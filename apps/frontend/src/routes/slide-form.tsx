@@ -3,22 +3,35 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { LayoutPanelLeft, LayoutPanelTop, Maximize2, PanelRight } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard';
 import { MarkdownEditor } from '@/components/markdown-editor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiErrorText } from '../api/http';
+import type { SlideLayout } from '@quiz-dock/contracts';
 import type { QuizDetailDtoSlidesItem } from '../api/generated/model';
+import { SlideStage } from '../game/slide-stage';
 import { MediaUpload } from './media-upload';
 import { useSlidesControllerAdd, useSlidesControllerUpdate } from '../api/generated/slides/slides';
 import { getQuizzesControllerGetQueryKey } from '../api/generated/quizzes/quizzes';
+
+/** Layout choices, in the order they are offered. */
+const LAYOUTS: { value: SlideLayout; Icon: typeof LayoutPanelTop }[] = [
+  { value: 'auto', Icon: LayoutPanelTop },
+  { value: 'media_left', Icon: LayoutPanelLeft },
+  { value: 'media_right', Icon: PanelRight },
+  { value: 'media_full', Icon: Maximize2 },
+];
 
 interface FormValues {
   title: string;
   body: string;
   mediaId: string | null;
   displayDelayS: number | null;
+  layout: SlideLayout;
 }
 
 function initialValues(s?: QuizDetailDtoSlidesItem): FormValues {
@@ -27,6 +40,7 @@ function initialValues(s?: QuizDetailDtoSlidesItem): FormValues {
     body: s?.body ?? '',
     mediaId: s?.mediaId ?? null,
     displayDelayS: s?.displayDelayS ?? null,
+    layout: (s?.layout as SlideLayout | undefined) ?? 'auto',
   };
 }
 
@@ -63,6 +77,7 @@ export function SlideForm({
         body: value.body.trim() || null,
         mediaId: value.mediaId,
         displayDelayS: value.displayDelayS,
+        layout: value.layout,
       };
       try {
         if (slide) {
@@ -80,6 +95,7 @@ export function SlideForm({
     },
   });
   const mediaId = useStore(form.store, (s) => s.values.mediaId);
+  const values = useStore(form.store, (s) => s.values);
   const dirty = useStore(form.store, (s) => JSON.stringify(s.values) !== JSON.stringify(initial));
   useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
   useUnsavedGuard(dirty);
@@ -121,6 +137,50 @@ export function SlideForm({
       </form.Field>
 
       <MediaUpload value={mediaId} onChange={(id) => form.setFieldValue('mediaId', id)} />
+
+      {mediaId ? (
+        <form.Field name="layout">
+          {(field) => (
+            <fieldset className="flex flex-col gap-2">
+              <legend className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
+                {t('slideForm.layoutLegend')}
+              </legend>
+              <div className="flex flex-wrap gap-2">
+                {LAYOUTS.map(({ value, Icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={field.state.value === value}
+                    title={t(`slideForm.layout.${value}`)}
+                    aria-label={t(`slideForm.layout.${value}`)}
+                    onClick={() => field.handleChange(value)}
+                    className={cn(
+                      'border-input hover:bg-accent flex size-12 items-center justify-center rounded-md border',
+                      field.state.value === value && 'border-primary bg-primary/10 text-primary',
+                    )}
+                  >
+                    <Icon className="size-6" />
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          )}
+        </form.Field>
+      ) : null}
+
+      {/* What the projected screen will show, at slide proportions. */}
+      <SlideStage
+        className="rounded-xl border"
+        slide={{
+          slideIndex: 0,
+          questionIndex: 0,
+          title: values.title || null,
+          body: values.body || null,
+          media: mediaId ? { url: `/api/v1/media/${mediaId}`, kind: 'image' } : null,
+          displayDelayS: values.displayDelayS,
+          layout: values.layout,
+        }}
+      />
 
       <form.Field name="displayDelayS">
         {(field) => (

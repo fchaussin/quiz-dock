@@ -124,6 +124,7 @@ describe('buildSnapshot', () => {
       body: null,
       media: null,
       displayDelayS: null,
+      layout: 'auto',
     });
     const snap = buildSnapshot(
       quiz({

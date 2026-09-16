@@ -190,36 +190,91 @@ export function AnswerExplanation({
 }
 
 /**
- * A content slide (#7): title, Markdown body and media. Same block on the projected
- * screen (`large`), the host console and the participant's phone.
+ * A content slide (#7). It owns its whole surface — no max-width: the
+ * projected screen is a slide, not a document. `layout` composes text and
+ * media: `auto` = media above the text, `media_left` / `media_right` = two
+ * columns, `media_full` = the image fills the surface, text overlaid.
  */
 export function SlideView({ slide, large }: { slide: SlideShowPayload; large?: boolean }) {
-  return (
-    <article
+  const image = slide.media?.kind === 'image' ? slide.media.url : null;
+  const audio = slide.media?.kind === 'audio' ? slide.media.url : null;
+  const layout = image ? slide.layout : 'auto';
+
+  const text = (
+    <div
       className={cn(
-        'flex w-full flex-col items-center gap-4 text-center',
-        large ? 'max-w-4xl' : 'max-w-3xl',
+        'flex min-w-0 flex-col justify-center gap-4',
+        // Text stands alone or over a full image → centred; next to an image → aligned to it.
+        layout === 'media_full' || !image ? 'items-center text-center' : 'items-start text-left',
       )}
     >
       {slide.title ? (
-        <h1 className={cn('font-bold text-balance', large ? 'text-4xl md:text-5xl' : 'text-2xl')}>
+        <h1
+          className={cn(
+            'font-bold text-balance',
+            large ? 'text-5xl leading-tight md:text-6xl' : 'text-2xl',
+          )}
+        >
           {slide.title}
         </h1>
       ) : null}
-      {slide.media?.kind === 'image' ? (
-        <img
-          src={slide.media.url}
-          alt=""
-          className={cn('self-center object-contain', large ? 'max-h-[45vh]' : 'max-h-64')}
-        />
-      ) : slide.media?.kind === 'audio' ? (
-        <audio controls src={slide.media.url} className="w-full max-w-md" />
-      ) : null}
+      {audio ? <audio controls src={audio} className="w-full max-w-md" /> : null}
       {slide.body ? (
-        <Markdown className={cn('w-full text-left', large ? 'text-2xl' : 'text-base')}>
+        <Markdown
+          className={cn('w-full', large ? 'text-2xl leading-relaxed md:text-3xl' : 'text-base')}
+        >
           {slide.body}
         </Markdown>
       ) : null}
+    </div>
+  );
+
+  if (layout === 'media_full' && image) {
+    return (
+      <article className="relative flex h-full min-h-[60vh] w-full items-center justify-center overflow-hidden">
+        <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-black/45" />
+        <div className={cn('relative z-10 text-white', large ? 'max-w-5xl p-12' : 'p-6')}>
+          {text}
+        </div>
+      </article>
+    );
+  }
+  if ((layout === 'media_left' || layout === 'media_right') && image) {
+    const media = (
+      <img
+        src={image}
+        alt=""
+        className={cn('h-full w-full object-contain', large ? 'max-h-[80vh]' : 'max-h-72')}
+      />
+    );
+    return (
+      <article
+        className={cn(
+          'grid h-full w-full items-center',
+          large ? 'grid-cols-2 gap-12 p-12' : 'grid-cols-1 gap-4 sm:grid-cols-2',
+        )}
+      >
+        {layout === 'media_left' ? media : text}
+        {layout === 'media_left' ? text : media}
+      </article>
+    );
+  }
+  return (
+    <article
+      className={cn(
+        'flex h-full w-full flex-col items-center justify-center',
+        large ? 'gap-8 p-12' : 'gap-4',
+      )}
+    >
+      {image ? (
+        <img
+          src={image}
+          alt=""
+          className={cn('w-full object-contain', large ? 'max-h-[55vh]' : 'max-h-72')}
+        />
+      ) : null}
+      <div className={cn('w-full', large ? 'max-w-6xl' : '')}>{text}</div>
     </article>
   );
 }

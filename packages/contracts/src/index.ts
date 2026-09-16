@@ -151,6 +151,9 @@ export interface QuestionStartPayload {
   endsAt: number;
 }
 
+/** How a slide composes its text and media (#7); `auto` = media above the text. */
+export type SlideLayout = 'auto' | 'media_left' | 'media_right' | 'media_full';
+
 /**
  * A content slide on screen (#7). `questionIndex` is the question that follows
  * the slide (`totalQuestions` when the slide closes the quiz). Sent to everyone:
@@ -165,6 +168,7 @@ export interface SlideShowPayload {
   media?: { url: string; kind: 'image' | 'audio' } | null;
   /** Seconds before the engine advances by itself; null = the host clicks. */
   displayDelayS: number | null;
+  layout: SlideLayout;
 }
 
 export interface GameStatePayload {

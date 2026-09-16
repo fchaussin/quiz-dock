@@ -5,6 +5,7 @@
  * API REST du builder de quiz et des restitutions
  * OpenAPI spec version: 0.1.0
  */
+import type { CreateSlideDtoLayout } from './createSlideDtoLayout';
 
 export interface CreateSlideDto {
   /**
@@ -29,4 +30,5 @@ export interface CreateSlideDto {
      * @nullable
      */
   displayDelayS?: number | null;
+  layout?: CreateSlideDtoLayout;
 }

@@ -284,7 +284,7 @@ export function PlayerPage() {
   // ── États de jeu ───────────────────────────────────────────────────────────
   if (view.state === 'SLIDE_SHOW' && view.slide) {
     return (
-      <section className="mx-auto flex w-full max-w-md flex-col items-center gap-6 py-6">
+      <section className="flex w-full flex-col py-4">
         <SlideView slide={view.slide} />
       </section>
     );

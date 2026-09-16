@@ -1441,6 +1441,15 @@
                   "minimum": -9007199254740991,
                   "maximum": 9007199254740991,
                   "nullable": true
+                },
+                "layout": {
+                  "type": "string",
+                  "enum": [
+                    "auto",
+                    "media_left",
+                    "media_right",
+                    "media_full"
+                  ]
                 }
               },
               "required": [
@@ -1451,7 +1460,8 @@
                 "title",
                 "body",
                 "mediaId",
-                "displayDelayS"
+                "displayDelayS",
+                "layout"
               ]
             }
           }
@@ -2429,6 +2439,16 @@
             "minimum": 1,
             "maximum": 600,
             "nullable": true
+          },
+          "layout": {
+            "default": "auto",
+            "type": "string",
+            "enum": [
+              "auto",
+              "media_left",
+              "media_right",
+              "media_full"
+            ]
           }
         }
       },
@@ -2467,6 +2487,15 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991,
             "nullable": true
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "media_left",
+              "media_right",
+              "media_full"
+            ]
           }
         },
         "required": [
@@ -2477,7 +2506,8 @@
           "title",
           "body",
           "mediaId",
-          "displayDelayS"
+          "displayDelayS",
+          "layout"
         ]
       },
       "ReorderItemsDto": {
@@ -2537,6 +2567,16 @@
             "minimum": 1,
             "maximum": 600,
             "nullable": true
+          },
+          "layout": {
+            "default": "auto",
+            "type": "string",
+            "enum": [
+              "auto",
+              "media_left",
+              "media_right",
+              "media_full"
+            ]
           }
         }
       },

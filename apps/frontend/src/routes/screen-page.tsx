@@ -82,7 +82,11 @@ export function ScreenPage() {
   } else if (view.state === 'ENDED') {
     body = <p className="text-3xl font-semibold">{t('screen.thanks')}</p>;
   } else if (view.state === 'SLIDE_SHOW' && view.slide) {
-    body = <SlideView slide={view.slide} large />;
+    body = (
+      <div className="flex min-h-[80vh] w-full flex-1 [&:fullscreen]:min-h-dvh">
+        <SlideView slide={view.slide} large />
+      </div>
+    );
   } else if (view.state === 'PODIUM' && view.podium) {
     body = (
       <div className="flex w-full max-w-md flex-col items-center gap-6">
@@ -175,7 +179,13 @@ export function ScreenPage() {
   return (
     <div
       ref={ref}
-      className="bg-background relative flex min-h-[80vh] flex-col items-center justify-center gap-6 p-8 text-center"
+      className={cn(
+        'bg-background relative flex min-h-[80vh] flex-col [&:fullscreen]:min-h-dvh',
+        // A slide owns the whole surface; everything else is centred with breathing room.
+        view.state === 'SLIDE_SHOW'
+          ? 'items-stretch justify-stretch p-0'
+          : 'items-center justify-center gap-6 p-8 text-center',
+      )}
     >
       {fullscreenBtn}
       {body}

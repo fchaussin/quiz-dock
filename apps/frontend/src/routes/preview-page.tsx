@@ -7,7 +7,7 @@ import { COLOR_BG, OPTION_BG_FALLBACK, SHAPE_GLYPH } from '@/lib/option-style';
 import { cn } from '@/lib/utils';
 import { quizItems } from '@/lib/quiz-items';
 import { useFullscreen } from '@/lib/use-fullscreen';
-import { SlideView } from '../game/live-components';
+import { SlideStage } from '../game/slide-stage';
 import type { QuizDetailDto, QuizDetailDtoQuestionsItem } from '../api/generated/model';
 import { useQuizzesControllerGet } from '../api/generated/quizzes/quizzes';
 import { previewRoute } from '../router';
@@ -62,21 +62,20 @@ function QuizPreview({ quiz }: { quiz: QuizDetailDto }) {
           {item.kind === 'question' ? (
             <QuestionPreview question={item.question} large={isFullscreen} />
           ) : (
-            <div className="rounded-xl border p-6">
-              <SlideView
-                large={isFullscreen}
-                slide={{
-                  slideIndex: index,
-                  questionIndex: 0,
-                  title: item.slide.title,
-                  body: item.slide.body,
-                  media: item.slide.mediaId
-                    ? { url: `/api/v1/media/${item.slide.mediaId}`, kind: 'image' }
-                    : null,
-                  displayDelayS: item.slide.displayDelayS,
-                }}
-              />
-            </div>
+            <SlideStage
+              className="rounded-xl border"
+              slide={{
+                slideIndex: index,
+                questionIndex: 0,
+                title: item.slide.title,
+                body: item.slide.body,
+                media: item.slide.mediaId
+                  ? { url: `/api/v1/media/${item.slide.mediaId}`, kind: 'image' }
+                  : null,
+                displayDelayS: item.slide.displayDelayS,
+                layout: item.slide.layout,
+              }}
+            />
           )}
           <nav className="flex items-center justify-between">
             <Button

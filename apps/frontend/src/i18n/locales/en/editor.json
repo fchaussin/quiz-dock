@@ -76,6 +76,13 @@
     "titlePlaceholder": "Slide title (optional)",
     "bodyLabel": "Content",
     "bodyPlaceholder": "Text to display…",
+    "layoutLegend": "Layout",
+    "layout": {
+      "auto": "Image above the text",
+      "media_left": "Image on the left",
+      "media_right": "Image on the right",
+      "media_full": "Full-screen image, text on top"
+    },
     "displayDelayLabel": "Display time (s)",
     "displayDelayPlaceholder": "manual",
     "displayDelayHint": "Moves on by itself after this delay. Empty = the host clicks.",

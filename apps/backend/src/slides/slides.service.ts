@@ -113,6 +113,7 @@ export class SlidesService {
       body: dto.body || null,
       mediaId: dto.mediaId || null,
       displayDelayS: dto.displayDelayS ?? null,
+      layout: dto.layout,
     };
   }
 
