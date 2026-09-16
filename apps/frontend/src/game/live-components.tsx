@@ -7,6 +7,7 @@ import type {
   SlideImageSize,
   SlideLeafBlock,
   SlideShowPayload,
+  SlideTextAlign,
 } from '@quiz-dock/contracts';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
@@ -243,6 +244,13 @@ export function columnsTemplate(count: number, ratio?: SlideColumnsRatio): strin
   return `repeat(${count}, minmax(0, 1fr))`;
 }
 
+/** Text blocks are centred unless the author says otherwise (a slide, not a document). */
+const TEXT_ALIGN: Record<SlideTextAlign, string> = {
+  left: 'text-left [&_ul]:text-left [&_ol]:text-left',
+  center: 'text-center [&_ul]:inline-block [&_ul]:text-left [&_ol]:inline-block [&_ol]:text-left',
+  right: 'text-right [&_ul]:text-left [&_ol]:text-left',
+};
+
 const IMAGE_WIDTH: Record<SlideImageSize, string> = {
   small: 'w-1/3',
   medium: 'w-1/2',
@@ -254,17 +262,35 @@ function SlideBlockView({ block, large }: { block: SlideLeafBlock; large?: boole
   switch (block.type) {
     case 'heading':
       return block.level === 1 ? (
-        <h1 className={cn('font-bold text-balance', large ? 'text-6xl leading-tight' : 'text-2xl')}>
+        <h1
+          className={cn(
+            'font-bold text-balance',
+            TEXT_ALIGN[block.align ?? 'center'],
+            large ? 'text-6xl leading-tight' : 'text-2xl',
+          )}
+        >
           {block.text}
         </h1>
       ) : (
-        <h2 className={cn('font-semibold text-balance', large ? 'text-4xl' : 'text-xl')}>
+        <h2
+          className={cn(
+            'font-semibold text-balance',
+            TEXT_ALIGN[block.align ?? 'center'],
+            large ? 'text-4xl' : 'text-xl',
+          )}
+        >
           {block.text}
         </h2>
       );
     case 'text':
       return (
-        <Markdown className={cn('w-full', large ? 'text-3xl leading-relaxed' : 'text-base')}>
+        <Markdown
+          className={cn(
+            'w-full',
+            TEXT_ALIGN[block.align ?? 'center'],
+            large ? 'text-3xl leading-relaxed' : 'text-base',
+          )}
+        >
           {block.md}
         </Markdown>
       );

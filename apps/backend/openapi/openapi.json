@@ -1507,6 +1507,14 @@
                                     ]
                                   }
                                 ]
+                              },
+                              "align": {
+                                "type": "string",
+                                "enum": [
+                                  "left",
+                                  "center",
+                                  "right"
+                                ]
                               }
                             },
                             "required": [
@@ -1533,6 +1541,14 @@
                                 "type": "string",
                                 "minLength": 1,
                                 "maxLength": 5000
+                              },
+                              "align": {
+                                "type": "string",
+                                "enum": [
+                                  "left",
+                                  "center",
+                                  "right"
+                                ]
                               }
                             },
                             "required": [
@@ -1646,6 +1662,14 @@
                                             ]
                                           }
                                         ]
+                                      },
+                                      "align": {
+                                        "type": "string",
+                                        "enum": [
+                                          "left",
+                                          "center",
+                                          "right"
+                                        ]
                                       }
                                     },
                                     "required": [
@@ -1672,6 +1696,14 @@
                                         "type": "string",
                                         "minLength": 1,
                                         "maxLength": 5000
+                                      },
+                                      "align": {
+                                        "type": "string",
+                                        "enum": [
+                                          "left",
+                                          "center",
+                                          "right"
+                                        ]
                                       }
                                     },
                                     "required": [
@@ -2928,6 +2960,14 @@
                               ]
                             }
                           ]
+                        },
+                        "align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
                         }
                       },
                       "required": [
@@ -2954,6 +2994,14 @@
                           "type": "string",
                           "minLength": 1,
                           "maxLength": 5000
+                        },
+                        "align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
                         }
                       },
                       "required": [
@@ -3067,6 +3115,14 @@
                                       ]
                                     }
                                   ]
+                                },
+                                "align": {
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
                                 }
                               },
                               "required": [
@@ -3093,6 +3149,14 @@
                                   "type": "string",
                                   "minLength": 1,
                                   "maxLength": 5000
+                                },
+                                "align": {
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
                                 }
                               },
                               "required": [
@@ -3277,6 +3341,14 @@
                               ]
                             }
                           ]
+                        },
+                        "align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
                         }
                       },
                       "required": [
@@ -3303,6 +3375,14 @@
                           "type": "string",
                           "minLength": 1,
                           "maxLength": 5000
+                        },
+                        "align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
                         }
                       },
                       "required": [
@@ -3416,6 +3496,14 @@
                                       ]
                                     }
                                   ]
+                                },
+                                "align": {
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
                                 }
                               },
                               "required": [
@@ -3442,6 +3530,14 @@
                                   "type": "string",
                                   "minLength": 1,
                                   "maxLength": 5000
+                                },
+                                "align": {
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
                                 }
                               },
                               "required": [
@@ -3654,6 +3750,14 @@
                               ]
                             }
                           ]
+                        },
+                        "align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
                         }
                       },
                       "required": [
@@ -3680,6 +3784,14 @@
                           "type": "string",
                           "minLength": 1,
                           "maxLength": 5000
+                        },
+                        "align": {
+                          "type": "string",
+                          "enum": [
+                            "left",
+                            "center",
+                            "right"
+                          ]
                         }
                       },
                       "required": [
@@ -3793,6 +3905,14 @@
                                       ]
                                     }
                                   ]
+                                },
+                                "align": {
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
                                 }
                               },
                               "required": [
@@ -3819,6 +3939,14 @@
                                   "type": "string",
                                   "minLength": 1,
                                   "maxLength": 5000
+                                },
+                                "align": {
+                                  "type": "string",
+                                  "enum": [
+                                    "left",
+                                    "center",
+                                    "right"
+                                  ]
                                 }
                               },
                               "required": [

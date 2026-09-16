@@ -118,7 +118,8 @@
       "center": "居中",
       "right": "右"
     },
-    "ratio": "分栏比例"
+    "ratio": "分栏比例",
+    "textAlign": "文字对齐"
   },
   "discardConfirm": {
     "title": "放弃修改？",

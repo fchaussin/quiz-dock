@@ -118,7 +118,8 @@
       "center": "Centre",
       "right": "Droite"
     },
-    "ratio": "Répartition des colonnes"
+    "ratio": "Répartition des colonnes",
+    "textAlign": "Alignement du texte"
   },
   "discardConfirm": {
     "title": "Abandonner les modifications ?",

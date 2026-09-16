@@ -12,12 +12,14 @@ const leafBlockSchema = z.discriminatedUnion('type', [
     id: blockId,
     text: z.string().trim().min(1).max(200),
     level: z.union([z.literal(1), z.literal(2)]).default(1),
+    align: z.enum(['left', 'center', 'right']).optional(),
   }),
   z.object({
     type: z.literal('text'),
     id: blockId,
     /** Markdown, block profile (images inside are allowed too). */
     md: z.string().trim().min(1).max(5000),
+    align: z.enum(['left', 'center', 'right']).optional(),
   }),
   z.object({
     type: z.literal('image'),

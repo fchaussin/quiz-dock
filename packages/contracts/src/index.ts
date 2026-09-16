@@ -158,6 +158,9 @@ export interface QuestionStartPayload {
 /** Text over a full-cover background: light text on a darkened image, or dark text on a lightened one. */
 export type SlideTextTone = 'light' | 'dark';
 
+/** Horizontal alignment of a text-like block; centred when absent. */
+export type SlideTextAlign = 'left' | 'center' | 'right';
+
 /** Width of an image block on the slide surface. */
 export type SlideImageSize = 'small' | 'medium' | 'large' | 'full';
 
@@ -166,8 +169,8 @@ export type SlideImageSize = 'small' | 'medium' | 'large' | 'full';
  * leaf blocks side by side. `id` is a stable client key (reorder, edit).
  */
 export type SlideLeafBlock =
-  | { type: 'heading'; id: string; text: string; level: 1 | 2 }
-  | { type: 'text'; id: string; md: string }
+  | { type: 'heading'; id: string; text: string; level: 1 | 2; align?: SlideTextAlign }
+  | { type: 'text'; id: string; md: string; align?: SlideTextAlign }
   | {
       type: 'image';
       id: string;

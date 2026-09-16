@@ -118,7 +118,8 @@
       "center": "Centre",
       "right": "Right"
     },
-    "ratio": "Column split"
+    "ratio": "Column split",
+    "textAlign": "Text alignment"
   },
   "discardConfirm": {
     "title": "Discard changes?",

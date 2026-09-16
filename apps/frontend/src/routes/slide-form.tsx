@@ -20,10 +20,14 @@ import type {
   SlideColumnsRatio,
   SlideGradient,
   SlideLeafBlock,
+  SlideTextAlign,
   SlideTextTone,
 } from '@quiz-dock/contracts';
 import { useQueryClient } from '@tanstack/react-query';
 import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
   Columns2,
   Columns3,
   GripVertical,
@@ -490,16 +494,23 @@ function LeafEditor({
   switch (block.type) {
     case 'heading':
       return (
-        <div className="flex items-center gap-2">
-          <Select
-            aria-label={t('slideForm.headingLevel')}
-            className="w-20 shrink-0"
-            value={String(block.level)}
-            onChange={(e) => onChange({ ...block, level: Number(e.target.value) as 1 | 2 })}
-          >
-            <option value="1">H1</option>
-            <option value="2">H2</option>
-          </Select>
+        <div className="flex flex-col gap-1.5">
+          {/* Block settings on one thin line above the field: level, then alignment. */}
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground text-xs font-medium">
+              {t('slideForm.block.heading')}
+            </span>
+            <Select
+              aria-label={t('slideForm.headingLevel')}
+              className="h-7 w-16 shrink-0 px-2 py-0 text-xs"
+              value={String(block.level)}
+              onChange={(e) => onChange({ ...block, level: Number(e.target.value) as 1 | 2 })}
+            >
+              <option value="1">H1</option>
+              <option value="2">H2</option>
+            </Select>
+            <AlignPicker value={block.align} onChange={(align) => onChange({ ...block, align })} />
+          </div>
           <Input
             aria-label={t('slideForm.block.heading')}
             placeholder={t('slideForm.headingPlaceholder')}
@@ -511,12 +522,20 @@ function LeafEditor({
       );
     case 'text':
       return (
-        <MarkdownEditor
-          aria-label={t('slideForm.block.text')}
-          placeholder={t('slideForm.bodyPlaceholder')}
-          value={block.md}
-          onChange={(md) => onChange({ ...block, md })}
-        />
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground text-xs font-medium">
+              {t('slideForm.block.text')}
+            </span>
+            <AlignPicker value={block.align} onChange={(align) => onChange({ ...block, align })} />
+          </div>
+          <MarkdownEditor
+            aria-label={t('slideForm.block.text')}
+            placeholder={t('slideForm.bodyPlaceholder')}
+            value={block.md}
+            onChange={(md) => onChange({ ...block, md })}
+          />
+        </div>
       );
     case 'image':
       return (
@@ -553,4 +572,40 @@ function LeafEditor({
         </div>
       );
   }
+}
+
+/** Left / centre / right for a text-like block; centre is the default. */
+function AlignPicker({
+  value,
+  onChange,
+}: {
+  value: SlideTextAlign | undefined;
+  onChange: (align: SlideTextAlign) => void;
+}) {
+  const { t } = useTranslation('editor');
+  const current = value ?? 'center';
+  const items: { align: SlideTextAlign; Icon: typeof AlignLeft }[] = [
+    { align: 'left', Icon: AlignLeft },
+    { align: 'center', Icon: AlignCenter },
+    { align: 'right', Icon: AlignRight },
+  ];
+  return (
+    <div className="flex shrink-0 gap-0.5" role="radiogroup" aria-label={t('slideForm.textAlign')}>
+      {items.map(({ align, Icon }) => (
+        <Button
+          key={align}
+          type="button"
+          variant={current === align ? 'default' : 'ghost'}
+          size="icon"
+          className="size-7"
+          role="radio"
+          aria-checked={current === align}
+          aria-label={t(`slideForm.align.${align}`)}
+          onClick={() => onChange(align)}
+        >
+          <Icon className="size-3.5" />
+        </Button>
+      ))}
+    </div>
+  );
 }

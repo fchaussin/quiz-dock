@@ -118,7 +118,8 @@
       "center": "Centro",
       "right": "Derecha"
     },
-    "ratio": "Reparto de columnas"
+    "ratio": "Reparto de columnas",
+    "textAlign": "Alineación del texto"
   },
   "discardConfirm": {
     "title": "¿Descartar los cambios?",

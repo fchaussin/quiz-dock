@@ -19,6 +19,7 @@ export type UpdateSlideDtoBlocksItem = {
      */
   text: string;
   level?: 1 | 2;
+  align?: 'left' | 'center' | 'right';
 } | {
   type: 'text';
   /**
@@ -31,6 +32,7 @@ export type UpdateSlideDtoBlocksItem = {
      * @maxLength 5000
      */
   md: string;
+  align?: 'left' | 'center' | 'right';
 } | {
   type: 'image';
   /**
@@ -70,6 +72,7 @@ export type UpdateSlideDtoBlocksItem = {
      */
   text: string;
   level?: 1 | 2;
+  align?: 'left' | 'center' | 'right';
 } | {
   type: 'text';
   /**
@@ -82,6 +85,7 @@ export type UpdateSlideDtoBlocksItem = {
      * @maxLength 5000
      */
   md: string;
+  align?: 'left' | 'center' | 'right';
 } | {
   type: 'image';
   /**
