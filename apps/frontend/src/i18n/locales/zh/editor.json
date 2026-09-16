@@ -33,7 +33,9 @@
     "backToDraft": "退回草稿",
     "archive": "归档",
     "restore": "恢复",
-    "presentError": "启动会话失败。"
+    "presentError": "启动会话失败。",
+    "archiveTitle": "归档",
+    "archiveHelp": "归档的测验会从主列表中隐藏，可以随时恢复。"
   },
   "feedback": {
     "enableLabel": "允许参与者评价",
@@ -140,7 +142,8 @@
     "hint": "删除此测验及其全部历史。",
     "title": "删除此测验？",
     "description": "“{{title}}”及其题目将被永久删除。此操作不可撤销。",
-    "confirmLabel": "删除"
+    "confirmLabel": "删除",
+    "zoneTitle": "危险区"
   },
   "gameAccess": {
     "label": "进行中的会话 — PIN",
@@ -216,5 +219,10 @@
     "removeColor": "移除颜色 {{index}}",
     "addColor": "添加颜色",
     "angle": "角度"
+  },
+  "status": {
+    "draft": "草稿 — 发布后即可开始演示。",
+    "ready": "可以开始演示。",
+    "archived": "已归档 — 恢复后可编辑或演示。"
   }
 }

@@ -33,7 +33,9 @@
     "backToDraft": "Repasser en brouillon",
     "archive": "Archiver",
     "restore": "Restaurer",
-    "presentError": "Échec du lancement de la session."
+    "presentError": "Échec du lancement de la session.",
+    "archiveTitle": "Archivage",
+    "archiveHelp": "Un quiz archivé disparaît de la liste principale ; il reste restaurable."
   },
   "feedback": {
     "enableLabel": "Autoriser les avis des participants",
@@ -140,7 +142,8 @@
     "hint": "Supprimer ce quiz et tout son historique.",
     "title": "Supprimer ce quiz ?",
     "description": "« {{title}} » et ses questions seront définitivement supprimés. Cette action est irréversible.",
-    "confirmLabel": "Supprimer"
+    "confirmLabel": "Supprimer",
+    "zoneTitle": "Zone dangereuse"
   },
   "gameAccess": {
     "label": "Session en cours — PIN",
@@ -216,5 +219,10 @@
     "removeColor": "Retirer la couleur {{index}}",
     "addColor": "Ajouter une couleur",
     "angle": "Angle"
+  },
+  "status": {
+    "draft": "Brouillon — publiez le quiz pour pouvoir le présenter.",
+    "ready": "Prêt à présenter.",
+    "archived": "Archivé — restaurez-le pour le modifier ou le présenter."
   }
 }

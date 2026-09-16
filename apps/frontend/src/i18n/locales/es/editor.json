@@ -33,7 +33,9 @@
     "backToDraft": "Volver a borrador",
     "archive": "Archivar",
     "restore": "Restaurar",
-    "presentError": "No se pudo iniciar la sesión."
+    "presentError": "No se pudo iniciar la sesión.",
+    "archiveTitle": "Archivo",
+    "archiveHelp": "Un cuestionario archivado sale de la lista principal; se puede restaurar."
   },
   "feedback": {
     "enableLabel": "Permitir opiniones de los participantes",
@@ -140,7 +142,8 @@
     "hint": "Eliminar este cuestionario y todo su historial.",
     "title": "¿Eliminar este quiz?",
     "description": "«{{title}}» y sus preguntas se eliminarán definitivamente. Esta acción es irreversible.",
-    "confirmLabel": "Eliminar"
+    "confirmLabel": "Eliminar",
+    "zoneTitle": "Zona peligrosa"
   },
   "gameAccess": {
     "label": "Sesión en curso — PIN",
@@ -216,5 +219,10 @@
     "removeColor": "Quitar el color {{index}}",
     "addColor": "Añadir un color",
     "angle": "Ángulo"
+  },
+  "status": {
+    "draft": "Borrador — publica el cuestionario para presentarlo.",
+    "ready": "Listo para presentar.",
+    "archived": "Archivado — restáuralo para editarlo o presentarlo."
   }
 }

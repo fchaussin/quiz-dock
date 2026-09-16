@@ -21,7 +21,6 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import {
   ArrowDown,
   ArrowUp,
-  ChevronRight,
   ExternalLink,
   Eye,
   GripVertical,
@@ -35,6 +34,7 @@ import {
   Plus,
   Radio,
   Save,
+  Settings2,
   Sparkles,
   Star,
   Trash2,
@@ -136,6 +136,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
   const [presenting, setPresenting] = useState(false);
   const [presentError, setPresentError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   // The description reads as text until clicked (the title is always an inline input).
   const [editingDescription, setEditingDescription] = useState(false);
   // Capture intégrale (§2.10) : conserve le détail des réponses par participant.
@@ -365,125 +366,84 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
               {t('header.history')}
             </Link>
           </div>
-          <span className="bg-border mx-1 hidden h-6 w-px sm:block" />
-          {quiz.status === 'draft' && (
-            <Button
-              type="button"
-              disabled={quiz.questionCount === 0 || transition.isPending}
-              onClick={() => void changeStatus('ready')}
-            >
-              {t('broadcast.publish')}
-            </Button>
-          )}
-          {quiz.status === 'ready' && (
-            <>
-              {!livePin && (
-                <Button
-                  type="button"
-                  variant="main-action"
-                  disabled={presenting}
-                  onClick={() => void onPresent()}
-                >
-                  <Play className="size-4" />
-                  {presenting ? t('broadcast.presenting') : t('broadcast.present')}
-                </Button>
-              )}
-            </>
-          )}
+          <Button type="button" variant="ghost" size="sm" onClick={() => setSettingsOpen(true)}>
+            <Settings2 className="size-4" />
+            {t('settings.title')}
+          </Button>
         </div>
       </header>
-      {presentError ? <p className="text-destructive text-sm">{presentError}</p> : null}
-      {livePin ? <GameAccessPanel pin={livePin} /> : null}
+      {/* Always visible: where the quiz stands and the one action that follows. Live access
+          shows here while a session runs — no folded box hiding dynamic state. */}
+      <StatusBar
+        quiz={quiz}
+        livePin={livePin}
+        presenting={presenting}
+        presentError={presentError}
+        fullCapture={fullCapture}
+        onFullCapture={setFullCapture}
+        onPublish={() => void changeStatus('ready')}
+        onPresent={() => void onPresent()}
+        onBackToDraft={() => void changeStatus('draft')}
+        onRestore={() => void changeStatus('draft')}
+        busy={transition.isPending}
+      />
 
-      {/* Quiz-level settings, folded away: they are touched once, the sequence is the work. */}
-      <details className="group rounded-xl border">
-        <summary className="flex cursor-pointer items-center gap-2 px-5 py-3 text-sm font-semibold select-none">
-          <ChevronRight className="text-muted-foreground size-4 transition-transform group-open:rotate-90" />
-          {t('settings.title')}
-        </summary>
-        <div className="flex flex-col gap-8 border-t px-5 py-5">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-            <Section title={t('broadcast.title')}>
-              {quiz.status === 'ready' && !livePin ? (
-                <label className="flex items-start gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    className="mt-0.5"
-                    checked={fullCapture}
-                    onChange={(e) => setFullCapture(e.target.checked)}
-                  />
-                  <span>
-                    <span className="font-medium">{t('broadcast.fullCaptureLabel')}</span>
-                    <span className="text-muted-foreground block">
-                      {t('broadcast.fullCaptureHelp')}
-                    </span>
-                  </span>
-                </label>
-              ) : null}
-              <div className="flex flex-wrap items-center gap-2">
-                {quiz.status === 'ready' && (
-                  <>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => void changeStatus('draft')}
-                    >
-                      {t('broadcast.backToDraft')}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => void changeStatus('archived')}
-                    >
-                      {t('broadcast.archive')}
-                    </Button>
-                  </>
-                )}
-                {quiz.status === 'archived' && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => void changeStatus('draft')}
-                  >
-                    {t('broadcast.restore')}
-                  </Button>
-                )}
-              </div>
+      <Drawer
+        open={settingsOpen}
+        side="right"
+        title={t('settings.title')}
+        onClose={() => setSettingsOpen(false)}
+      >
+        <div className="flex flex-col gap-8 py-2">
+          <Section title={t('feedback.title')}>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={quiz.feedbackEnabled}
+                disabled={update.isPending}
+                onChange={(e) => void setFeedbackEnabled(e.target.checked)}
+              />
+              <span>
+                <span className="font-medium">{t('feedback.enableLabel')}</span>
+                <span className="text-muted-foreground block">{t('feedback.enableHelp')}</span>
+              </span>
+            </label>
+            <FeedbackSection quizId={quiz.id} />
+          </Section>
+          {quiz.status !== 'archived' ? (
+            <Section title={t('broadcast.archiveTitle')}>
+              <p className="text-muted-foreground text-sm">{t('broadcast.archiveHelp')}</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="self-start"
+                disabled={transition.isPending}
+                onClick={() => void changeStatus('archived')}
+              >
+                {t('broadcast.archive')}
+              </Button>
             </Section>
-            <Section title={t('feedback.title')}>
-              <label className="flex items-start gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  className="mt-0.5"
-                  checked={quiz.feedbackEnabled}
-                  disabled={update.isPending}
-                  onChange={(e) => void setFeedbackEnabled(e.target.checked)}
-                />
-                <span>
-                  <span className="font-medium">{t('feedback.enableLabel')}</span>
-                  <span className="text-muted-foreground block">{t('feedback.enableHelp')}</span>
-                </span>
-              </label>
-              <FeedbackSection quizId={quiz.id} />
-            </Section>
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-5">
-            <span className="text-muted-foreground text-sm">{t('deleteConfirm.hint')}</span>
+          ) : null}
+          <Section
+            title={t('deleteConfirm.zoneTitle')}
+            className="border-destructive/30 border-t pt-6"
+          >
+            <p className="text-muted-foreground text-sm">{t('deleteConfirm.hint')}</p>
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive self-start"
               onClick={() => setConfirmDelete(true)}
             >
               <Trash2 className="size-4" />
               {t('header.deleteQuiz')}
             </Button>
-          </div>
+          </Section>
         </div>
-      </details>
+      </Drawer>
 
       {/* Master / detail: the sequence on the left, the open item on the right (a bottom
           sheet below `lg`). */}
@@ -744,49 +704,6 @@ function FeedbackSection({ quizId, className }: { quizId: string; className?: st
   );
 }
 
-/**
- * Panneau de partie en cours (§4.1) : trois accès indépendants, ouvrables sur des
- * postes différents. Contrôle = même onglet (pilotage) ; projection & invitation =
- * nouvelles fenêtres (grand écran / lien participants).
- */
-function GameAccessPanel({ pin }: { pin: string }) {
-  const { t } = useTranslation('editor');
-  const open = (path: string) => window.open(path, '_blank', 'noopener,noreferrer');
-  return (
-    <div className="border-primary/30 bg-primary/5 flex flex-col gap-3 rounded-lg border p-4">
-      <div className="flex items-center gap-2">
-        <Radio className="text-primary size-4" />
-        <span>
-          {t('gameAccess.label')} <strong className="font-mono tracking-widest">{pin}</strong>
-        </span>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <Link
-          to="/present/$pin/control"
-          params={{ pin }}
-          className={cn(buttonVariants({ size: 'sm' }))}
-        >
-          <MonitorPlay className="size-4" />
-          {t('gameAccess.controlScreen')}
-        </Link>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => open(`/present/${pin}/screen`)}
-        >
-          <Eye className="size-4" />
-          {t('gameAccess.projectionScreen')}
-        </Button>
-        <Button type="button" variant="outline" size="sm" onClick={() => open(`/join/${pin}`)}>
-          <Users className="size-4" />
-          {t('gameAccess.invitationScreen')}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 /** Engine default for a slide's auto-mode display time (GAME_AUTO_ADVANCE_MS). */
 const DEFAULT_SLIDE_SECONDS = 5;
 
@@ -979,6 +896,128 @@ function EmptyPane({
           </Button>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * Status bar: the quiz's state with the one action that follows it, and — while
+ * a session runs — the PIN and the three access screens (§4.1).
+ */
+function StatusBar({
+  quiz,
+  livePin,
+  presenting,
+  presentError,
+  fullCapture,
+  onFullCapture,
+  onPublish,
+  onPresent,
+  onBackToDraft,
+  onRestore,
+  busy,
+}: {
+  quiz: QuizDetailDto;
+  livePin: string | null;
+  presenting: boolean;
+  presentError: string | null;
+  fullCapture: boolean;
+  onFullCapture: (v: boolean) => void;
+  onPublish: () => void;
+  onPresent: () => void;
+  onBackToDraft: () => void;
+  onRestore: () => void;
+  busy: boolean;
+}) {
+  const { t } = useTranslation('editor');
+  const open = (path: string) => window.open(path, '_blank', 'noopener,noreferrer');
+
+  if (livePin) {
+    return (
+      <div className="border-primary/30 bg-primary/5 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-xl border px-5 py-4">
+        <div className="flex items-center gap-3">
+          <Radio className="text-primary size-5" />
+          <span className="text-sm">
+            {t('gameAccess.label')}{' '}
+            <strong className="font-mono text-2xl tracking-widest">{livePin}</strong>
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/present/$pin/control"
+            params={{ pin: livePin }}
+            className={cn(buttonVariants({ size: 'sm' }))}
+          >
+            <MonitorPlay className="size-4" />
+            {t('gameAccess.controlScreen')}
+          </Link>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => open(`/present/${livePin}/screen`)}
+          >
+            <Eye className="size-4" />
+            {t('gameAccess.projectionScreen')}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => open(`/join/${livePin}`)}
+          >
+            <Users className="size-4" />
+            {t('gameAccess.invitationScreen')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-muted/40 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-xl px-5 py-3">
+      <p className="text-muted-foreground min-w-0 flex-1 text-sm">{t(`status.${quiz.status}`)}</p>
+      {quiz.status === 'draft' ? (
+        <Button
+          type="button"
+          size="sm"
+          disabled={quiz.questionCount === 0 || busy}
+          onClick={onPublish}
+        >
+          {t('broadcast.publish')}
+        </Button>
+      ) : null}
+      {quiz.status === 'ready' ? (
+        <>
+          <label className="flex items-center gap-2 text-sm" title={t('broadcast.fullCaptureHelp')}>
+            <input
+              type="checkbox"
+              checked={fullCapture}
+              onChange={(e) => onFullCapture(e.target.checked)}
+            />
+            {t('broadcast.fullCaptureLabel')}
+          </label>
+          <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={onBackToDraft}>
+            {t('broadcast.backToDraft')}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="main-action"
+            disabled={presenting}
+            onClick={onPresent}
+          >
+            <Play className="size-4" />
+            {presenting ? t('broadcast.presenting') : t('broadcast.present')}
+          </Button>
+        </>
+      ) : null}
+      {quiz.status === 'archived' ? (
+        <Button type="button" variant="outline" size="sm" disabled={busy} onClick={onRestore}>
+          {t('broadcast.restore')}
+        </Button>
+      ) : null}
+      {presentError ? <p className="text-destructive w-full text-sm">{presentError}</p> : null}
     </div>
   );
 }

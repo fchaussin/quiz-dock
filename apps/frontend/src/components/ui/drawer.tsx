@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 /**
- * Bottom sheet on a native `<dialog>` (top layer, focus trap, Escape for free).
+ * Sheet on a native `<dialog>` (top layer, focus trap, Escape for free): a bottom
+ * sheet, or a right-hand panel on wide screens with `side="right"`.
  * Dismissing (backdrop, Escape, close button) calls `onClose`; the caller decides
  * whether that needs a confirmation.
  */
@@ -13,12 +14,15 @@ export function Drawer({
   title,
   onClose,
   className,
+  side = 'bottom',
   children,
 }: {
   open: boolean;
   title?: string;
   onClose: () => void;
   className?: string;
+  /** `right` slides in from the right edge on wide screens (bottom sheet below `lg`). */
+  side?: 'bottom' | 'right';
   children: ReactNode;
 }) {
   const { t } = useTranslation('common');
@@ -51,6 +55,8 @@ export function Drawer({
       }}
       className={cn(
         'bg-background text-foreground m-0 mt-auto mb-0 flex max-h-[92dvh] w-full max-w-none flex-col rounded-t-2xl border-t p-0 shadow-2xl backdrop:bg-black/40',
+        side === 'right' &&
+          'lg:mt-0 lg:mr-0 lg:ml-auto lg:h-dvh lg:max-h-none lg:w-[30rem] lg:rounded-none lg:border-t-0 lg:border-l',
         className,
       )}
     >

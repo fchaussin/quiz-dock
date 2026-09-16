@@ -33,7 +33,9 @@
     "backToDraft": "Back to draft",
     "archive": "Archive",
     "restore": "Restore",
-    "presentError": "Failed to start the session."
+    "presentError": "Failed to start the session.",
+    "archiveTitle": "Archiving",
+    "archiveHelp": "An archived quiz leaves the main list; it can be restored."
   },
   "feedback": {
     "enableLabel": "Allow player feedback",
@@ -140,7 +142,8 @@
     "hint": "Delete this quiz and all its history.",
     "title": "Delete this quiz?",
     "description": "“{{title}}” and its questions will be permanently deleted. This action cannot be undone.",
-    "confirmLabel": "Delete"
+    "confirmLabel": "Delete",
+    "zoneTitle": "Danger zone"
   },
   "gameAccess": {
     "label": "Active session — PIN",
@@ -216,5 +219,10 @@
     "removeColor": "Remove colour {{index}}",
     "addColor": "Add a colour",
     "angle": "Angle"
+  },
+  "status": {
+    "draft": "Draft — publish the quiz to present it.",
+    "ready": "Ready to present.",
+    "archived": "Archived — restore it to edit or present it."
   }
 }
