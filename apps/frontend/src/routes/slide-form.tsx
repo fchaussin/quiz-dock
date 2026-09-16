@@ -1,8 +1,10 @@
 import { useForm, useStore } from '@tanstack/react-form';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useUnsavedGuard } from '@/lib/use-unsaved-guard';
 import { MarkdownEditor } from '@/components/markdown-editor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,16 +38,20 @@ export function SlideForm({
   quizId,
   slide,
   onClose,
+  onDirtyChange,
 }: {
   quizId: string;
   slide?: QuizDetailDtoSlidesItem;
   onClose: () => void;
+  /** Reports unsaved edits so the parent can guard against losing them. */
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const { t } = useTranslation(['editor', 'common']);
   const queryClient = useQueryClient();
   const add = useSlidesControllerAdd();
   const update = useSlidesControllerUpdate();
   const [error, setError] = useState<string | null>(null);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
 
   const form = useForm({
     defaultValues: initialValues(slide),
@@ -73,10 +79,17 @@ export function SlideForm({
     },
   });
   const mediaId = useStore(form.store, (s) => s.values.mediaId);
+  const dirty = useStore(
+    form.store,
+    (s) => JSON.stringify(s.values) !== JSON.stringify(initialValues(slide)),
+  );
+  useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
+  useUnsavedGuard(dirty);
+  const cancel = () => (dirty ? setConfirmDiscard(true) : onClose());
 
   return (
     <form
-      className="bg-muted/40 flex flex-col gap-5 rounded-xl p-5"
+      className="bg-muted/50 flex flex-col gap-5 rounded-2xl p-6"
       onSubmit={(e) => {
         e.preventDefault();
         void form.handleSubmit();
@@ -133,13 +146,25 @@ export function SlideForm({
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={add.isPending || update.isPending}>
+        <Button type="submit" disabled={!dirty || add.isPending || update.isPending}>
           {slide ? t('slideForm.submitUpdate') : t('slideForm.submitAdd')}
         </Button>
-        <Button type="button" variant="ghost" onClick={onClose}>
+        <Button type="button" variant="ghost" onClick={cancel}>
           {t('common:cancel')}
         </Button>
       </div>
+      <ConfirmDialog
+        open={confirmDiscard}
+        destructive
+        title={t('discardConfirm.title')}
+        description={t('discardConfirm.description')}
+        confirmLabel={t('discardConfirm.confirmLabel')}
+        onCancel={() => setConfirmDiscard(false)}
+        onConfirm={() => {
+          setConfirmDiscard(false);
+          onClose();
+        }}
+      />
     </form>
   );
 }

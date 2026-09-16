@@ -48,9 +48,12 @@
     "moveDown": "下移",
     "edit": "编辑",
     "deleteQuestion": "删除题目",
+    "dragHandle": "拖动以排序",
+    "formTitle": "题目",
     "empty": "还没有题目。添加一道吧！"
   },
   "slides": {
+    "formTitle": "幻灯片",
     "add": "添加幻灯片",
     "kind": "幻灯片",
     "deleteSlide": "删除幻灯片"
@@ -66,6 +69,11 @@
     "invalidError": "幻灯片需要标题、内容或媒体。",
     "submitAdd": "添加",
     "submitUpdate": "保存"
+  },
+  "discardConfirm": {
+    "title": "放弃修改？",
+    "description": "未保存的修改将丢失。",
+    "confirmLabel": "放弃"
   },
   "deleteConfirm": {
     "title": "删除此测验？",

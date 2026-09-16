@@ -1,9 +1,11 @@
 import { useForm, useStore } from '@tanstack/react-form';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useUnsavedGuard } from '@/lib/use-unsaved-guard';
 import { MarkdownEditor } from '@/components/markdown-editor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -121,16 +123,20 @@ export function QuestionForm({
   quizId,
   question,
   onClose,
+  onDirtyChange,
 }: {
   quizId: string;
   question?: QuizDetailDtoQuestionsItem;
   onClose: () => void;
+  /** Reports unsaved edits so the parent can guard against losing them. */
+  onDirtyChange?: (dirty: boolean) => void;
 }) {
   const { t } = useTranslation(['editor', 'common']);
   const queryClient = useQueryClient();
   const add = useQuestionsControllerAdd();
   const update = useQuestionsControllerUpdate();
   const [error, setError] = useState<string | null>(null);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
 
   const form = useForm({
     defaultValues: initialValues(question),
@@ -154,6 +160,14 @@ export function QuestionForm({
   });
 
   const type = useStore(form.store, (s) => s.values.type);
+  // Dirty = values differ from what was loaded (a fresh question is dirty as soon as typed in).
+  const dirty = useStore(
+    form.store,
+    (s) => JSON.stringify(s.values) !== JSON.stringify(initialValues(question)),
+  );
+  useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
+  useUnsavedGuard(dirty);
+  const cancel = () => (dirty ? setConfirmDiscard(true) : onClose());
   const mediaId = useStore(form.store, (s) => s.values.mediaId);
   const options = useStore(form.store, (s) => s.values.options);
   const answers = useStore(form.store, (s) => s.values.acceptedAnswers);
@@ -187,7 +201,7 @@ export function QuestionForm({
 
   return (
     <form
-      className="bg-muted/40 flex flex-col gap-5 rounded-xl p-5"
+      className="bg-muted/50 flex flex-col gap-5 rounded-2xl p-6"
       onSubmit={(e) => {
         e.preventDefault();
         void form.handleSubmit();
@@ -483,13 +497,25 @@ export function QuestionForm({
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={add.isPending || update.isPending}>
+        <Button type="submit" disabled={!dirty || add.isPending || update.isPending}>
           {question ? t('questionForm.submitUpdate') : t('questionForm.submitAdd')}
         </Button>
-        <Button type="button" variant="ghost" onClick={onClose}>
+        <Button type="button" variant="ghost" onClick={cancel}>
           {t('common:cancel')}
         </Button>
       </div>
+      <ConfirmDialog
+        open={confirmDiscard}
+        destructive
+        title={t('discardConfirm.title')}
+        description={t('discardConfirm.description')}
+        confirmLabel={t('discardConfirm.confirmLabel')}
+        onCancel={() => setConfirmDiscard(false)}
+        onConfirm={() => {
+          setConfirmDiscard(false);
+          onClose();
+        }}
+      />
     </form>
   );
 }

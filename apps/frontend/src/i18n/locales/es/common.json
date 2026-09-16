@@ -2,6 +2,7 @@
   "loading": "Cargando…",
   "confirm": "Confirmar",
   "cancel": "Cancelar",
+  "close": "Cerrar",
   "quizStatus": {
     "draft": "Borrador",
     "ready": "Listo",

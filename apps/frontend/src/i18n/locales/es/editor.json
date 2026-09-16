@@ -48,9 +48,12 @@
     "moveDown": "Bajar",
     "edit": "Editar",
     "deleteQuestion": "Eliminar la pregunta",
+    "dragHandle": "Arrastrar para reordenar",
+    "formTitle": "Pregunta",
     "empty": "No hay preguntas. ¡Añade una!"
   },
   "slides": {
+    "formTitle": "Diapositiva",
     "add": "Añadir una diapositiva",
     "kind": "Diapositiva",
     "deleteSlide": "Eliminar la diapositiva"
@@ -66,6 +69,11 @@
     "invalidError": "La diapositiva necesita un título, un contenido o un medio.",
     "submitAdd": "Añadir",
     "submitUpdate": "Guardar"
+  },
+  "discardConfirm": {
+    "title": "¿Descartar los cambios?",
+    "description": "Los cambios no guardados se perderán.",
+    "confirmLabel": "Descartar"
   },
   "deleteConfirm": {
     "title": "¿Eliminar este quiz?",

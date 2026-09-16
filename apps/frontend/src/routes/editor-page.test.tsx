@@ -1,6 +1,6 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { mockApi, renderApp } from '../test/harness';
+import { mockApi, renderApp, setMarkdownField } from '../test/harness';
 
 vi.mock('../game/game-client', () => ({
   createSession: vi.fn().mockResolvedValue({ pin: '482913' }),
@@ -251,5 +251,38 @@ describe('EditorPage', () => {
         { kind: 'question', id: 'b' },
       ]);
     });
+  });
+
+  it('guards unsaved edits: leaving a dirty item form asks before discarding', async () => {
+    mockApi([
+      {
+        method: 'GET',
+        path: '/quizzes/q1',
+        body: detail({
+          questionCount: 2,
+          questions: [q('a', 'Première', 0), q('b', 'Seconde', 1)],
+        }),
+      },
+    ]);
+    renderApp('/quizzes/q1');
+
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Éditer' }))[0]);
+    // DOM order: the item form (main column) comes before the settings' own Save button.
+    const save = (await screen.findAllByRole('button', { name: 'Enregistrer' }))[0];
+    expect(save).toBeDisabled(); // nothing changed yet
+    setMarkdownField('Énoncé', 'Première (modifiée)');
+    expect(save).toBeEnabled();
+
+    // Opening another item while dirty → confirm dialog, the form stays until confirmed.
+    fireEvent.click(screen.getAllByRole('button', { name: 'Éditer' })[0]);
+    // Two <dialog> exist (the form's own and the editor's); only the editor's is open.
+    const openDialog = await waitFor(() => {
+      const d = document.querySelector('dialog[open]');
+      if (!d) throw new Error('no open dialog');
+      return d as HTMLElement;
+    });
+    expect(openDialog.textContent).toContain('Abandonner les modifications ?');
+    fireEvent.click(within(openDialog).getByRole('button', { name: 'Abandonner' }));
+    await waitFor(() => expect(screen.getByLabelText('Énoncé').textContent).toContain('Seconde'));
   });
 });

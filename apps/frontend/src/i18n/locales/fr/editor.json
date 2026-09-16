@@ -48,9 +48,12 @@
     "moveDown": "Descendre",
     "edit": "Éditer",
     "deleteQuestion": "Supprimer la question",
+    "dragHandle": "Glisser pour réordonner",
+    "formTitle": "Question",
     "empty": "Aucune question. Ajoutez-en une !"
   },
   "slides": {
+    "formTitle": "Slide",
     "add": "Ajouter une slide",
     "kind": "Slide",
     "deleteSlide": "Supprimer la slide"
@@ -66,6 +69,11 @@
     "invalidError": "La slide doit avoir un titre, un contenu ou un média.",
     "submitAdd": "Ajouter",
     "submitUpdate": "Enregistrer"
+  },
+  "discardConfirm": {
+    "title": "Abandonner les modifications ?",
+    "description": "Les modifications non enregistrées seront perdues.",
+    "confirmLabel": "Abandonner"
   },
   "deleteConfirm": {
     "title": "Supprimer ce quiz ?",

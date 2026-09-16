@@ -48,9 +48,12 @@
     "moveDown": "Move down",
     "edit": "Edit",
     "deleteQuestion": "Delete question",
+    "dragHandle": "Drag to reorder",
+    "formTitle": "Question",
     "empty": "No questions. Add one!"
   },
   "slides": {
+    "formTitle": "Slide",
     "add": "Add a slide",
     "kind": "Slide",
     "deleteSlide": "Delete the slide"
@@ -66,6 +69,11 @@
     "invalidError": "A slide needs a title, some content or a media.",
     "submitAdd": "Add",
     "submitUpdate": "Save"
+  },
+  "discardConfirm": {
+    "title": "Discard changes?",
+    "description": "Unsaved changes will be lost.",
+    "confirmLabel": "Discard"
   },
   "deleteConfirm": {
     "title": "Delete this quiz?",

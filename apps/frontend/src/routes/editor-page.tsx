@@ -1,3 +1,20 @@
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useForm, useStore } from '@tanstack/react-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
@@ -6,6 +23,7 @@ import {
   ArrowUp,
   ExternalLink,
   Eye,
+  GripVertical,
   History,
   LayoutTemplate,
   MonitorPlay,
@@ -18,7 +36,7 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MarkdownEditor } from '@/components/markdown-editor';
 import { Markdown } from '@/components/markdown';
@@ -31,6 +49,9 @@ import { cn } from '@/lib/utils';
 import { createSession } from '../game/game-client';
 import type { QuizDetailDto } from '../api/generated/model';
 import { quizItems, moveItem, type QuizItem } from '@/lib/quiz-items';
+import { useMediaQuery } from '@/lib/use-media-query';
+import { useUnsavedGuard } from '@/lib/use-unsaved-guard';
+import { Drawer } from '@/components/ui/drawer';
 import { QuestionForm } from './question-form';
 import { SlideForm } from './slide-form';
 import {
@@ -69,7 +90,25 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
   const removeQuestion = useQuestionsControllerRemove();
   const removeSlide = useSlidesControllerRemove();
   const reorder = useSlidesControllerReorderItems();
-  const [editing, setEditing] = useState<string | 'new' | 'new-slide' | null>(null);
+  type Editing = string | 'new' | 'new-slide' | null;
+  const [editing, setEditing] = useState<Editing>(null);
+  // Unsaved edits in the open item form: switching item or closing asks first.
+  const [formDirty, setFormDirty] = useState(false);
+  const [pendingEdit, setPendingEdit] = useState<Editing | undefined>(undefined);
+  const onFormDirty = useCallback((d: boolean) => setFormDirty(d), []);
+  const closeForm = useCallback(() => {
+    setFormDirty(false);
+    setEditing(null);
+  }, []);
+  // Below `lg` the open form lives in a bottom sheet instead of inline in the list.
+  const wide = useMediaQuery('(min-width: 1024px)');
+  const requestEditing = (next: Editing) => {
+    if (editing !== null && formDirty && next !== editing) setPendingEdit(next);
+    else {
+      setFormDirty(false);
+      setEditing(next);
+    }
+  };
   const [livePin, setLivePin] = useState<string | null>(null);
   const [presenting, setPresenting] = useState(false);
   const [presentError, setPresentError] = useState<string | null>(null);
@@ -106,6 +145,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
 
   // Le bouton « Enregistrer » n'est actif que si une modification est en cours.
   const isDirty = useStore(form.store, (s) => s.isDirty);
+  useUnsavedGuard(isDirty);
 
   const changeStatus = async (status: 'draft' | 'ready' | 'archived') => {
     await transition.mutateAsync({ id: quiz.id, data: { status } });
@@ -143,15 +183,53 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
 
   // Questions and slides share one sequence (#7): the server re-anchors slides from it.
   const items = quizItems(quiz);
-  const move = async (index: number, direction: -1 | 1) => {
-    const next = moveItem(items, index, direction);
-    if (next === items) return;
+  const persistOrder = async (next: QuizItem[]) => {
     await reorder.mutateAsync({
       id: quiz.id,
       data: { items: next.map((it) => ({ kind: it.kind, id: it.id })) },
     });
     await invalidate();
   };
+  const move = (index: number, direction: -1 | 1) => {
+    const next = moveItem(items, index, direction);
+    if (next !== items) void persistOrder(next);
+  };
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return;
+    const from = items.findIndex((it) => it.id === active.id);
+    const to = items.findIndex((it) => it.id === over.id);
+    if (from >= 0 && to >= 0) void persistOrder(arrayMove(items, from, to));
+  };
+
+  const editingItem = items.find((it) => it.id === editing);
+  const openForm =
+    editing === 'new' ? (
+      <QuestionForm quizId={quiz.id} onClose={closeForm} onDirtyChange={onFormDirty} />
+    ) : editing === 'new-slide' ? (
+      <SlideForm quizId={quiz.id} onClose={closeForm} onDirtyChange={onFormDirty} />
+    ) : editingItem?.kind === 'question' ? (
+      <QuestionForm
+        quizId={quiz.id}
+        question={editingItem.question}
+        onClose={closeForm}
+        onDirtyChange={onFormDirty}
+      />
+    ) : editingItem?.kind === 'slide' ? (
+      <SlideForm
+        quizId={quiz.id}
+        slide={editingItem.slide}
+        onClose={closeForm}
+        onDirtyChange={onFormDirty}
+      />
+    ) : null;
+  const formTitle =
+    editing === 'new' || editingItem?.kind === 'question'
+      ? t('questions.formTitle')
+      : t('slides.formTitle');
 
   const statusVariant =
     quiz.status === 'ready' ? 'success' : quiz.status === 'archived' ? 'muted' : 'default';
@@ -215,7 +293,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
                 type="button"
                 size="sm"
                 variant="ghost"
-                onClick={() => setEditing('new-slide')}
+                onClick={() => requestEditing('new-slide')}
                 disabled={editing === 'new-slide'}
               >
                 <LayoutTemplate className="size-4" />
@@ -224,7 +302,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
               <Button
                 type="button"
                 size="sm"
-                onClick={() => setEditing('new')}
+                onClick={() => requestEditing('new')}
                 disabled={editing === 'new'}
               >
                 <Plus className="size-4" />
@@ -233,51 +311,53 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
             </div>
           </div>
 
-          {editing === 'new' && <QuestionForm quizId={quiz.id} onClose={() => setEditing(null)} />}
-          {editing === 'new-slide' && (
-            <SlideForm quizId={quiz.id} onClose={() => setEditing(null)} />
-          )}
+          {wide && (editing === 'new' || editing === 'new-slide') ? openForm : null}
 
-          <ul className="divide-border flex flex-col divide-y">
-            {items.map((item, i) => (
-              <li key={item.id} className={editing === item.id ? 'py-3' : undefined}>
-                {editing === item.id ? (
-                  item.kind === 'question' ? (
-                    <QuestionForm
-                      quizId={quiz.id}
-                      question={item.question}
-                      onClose={() => setEditing(null)}
-                    />
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+            <SortableContext
+              items={items.map((it) => it.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <ul className="divide-border flex flex-col divide-y">
+                {items.map((item, i) =>
+                  wide && editing === item.id ? (
+                    <li key={item.id} className="py-3">
+                      {openForm}
+                    </li>
                   ) : (
-                    <SlideForm
-                      quizId={quiz.id}
-                      slide={item.slide}
-                      onClose={() => setEditing(null)}
-                    />
-                  )
-                ) : (
-                  <ItemRow
-                    item={item}
-                    number={questionNumber(items, i)}
-                    canMoveUp={i > 0 && !reorder.isPending}
-                    canMoveDown={i < items.length - 1 && !reorder.isPending}
-                    onMove={(d) => void move(i, d)}
-                    onEdit={() => setEditing(item.id)}
-                    onDelete={() =>
-                      void (item.kind === 'question'
-                        ? onDeleteQuestion(item.id)
-                        : onDeleteSlide(item.id))
-                    }
-                  />
+                    <SortableRow key={item.id} id={item.id}>
+                      {(handle) => (
+                        <ItemRow
+                          item={item}
+                          number={questionNumber(items, i)}
+                          handle={handle}
+                          canMoveUp={i > 0 && !reorder.isPending}
+                          canMoveDown={i < items.length - 1 && !reorder.isPending}
+                          onMove={(d) => move(i, d)}
+                          onEdit={() => requestEditing(item.id)}
+                          onDelete={() =>
+                            void (item.kind === 'question'
+                              ? onDeleteQuestion(item.id)
+                              : onDeleteSlide(item.id))
+                          }
+                        />
+                      )}
+                    </SortableRow>
+                  ),
                 )}
-              </li>
-            ))}
-            {items.length === 0 && editing === null && (
-              <li className="text-muted-foreground rounded-xl border border-dashed py-10 text-center text-sm">
-                {t('questions.empty')}
-              </li>
-            )}
-          </ul>
+                {items.length === 0 && editing === null && (
+                  <li className="text-muted-foreground rounded-xl border border-dashed py-10 text-center text-sm">
+                    {t('questions.empty')}
+                  </li>
+                )}
+              </ul>
+            </SortableContext>
+          </DndContext>
+          {!wide ? (
+            <Drawer open={editing !== null} title={formTitle} onClose={() => requestEditing(null)}>
+              {openForm}
+            </Drawer>
+          ) : null}
         </main>
 
         <aside className="divide-border bg-muted/50 flex flex-col divide-y rounded-2xl p-6 lg:sticky lg:top-6">
@@ -399,6 +479,20 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
         </aside>
       </div>
 
+      <ConfirmDialog
+        open={pendingEdit !== undefined}
+        destructive
+        title={t('discardConfirm.title')}
+        description={t('discardConfirm.description')}
+        confirmLabel={t('discardConfirm.confirmLabel')}
+        onCancel={() => setPendingEdit(undefined)}
+        onConfirm={() => {
+          const next = pendingEdit ?? null;
+          setPendingEdit(undefined);
+          setFormDirty(false);
+          setEditing(next);
+        }}
+      />
       <ConfirmDialog
         open={confirmDelete}
         destructive
@@ -545,10 +639,46 @@ function questionNumber(items: QuizItem[], index: number): number | null {
   return items.slice(0, index + 1).filter((it) => it.kind === 'question').length;
 }
 
+/** Sortable `<li>`: hands its drag handle props to the row (arrows stay for keyboard/a11y). */
+function SortableRow({ id, children }: { id: string; children: (handle: ReactNode) => ReactNode }) {
+  const { t } = useTranslation('editor');
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+  const handle = (
+    <button
+      type="button"
+      ref={setActivatorNodeRef}
+      aria-label={t('questions.dragHandle')}
+      className="text-muted-foreground hover:text-foreground -ml-1 cursor-grab touch-none rounded p-1 active:cursor-grabbing"
+      {...attributes}
+      {...listeners}
+    >
+      <GripVertical className="size-4" />
+    </button>
+  );
+  return (
+    <li
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={cn(isDragging && 'bg-background relative z-10 shadow-md')}
+    >
+      {children(handle)}
+    </li>
+  );
+}
+
 /** One row of the quiz sequence: a question (numbered) or a content slide (#7). */
 function ItemRow({
   item,
   number,
+  handle,
   canMoveUp,
   canMoveDown,
   onMove,
@@ -557,6 +687,7 @@ function ItemRow({
 }: {
   item: QuizItem;
   number: number | null;
+  handle?: ReactNode;
   canMoveUp: boolean;
   canMoveDown: boolean;
   onMove: (direction: -1 | 1) => void;
@@ -567,7 +698,8 @@ function ItemRow({
   const isSlide = item.kind === 'slide';
   const label = isSlide ? item.slide.title || item.slide.body || '' : item.question.prompt;
   return (
-    <div className="group flex items-center gap-1 py-3 sm:gap-4">
+    <div className="group flex items-center gap-1 py-3 sm:gap-3">
+      {handle}
       <span
         className={cn(
           'text-muted-foreground w-7 shrink-0 text-center text-sm tabular-nums',

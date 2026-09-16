@@ -2,6 +2,7 @@
   "loading": "Chargement…",
   "confirm": "Confirmer",
   "cancel": "Annuler",
+  "close": "Fermer",
   "quizStatus": {
     "draft": "Brouillon",
     "ready": "Prêt",

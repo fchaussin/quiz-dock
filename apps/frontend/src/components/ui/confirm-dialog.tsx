@@ -42,7 +42,8 @@ export function ConfirmDialog({
         d.setAttribute('open', ''); // jsdom : showModal non implémenté
       }
     } else if (d.open) {
-      d.close();
+      if (typeof d.close === 'function') d.close();
+      else d.removeAttribute('open'); // jsdom: close non implémenté
     }
   }, [open]);
 
