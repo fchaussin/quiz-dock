@@ -19,5 +19,27 @@
     "uploading": "Envoi…",
     "bulletList": "Liste à puces",
     "orderedList": "Liste numérotée"
+  },
+  "captureConfirm": {
+    "title": "Activer la capture intégrale ?",
+    "description": "Chaque réponse de chaque participant sera conservée, avec son pseudo : ce sont des données personnelles (RGPD — informez les participants, purgez à la fin). L’archive de session est aussi bien plus lourde en base. À réserver au suivi individuel (évaluation, certification).",
+    "confirmLabel": "Activer"
+  },
+  "draft": {
+    "restored": "Brouillon restauré — vos modifications non enregistrées ont été retrouvées.",
+    "discard": "Ignorer le brouillon"
+  },
+  "titles": {
+    "login": "Connexion",
+    "dashboard": "Mes quiz",
+    "editor": "Éditeur",
+    "preview": "Aperçu",
+    "feedback": "Avis",
+    "sessions": "Historique",
+    "session": "Session",
+    "player": "Participant",
+    "control": "Console",
+    "screen": "Projection",
+    "join": "Rejoindre"
   }
 }

@@ -31,6 +31,27 @@ describe('DashboardPage', () => {
     expect(await screen.findByText('Histoire')).toBeInTheDocument();
   });
 
+  it('shows how many sessions of a quiz are running (badge on the card)', async () => {
+    mockApi([
+      {
+        method: 'GET',
+        path: '/games/mine',
+        body: [
+          { pin: '111111', quizId: 'q1', title: 'Histoire', state: 'LOBBY', playerCount: 0 },
+          { pin: '222222', quizId: 'q1', title: 'Histoire', state: 'ANSWERING', playerCount: 3 },
+        ],
+      },
+      {
+        method: 'GET',
+        path: '/quizzes',
+        body: [quiz({ id: 'q1' }), quiz({ id: 'q2', title: 'Géo' })],
+      },
+    ]);
+    renderApp('/dashboard');
+    expect(await screen.findByText('2 sessions en cours')).toBeInTheDocument();
+    expect(screen.queryByText(/1 session en cours/)).toBeNull();
+  });
+
   it('affiche un état vide sans quiz', async () => {
     mockApi([{ method: 'GET', path: '/quizzes', body: [] }]);
     renderApp('/dashboard');

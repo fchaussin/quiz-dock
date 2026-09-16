@@ -73,7 +73,11 @@
       "numeric": "Numérique",
       "ordering": "Ordre",
       "poll": "Sondage"
-    }
+    },
+    "breadcrumb": "Fil d’Ariane",
+    "myQuizzes": "Mes quiz",
+    "sessionCrumb": "Session {{pin}}",
+    "backToEditorHint": "Retour à l’éditeur — la session continue en arrière-plan"
   },
   "screen": {
     "sessionUnavailable": "Session indisponible.",
@@ -130,7 +134,11 @@
     "submitAnswer": "Valider ma réponse",
     "moveUp": "Monter",
     "moveDown": "Descendre",
-    "unsupportedType": "Type de question non pris en charge."
+    "unsupportedType": "Type de question non pris en charge.",
+    "leave": "Quitter",
+    "leaveConfirmTitle": "Quitter la session ?",
+    "leaveConfirmDescription": "Vous perdrez votre place et votre score. Pour revenir, il faudra rejoindre à nouveau avec le PIN.",
+    "joinAnother": "Rejoindre une autre partie"
   },
   "reveal": {
     "explanation": "Explication",

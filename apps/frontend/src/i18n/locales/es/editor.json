@@ -125,7 +125,13 @@
     "textAlign": "Alineación del texto",
     "previewLegend": "Vista previa",
     "hidePreview": "Ocultar",
-    "showPreview": "Mostrar"
+    "showPreview": "Mostrar",
+    "textSize": "Tamaño del texto",
+    "sizeShort": {
+      "small": "S",
+      "medium": "M",
+      "large": "L"
+    }
   },
   "discardConfirm": {
     "title": "¿Descartar los cambios?",
@@ -225,15 +231,19 @@
     "ready": "Listo para presentar.",
     "archived": "Archivado — restáuralo para editarlo o presentarlo."
   },
-  "captureConfirm": {
-    "title": "¿Activar la captura completa de respuestas?",
-    "description": "Se guardará cada respuesta de cada participante con su apodo: son datos personales (RGPD — informa a los participantes, purga después). Los archivos de sesión también pesan mucho más en la base de datos. Resérvalo para el seguimiento individual (evaluación, certificación).",
-    "confirmLabel": "Activar"
-  },
   "deleteItemConfirm": {
     "questionTitle": "¿Eliminar esta pregunta?",
     "slideTitle": "¿Eliminar esta diapositiva?",
     "description": "«{{label}}» se eliminará definitivamente.",
     "confirmLabel": "Eliminar"
+  },
+  "questionTypeHelp": {
+    "single_choice": "Una sola respuesta correcta entre 2 y 8 opciones. Puntos según la rapidez, más bonus de racha.",
+    "multiple_choice": "Varias respuestas correctas; el participante marca y valida. Todo o nada: el conjunto marcado debe coincidir exactamente.",
+    "true_false": "Dos opciones fijas, una correcta. La más rápida de jugar.",
+    "text_input": "El participante escribe su respuesta. Se compara con las aceptadas sin distinguir mayúsculas, acentos ni espacios sobrantes.",
+    "numeric": "El participante introduce un número; correcto si está a ± tolerancia del valor objetivo.",
+    "ordering": "El participante ordena las opciones según las posiciones (#). Todo o nada.",
+    "poll": "Sondeo de opinión: sin respuesta correcta ni puntos; la distribución se muestra al revelar."
   }
 }

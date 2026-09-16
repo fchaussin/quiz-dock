@@ -1,16 +1,19 @@
-import { useParams } from '@tanstack/react-router';
-import { ArrowDown, ArrowUp, Check, LogIn, Shuffle } from 'lucide-react';
+import { Link, useNavigate, useParams } from '@tanstack/react-router';
+import { ArrowDown, ArrowUp, Check, LogIn, LogOut, Shuffle } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar } from '../game/avatar';
 import {
   joinSession,
+  clearPlayerSession,
   loadAvatarSeed,
+  loadNickname,
   loadPlayerSession,
   saveAvatarSeed,
 } from '../game/game-client';
@@ -31,8 +34,11 @@ export function PlayerPage() {
   const { t } = useTranslation('live');
   const { pin } = useParams({ from: '/join/$pin' });
   const { view, socket, markJoined } = useGameSession(pin, 'player');
-  const [nickname, setNickname] = useState(() => loadPlayerSession()?.nickname ?? '');
+  const [nickname, setNickname] = useState(() => loadPlayerSession()?.nickname ?? loadNickname());
   const [joining, setJoining] = useState(false);
+  // Leaving on purpose: the seat and the score are gone, so it is confirmed first.
+  const [confirmLeave, setConfirmLeave] = useState(false);
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [order, setOrder] = useState<string[]>([]);
@@ -232,8 +238,38 @@ export function PlayerPage() {
         !view.question?.background && 'bg-transparent',
       )}
     >
-      <section className="mx-auto flex w-full max-w-sm flex-col items-center gap-6 py-8 text-center">
+      <section className="mx-auto flex w-full max-w-sm flex-col items-center gap-6 py-6 text-center">
+        {view.status === 'ready' && view.state !== 'ENDED' && !view.kicked ? (
+          <div className="flex w-full items-center gap-2 text-sm">
+            <Avatar name={avatarName} size={28} />
+            <span className="min-w-0 flex-1 truncate text-left font-medium">{nickname}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={() => setConfirmLeave(true)}
+            >
+              <LogOut className="size-3.5" />
+              {t('player.leave')}
+            </Button>
+          </div>
+        ) : null}
         {children}
+        <ConfirmDialog
+          open={confirmLeave}
+          destructive
+          title={t('player.leaveConfirmTitle')}
+          description={t('player.leaveConfirmDescription')}
+          confirmLabel={t('player.leave')}
+          onCancel={() => setConfirmLeave(false)}
+          onConfirm={() => {
+            setConfirmLeave(false);
+            clearPlayerSession();
+            socket?.disconnect();
+            void navigate({ to: '/join' });
+          }}
+        />
       </section>
     </Surface>
   );
@@ -336,6 +372,9 @@ export function PlayerPage() {
           </>
         )}
         {view.feedbackEnabled ? <RatingPanel pin={pin} socket={socket} /> : null}
+        <Link to="/join" className="text-muted-foreground text-sm underline underline-offset-2">
+          {t('player.joinAnother')}
+        </Link>
       </>,
     );
   }

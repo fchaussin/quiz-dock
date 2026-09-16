@@ -8,12 +8,14 @@ function renderForm(onClose = vi.fn()) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
-  render(
-    <QueryClientProvider client={queryClient}>
-      <QuestionForm quizId="q1" onClose={onClose} />
-    </QueryClientProvider>,
-  );
-  return { onClose };
+  return {
+    onClose,
+    ...render(
+      <QueryClientProvider client={queryClient}>
+        <QuestionForm quizId="q1" onClose={onClose} />
+      </QueryClientProvider>,
+    ),
+  };
 }
 
 const lastPost = (fetchMock: ReturnType<typeof mockApi>) => {
@@ -99,5 +101,23 @@ describe('QuestionForm', () => {
     setMarkdownField('Énoncé', 'X');
     fireEvent.click(screen.getByText('Ajouter'));
     expect(await screen.findByText('Certains champs sont invalides.')).toBeInTheDocument();
+  });
+
+  it('keeps a draft in localStorage until saved: a reopened form restores it, discard clears it', async () => {
+    mockApi([]);
+    localStorage.clear();
+    const first = renderForm();
+    setMarkdownField('Énoncé', 'Brouillon en cours');
+    expect(localStorage.getItem('draft:quiz:q1:question:new')).toContain('Brouillon en cours');
+    first.unmount();
+
+    // Same form again (new question of the same quiz): the draft comes back with a notice.
+    renderForm();
+    expect(await screen.findByText(/Brouillon restauré/)).toBeInTheDocument();
+    expect(screen.getByLabelText('Énoncé').textContent).toContain('Brouillon en cours');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ignorer le brouillon' }));
+    expect(localStorage.getItem('draft:quiz:q1:question:new')).toBeNull();
+    expect(screen.queryByText(/Brouillon restauré/)).toBeNull();
   });
 });

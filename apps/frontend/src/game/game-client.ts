@@ -152,6 +152,7 @@ export async function joinSession(
     { pin, nickname, avatar },
   );
   savePlayerSession({ pin, nickname, ...res }); // reprise après fermeture (§6.1)
+  saveNickname(nickname);
   return res;
 }
 
@@ -175,5 +176,27 @@ export function saveAvatarSeed(seed: string): void {
     localStorage.setItem(AVATAR_KEY, seed);
   } catch {
     /* stockage indisponible : l'avatar ne sera pas mémorisé */
+  }
+}
+
+/**
+ * Last nickname used, kept across games (the session record is purged at the end
+ * of a game, the name should not be). Only the player changes it.
+ */
+const NICKNAME_KEY = 'live.nickname';
+
+export function loadNickname(): string {
+  try {
+    return localStorage.getItem(NICKNAME_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+export function saveNickname(nickname: string): void {
+  try {
+    localStorage.setItem(NICKNAME_KEY, nickname);
+  } catch {
+    /* storage unavailable: the nickname is not remembered */
   }
 }

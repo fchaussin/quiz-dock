@@ -19,5 +19,27 @@
     "uploading": "Uploading…",
     "bulletList": "Bulleted list",
     "orderedList": "Numbered list"
+  },
+  "captureConfirm": {
+    "title": "Turn on full answer capture?",
+    "description": "Every answer of every participant will be kept, with their nickname: that is personal data (GDPR — inform the participants, purge afterwards). Session archives also get much heavier in the database. Reserve it for individual tracking (assessment, certification).",
+    "confirmLabel": "Turn on"
+  },
+  "draft": {
+    "restored": "Draft restored — your unsaved changes were recovered.",
+    "discard": "Discard the draft"
+  },
+  "titles": {
+    "login": "Sign in",
+    "dashboard": "My quizzes",
+    "editor": "Editor",
+    "preview": "Preview",
+    "feedback": "Reviews",
+    "sessions": "History",
+    "session": "Session",
+    "player": "Participant",
+    "control": "Console",
+    "screen": "Projection",
+    "join": "Join"
   }
 }

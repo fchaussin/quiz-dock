@@ -19,5 +19,27 @@
     "uploading": "Subiendo…",
     "bulletList": "Lista con viñetas",
     "orderedList": "Lista numerada"
+  },
+  "captureConfirm": {
+    "title": "¿Activar la captura completa de respuestas?",
+    "description": "Se guardará cada respuesta de cada participante con su apodo: son datos personales (RGPD — informa a los participantes, purga después). Los archivos de sesión también pesan mucho más en la base de datos. Resérvalo para el seguimiento individual (evaluación, certificación).",
+    "confirmLabel": "Activar"
+  },
+  "draft": {
+    "restored": "Borrador restaurado — se recuperaron tus cambios sin guardar.",
+    "discard": "Descartar el borrador"
+  },
+  "titles": {
+    "login": "Iniciar sesión",
+    "dashboard": "Mis cuestionarios",
+    "editor": "Editor",
+    "preview": "Vista previa",
+    "feedback": "Opiniones",
+    "sessions": "Historial",
+    "session": "Sesión",
+    "player": "Participante",
+    "control": "Consola",
+    "screen": "Proyección",
+    "join": "Unirse"
   }
 }

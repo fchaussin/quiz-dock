@@ -125,7 +125,13 @@
     "textAlign": "Alignement du texte",
     "previewLegend": "Aperçu",
     "hidePreview": "Masquer",
-    "showPreview": "Afficher"
+    "showPreview": "Afficher",
+    "textSize": "Taille du texte",
+    "sizeShort": {
+      "small": "S",
+      "medium": "M",
+      "large": "L"
+    }
   },
   "discardConfirm": {
     "title": "Abandonner les modifications ?",
@@ -225,15 +231,19 @@
     "ready": "Prêt à présenter.",
     "archived": "Archivé — restaurez-le pour le modifier ou le présenter."
   },
-  "captureConfirm": {
-    "title": "Activer la capture intégrale ?",
-    "description": "Chaque réponse de chaque participant sera conservée, avec son pseudo : ce sont des données personnelles (RGPD — informez les participants, purgez à la fin). L’archive de session est aussi bien plus lourde en base. À réserver au suivi individuel (évaluation, certification).",
-    "confirmLabel": "Activer"
-  },
   "deleteItemConfirm": {
     "questionTitle": "Supprimer cette question ?",
     "slideTitle": "Supprimer cette slide ?",
     "description": "« {{label}} » sera définitivement supprimé.",
     "confirmLabel": "Supprimer"
+  },
+  "questionTypeHelp": {
+    "single_choice": "Une seule bonne réponse parmi 2 à 8 options. Points selon la rapidité, bonus de série.",
+    "multiple_choice": "Plusieurs bonnes réponses ; le participant coche puis valide. Tout ou rien : l’ensemble coché doit être exactement le bon.",
+    "true_false": "Deux options fixes, une seule bonne. Le plus rapide à jouer.",
+    "text_input": "Le participant tape sa réponse. Comparée aux réponses acceptées sans tenir compte de la casse, des accents ni des espaces en trop.",
+    "numeric": "Le participant saisit un nombre ; bon s’il est à ± tolérance de la valeur cible.",
+    "ordering": "Le participant remet les options dans l’ordre défini par les positions (#). Tout ou rien.",
+    "poll": "Recueil d’opinion : aucune bonne réponse, aucun point ; la répartition est affichée à la révélation."
   }
 }

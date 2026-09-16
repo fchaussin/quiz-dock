@@ -14,5 +14,7 @@
   "questionCount_one": "{{count}} question",
   "questionCount_other": "{{count}} questions",
   "edit": "Edit",
-  "present": "Present"
+  "present": "Present",
+  "running_one": "{{count}} session running",
+  "running_other": "{{count}} sessions running"
 }

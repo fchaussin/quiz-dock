@@ -40,6 +40,15 @@ export interface JoinSessionResult {
  * gère pas le transport : il est appelé par le gateway (`host:create`,
  * `player:join`) et renvoie des données ; la diffusion socket reste au gateway.
  */
+/** A host's running game, as listed on the dashboard (§6.2). */
+type ActiveGame = {
+  pin: string;
+  quizId: string;
+  title: string;
+  state: string;
+  playerCount: number;
+};
+
 @Injectable()
 export class GameService {
   constructor(
@@ -309,11 +318,9 @@ export class GameService {
    * Liste les parties **encore vivantes** d'un hôte (dashboard §6.2). Purge au
    * passage les PINs dont l'état a expiré ou est terminé (index auto-nettoyant).
    */
-  async listActiveHostGames(
-    hostUserId: string,
-  ): Promise<Array<{ pin: string; title: string; state: string; playerCount: number }>> {
+  async listActiveHostGames(hostUserId: string): Promise<ActiveGame[]> {
     const pins = await this.redis.smembers(gameKeys.hostGames(hostUserId));
-    const games: Array<{ pin: string; title: string; state: string; playerCount: number }> = [];
+    const games: ActiveGame[] = [];
     for (const pin of pins) {
       const meta = await this.getMeta(pin);
       if (!meta || meta.state === GameState.Ended) {
@@ -322,6 +329,7 @@ export class GameService {
       }
       games.push({
         pin,
+        quizId: meta.quizId,
         title: meta.title,
         state: meta.state,
         playerCount: await this.connectedCount(pin),

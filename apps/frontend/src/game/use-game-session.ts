@@ -71,6 +71,7 @@ export interface GameView {
   autoNextMs: number | null;
   /** Titre du quiz (récap console hôte), `null` tant que le sommaire n'est pas reçu. */
   quizTitle: string | null;
+  quizId: string | null;
   /** Description du quiz (récap console hôte), `null` si absente. */
   quizDescription: string | null;
   /** Sommaire des questions (console hôte uniquement). */
@@ -101,6 +102,7 @@ const INITIAL: GameView = {
   autoNextAt: null,
   autoNextMs: null,
   quizTitle: null,
+  quizId: null,
   quizDescription: null,
   outline: [],
 };
@@ -163,7 +165,12 @@ export function useGameSession(pin: string, role: LiveRole) {
         autoNextMs: p.autoNextMs ?? null,
       });
     const onOutline = (p: GameOutlinePayload) =>
-      patch({ quizTitle: p.title, quizDescription: p.description, outline: p.questions });
+      patch({
+        quizId: p.quizId,
+        quizTitle: p.title,
+        quizDescription: p.description,
+        outline: p.questions,
+      });
     // Ajustement du chrono : on remplace les timings de la question courante (le
     // décompte est dérivé de `endsAt`), sans toucher au reste de son contenu.
     const onTime = (p: QuestionTimePayload) =>

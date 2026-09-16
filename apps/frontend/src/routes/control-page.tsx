@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import { useEffect, useRef, useState } from 'react';
+import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,8 @@ const CHRONO_STEPS = [-5, -1, 1, 5] as const;
  */
 export function ControlPage() {
   const { t } = useTranslation(['live', 'common']);
+  // Same explanation as in the editor before switching full capture on (GDPR, archive size).
+  const [confirmCapture, setConfirmCapture] = useState(false);
   const { pin } = useParams({ from: '/present/$pin/control' });
   const { view, socket } = useGameSession(pin, 'host');
   const [shareNote, setShareNote] = useState<string | null>(null);
@@ -127,14 +130,17 @@ export function ControlPage() {
   }
 
   const controlBar = (
-    <ControlBar
-      view={view}
-      pin={pin}
-      onMode={setMode}
-      onPause={setPaused}
-      onBan={banPlayer}
-      screenButton={screenButton}
-    />
+    <>
+      <HostBreadcrumb view={view} pin={pin} />
+      <ControlBar
+        view={view}
+        pin={pin}
+        onMode={setMode}
+        onPause={setPaused}
+        onBan={banPlayer}
+        screenButton={screenButton}
+      />
+    </>
   );
 
   // ── LOBBY ────────────────────────────────────────────────────────────────
@@ -183,12 +189,23 @@ export function ControlPage() {
         {/* Capture intégrale (§3.1 / RG-13) : choix avant le démarrage, verrouillé une
             fois la partie lancée (cette vue lobby disparaît au start). Les joueurs déjà
             connectés sont informés en direct (avis de consentement §2.10). */}
+        <ConfirmDialog
+          open={confirmCapture}
+          title={t('common:captureConfirm.title')}
+          description={t('common:captureConfirm.description')}
+          confirmLabel={t('common:captureConfirm.confirmLabel')}
+          onCancel={() => setConfirmCapture(false)}
+          onConfirm={() => {
+            setConfirmCapture(false);
+            setCapture(true);
+          }}
+        />
         <label className="flex items-start gap-2 rounded-lg border p-4 text-sm">
           <input
             type="checkbox"
             className="mt-0.5"
             checked={view.fullCapture}
-            onChange={(e) => setCapture(e.target.checked)}
+            onChange={(e) => (e.target.checked ? setConfirmCapture(true) : setCapture(false))}
           />
           <span>
             <span className="font-medium">{t('control.captureLabel')}</span>
@@ -196,7 +213,7 @@ export function ControlPage() {
           </span>
         </label>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap items-center justify-between gap-3">
           <ModeToggle mode={view.mode} onChange={setMode} />
           <div className="flex items-center gap-2">
             <EndGameButton label={t('control.stopSession')} onConfirm={endGame} />
@@ -247,7 +264,7 @@ export function ControlPage() {
         <div className="bg-card rounded-xl border p-5 sm:p-6">
           <SlideView slide={view.slide} />
         </div>
-        <div className="flex items-end justify-between gap-3">
+        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">
           <div className="min-w-0 flex-1">
             {view.paused && view.slide.displayDelayS ? (
               <span className="text-muted-foreground text-sm">{t('control.autoPaused')}</span>
@@ -280,7 +297,7 @@ export function ControlPage() {
             <LeaderboardList rows={view.leaderboard.top} />
           </div>
         ) : null}
-        <div className="flex items-end justify-between gap-3">
+        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">
           <div className="min-w-0 flex-1">
             {view.mode === 'auto' && view.paused ? (
               <span className="text-muted-foreground text-sm">{t('control.autoPaused')}</span>
@@ -303,7 +320,9 @@ export function ControlPage() {
       <section className="mx-auto flex w-full max-w-4xl flex-col items-center gap-6 py-8">
         <h2 className="text-2xl font-bold">{t('control.podium')}</h2>
         {view.podium ? <Podium rows={view.podium.podium} /> : null}
-        <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
+        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex w-full justify-center">
+          <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
+        </div>
       </section>
     );
   }
@@ -374,7 +393,7 @@ export function ControlPage() {
       {/* Déroulé du quiz (vue d'ensemble). */}
       <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
 
-      <div className="flex flex-wrap gap-2">
+      <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap gap-2">
         <Button type="button" onClick={() => emit('host:reveal')}>
           <Eye className="size-4" />
           {t('control.revealNow')}
@@ -815,5 +834,40 @@ function QuestionCarousel({
         })}
       </ol>
     </div>
+  );
+}
+
+/**
+ * Where the host is: My quizzes › quiz › this session. The editor link is safe —
+ * the session keeps running on the server while the host is elsewhere.
+ */
+function HostBreadcrumb({ view, pin }: { view: GameView; pin: string }) {
+  const { t } = useTranslation('live');
+  return (
+    <nav
+      aria-label={t('control.breadcrumb')}
+      className="text-muted-foreground flex flex-wrap items-center gap-1 text-sm"
+    >
+      <Link to="/dashboard" className="hover:text-foreground hover:underline">
+        {t('control.myQuizzes')}
+      </Link>
+      <ChevronRight className="size-3.5" />
+      {view.quizId ? (
+        <Link
+          to="/quizzes/$quizId"
+          params={{ quizId: view.quizId }}
+          className="hover:text-foreground max-w-[16rem] truncate hover:underline"
+          title={t('control.backToEditorHint')}
+        >
+          {view.quizTitle ?? t('control.sessionInProgress')}
+        </Link>
+      ) : (
+        <span className="max-w-[16rem] truncate">
+          {view.quizTitle ?? t('control.sessionInProgress')}
+        </span>
+      )}
+      <ChevronRight className="size-3.5" />
+      <span className="text-foreground font-medium">{t('control.sessionCrumb', { pin })}</span>
+    </nav>
   );
 }

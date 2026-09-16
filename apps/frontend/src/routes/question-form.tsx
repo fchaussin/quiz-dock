@@ -24,6 +24,8 @@ import { GripVertical, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard';
+import { clearDraft, loadDraft, saveDraft } from '@/lib/draft-store';
+import { DraftNotice } from '@/components/draft-notice';
 import { MarkdownEditor } from '@/components/markdown-editor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -183,9 +185,12 @@ export function QuestionForm({
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   // Computed once: option keys are generated, so a fresh copy per render would reset the form.
   const [initial] = useState(() => initialValues(question));
+  // Draft kept in localStorage until saved or discarded (survives reload / closed tab).
+  const draftKey = `quiz:${quizId}:question:${question?.id ?? 'new'}`;
+  const [restored, setRestored] = useState(() => loadDraft<FormValues>(draftKey));
 
   const form = useForm({
-    defaultValues: initial,
+    defaultValues: restored ?? initial,
     onSubmit: async ({ value }) => {
       setError(null);
       const data = buildPayload(value);
@@ -198,12 +203,23 @@ export function QuestionForm({
         await queryClient.invalidateQueries({
           queryKey: getQuizzesControllerGetQueryKey(quizId),
         });
+        clearDraft(draftKey);
         onClose();
       } catch (err) {
         setError(apiErrorText(err, t('questionForm.invalidError')));
       }
     },
   });
+  const values = useStore(form.store, (s) => s.values);
+  useEffect(() => {
+    if (JSON.stringify(values) === JSON.stringify(initial)) clearDraft(draftKey);
+    else saveDraft(draftKey, values);
+  }, [values, initial, draftKey]);
+  const discardDraft = () => {
+    clearDraft(draftKey);
+    setRestored(null);
+    form.reset(initial);
+  };
 
   const type = useStore(form.store, (s) => s.values.type);
   // Dirty = values differ from what was loaded (a fresh question is dirty as soon as typed in).
@@ -267,6 +283,7 @@ export function QuestionForm({
         void form.handleSubmit();
       }}
     >
+      {restored ? <DraftNotice onDiscard={discardDraft} /> : null}
       <Label>
         {t('questionForm.typeLabel')}
         <Select value={type} onChange={(e) => onTypeChange(e.target.value as QType)}>
@@ -277,6 +294,10 @@ export function QuestionForm({
           ))}
         </Select>
       </Label>
+      {/* What this type does on screen and how it scores — the rules are not obvious. */}
+      <p className="text-muted-foreground -mt-3 text-xs leading-snug">
+        {t(`questionTypeHelp.${type}`)}
+      </p>
 
       <form.Field name="prompt">
         {(field) => (
@@ -558,6 +579,7 @@ export function QuestionForm({
         onCancel={() => setConfirmDiscard(false)}
         onConfirm={() => {
           setConfirmDiscard(false);
+          clearDraft(draftKey);
           onClose();
         }}
       />

@@ -73,7 +73,11 @@
       "numeric": "数字",
       "ordering": "排序",
       "poll": "投票"
-    }
+    },
+    "breadcrumb": "路径",
+    "myQuizzes": "我的测验",
+    "sessionCrumb": "会话 {{pin}}",
+    "backToEditorHint": "返回编辑器 — 会话继续进行"
   },
   "screen": {
     "sessionUnavailable": "会话不可用。",
@@ -130,7 +134,11 @@
     "submitAnswer": "提交我的回答",
     "moveUp": "上移",
     "moveDown": "下移",
-    "unsupportedType": "不支持的题目类型。"
+    "unsupportedType": "不支持的题目类型。",
+    "leave": "退出",
+    "leaveConfirmTitle": "退出本场？",
+    "leaveConfirmDescription": "你将失去席位和分数。要回来需要再次用 PIN 加入。",
+    "joinAnother": "加入另一场"
   },
   "reveal": {
     "explanation": "解析",

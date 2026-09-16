@@ -40,7 +40,7 @@ import {
   Trash2,
   Users,
 } from 'lucide-react';
-import { useCallback, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MarkdownEditor } from '@/components/markdown-editor';
 import { Markdown } from '@/components/markdown';
@@ -54,6 +54,8 @@ import type { QuizDetailDto } from '../api/generated/model';
 import { quizItems, moveItem, slideLabel, type QuizItem } from '@/lib/quiz-items';
 import { useMediaQuery } from '@/lib/use-media-query';
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard';
+import { clearDraft, loadDraft, saveDraft } from '@/lib/draft-store';
+import { DraftNotice } from '@/components/draft-notice';
 import { Drawer } from '@/components/ui/drawer';
 import { QuestionForm } from './question-form';
 import { SlideForm } from './slide-form';
@@ -151,6 +153,10 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
       queryClient.invalidateQueries({ queryKey: getQuizzesControllerListQueryKey() }),
     ]);
 
+  // Title/description draft kept in localStorage until saved or discarded.
+  const quizDraftKey = `quiz:${quiz.id}:settings`;
+  type QuizForm = { title: string; description: string; language: string };
+  const [quizDraft, setQuizDraft] = useState(() => loadDraft<QuizForm>(quizDraftKey));
   const form = useForm({
     defaultValues: {
       title: quiz.title,
@@ -167,13 +173,25 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
         },
       });
       await invalidate();
+      clearDraft(quizDraftKey);
+      setQuizDraft(null);
       form.reset(value); // valeurs enregistrées = nouvelle base « propre » → bouton inactif
       setEditingDescription(false);
     },
   });
+  // A restored draft is applied once, on mount; changes are then written back on every edit.
+  useEffect(() => {
+    if (quizDraft) form.reset(quizDraft, { keepDefaultValues: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const quizValues = useStore(form.store, (s) => s.values);
 
   // Le bouton « Enregistrer » n'est actif que si une modification est en cours.
   const isDirty = useStore(form.store, (s) => s.isDirty);
+  useEffect(() => {
+    if (isDirty) saveDraft(quizDraftKey, quizValues);
+    else clearDraft(quizDraftKey);
+  }, [isDirty, quizValues, quizDraftKey]);
   useUnsavedGuard(isDirty);
 
   const setFeedbackEnabled = async (feedbackEnabled: boolean) => {
@@ -328,6 +346,16 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
               </div>
             )}
           </form.Field>
+          {quizDraft && isDirty ? (
+            <DraftNotice
+              onDiscard={() => {
+                clearDraft(quizDraftKey);
+                setQuizDraft(null);
+                form.reset();
+                setEditingDescription(false);
+              }}
+            />
+          ) : null}
           {isDirty ? (
             <div className="flex items-center gap-2">
               <Button type="submit" size="sm" disabled={update.isPending}>
@@ -339,6 +367,8 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
                 size="sm"
                 variant="ghost"
                 onClick={() => {
+                  clearDraft(quizDraftKey);
+                  setQuizDraft(null);
                   form.reset();
                   setEditingDescription(false);
                 }}
@@ -952,7 +982,7 @@ function StatusBar({
   onRestore: () => void;
   busy: boolean;
 }) {
-  const { t } = useTranslation('editor');
+  const { t } = useTranslation(['editor', 'common']);
   const open = (path: string) => window.open(path, '_blank', 'noopener,noreferrer');
   // Full capture keeps every answer per participant: personal data (GDPR) and a
   // heavier archive — it is switched on knowingly, through an explanation.
@@ -1025,9 +1055,9 @@ function StatusBar({
           </label>
           <ConfirmDialog
             open={confirmCapture}
-            title={t('captureConfirm.title')}
-            description={t('captureConfirm.description')}
-            confirmLabel={t('captureConfirm.confirmLabel')}
+            title={t('common:captureConfirm.title')}
+            description={t('common:captureConfirm.description')}
+            confirmLabel={t('common:captureConfirm.confirmLabel')}
             onCancel={() => setConfirmCapture(false)}
             onConfirm={() => {
               setConfirmCapture(false);

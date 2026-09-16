@@ -15,6 +15,9 @@ vi.mock('../game/game-client', () => ({
   joinSession: vi.fn(),
   loadPlayerSession: () => null,
   loadAvatarSeed: () => null,
+  loadNickname: () => '',
+  saveNickname: () => undefined,
+  clearPlayerSession: () => undefined,
   saveAvatarSeed: () => undefined,
 }));
 

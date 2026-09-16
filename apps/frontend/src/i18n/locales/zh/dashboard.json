@@ -14,5 +14,7 @@
   "questionCount_one": "{{count}} 道题",
   "questionCount_other": "{{count}} 道题",
   "edit": "编辑",
-  "present": "演示"
+  "present": "演示",
+  "running_one": "{{count}} 场进行中",
+  "running_other": "{{count}} 场进行中"
 }

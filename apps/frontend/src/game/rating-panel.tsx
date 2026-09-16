@@ -1,5 +1,6 @@
 import { Star } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { clearDraft, loadDraft, saveDraft } from '@/lib/draft-store';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +19,12 @@ export function RatingPanel({ pin, socket }: { pin: string; socket: GameSocket |
   const storageKey = `live.rated.${pin}`;
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
-  const [comment, setComment] = useState('');
+  // The comment survives a reload until it is sent.
+  const [comment, setComment] = useState(() => loadDraft<string>(`rating:${pin}`) ?? '');
+  useEffect(() => {
+    if (comment) saveDraft(`rating:${pin}`, comment);
+    else clearDraft(`rating:${pin}`);
+  }, [comment, pin]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(
@@ -42,6 +48,7 @@ export function RatingPanel({ pin, socket }: { pin: string; socket: GameSocket |
       setSubmitting(false);
       if (ok) {
         localStorage.setItem(storageKey, '1');
+        clearDraft(`rating:${pin}`);
         setDone(true);
       } else {
         setError(message ?? t('rating.sendFailed'));

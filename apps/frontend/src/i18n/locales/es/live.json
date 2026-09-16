@@ -73,7 +73,11 @@
       "numeric": "Numérica",
       "ordering": "Orden",
       "poll": "Encuesta"
-    }
+    },
+    "breadcrumb": "Ruta",
+    "myQuizzes": "Mis cuestionarios",
+    "sessionCrumb": "Sesión {{pin}}",
+    "backToEditorHint": "Volver al editor — la sesión sigue en marcha"
   },
   "screen": {
     "sessionUnavailable": "Sesión no disponible.",
@@ -130,7 +134,11 @@
     "submitAnswer": "Enviar mi respuesta",
     "moveUp": "Subir",
     "moveDown": "Bajar",
-    "unsupportedType": "Tipo de pregunta no compatible."
+    "unsupportedType": "Tipo de pregunta no compatible.",
+    "leave": "Salir",
+    "leaveConfirmTitle": "¿Salir de la sesión?",
+    "leaveConfirmDescription": "Perderás tu sitio y tu puntuación. Para volver tendrás que unirte de nuevo con el PIN.",
+    "joinAnother": "Unirse a otra partida"
   },
   "reveal": {
     "explanation": "Explicación",

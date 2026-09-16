@@ -33,6 +33,7 @@ export type CreateSlideDtoBlocksItem = {
      */
   md: string;
   align?: 'left' | 'center' | 'right';
+  size?: 'small' | 'medium' | 'large';
 } | {
   type: 'image';
   /**
@@ -86,6 +87,7 @@ export type CreateSlideDtoBlocksItem = {
      */
   md: string;
   align?: 'left' | 'center' | 'right';
+  size?: 'small' | 'medium' | 'large';
 } | {
   type: 'image';
   /**
