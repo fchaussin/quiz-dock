@@ -1,12 +1,37 @@
-import { Link, Outlet, useNavigate } from '@tanstack/react-router';
+import { Link, Outlet, useMatches, useNavigate } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import { LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '../auth/auth-context';
 import { APP_NAME, appConfig } from '../config';
 
+/** Route id → `titles.*` key in `common`; the document title reads "<page> · <app>". */
+const TITLE_KEYS: Record<string, string> = {
+  '/login': 'login',
+  '/dashboard': 'dashboard',
+  '/quizzes/$quizId': 'editor',
+  '/quizzes/$quizId/preview': 'preview',
+  '/quizzes/$quizId/feedback': 'feedback',
+  '/quizzes/$quizId/sessions': 'sessions',
+  '/quizzes/$quizId/sessions/$sessionId': 'session',
+  '/quizzes/$quizId/sessions/$sessionId/players/$playerResultId': 'player',
+  '/present/$pin/control': 'control',
+  '/present/$pin/screen': 'screen',
+  '/join': 'join',
+  '/join/$pin': 'join',
+};
+
 export function RootLayout() {
   const { t } = useTranslation(['auth', 'common']);
+  const matches = useMatches();
+  useEffect(() => {
+    const key = [...matches]
+      .reverse()
+      .map((m) => TITLE_KEYS[m.routeId])
+      .find(Boolean);
+    document.title = key ? `${t(`common:titles.${key}`)} · ${APP_NAME}` : APP_NAME;
+  }, [matches, t]);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 

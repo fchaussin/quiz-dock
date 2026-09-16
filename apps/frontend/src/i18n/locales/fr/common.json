@@ -28,5 +28,18 @@
   "draft": {
     "restored": "Brouillon restauré — vos modifications non enregistrées ont été retrouvées.",
     "discard": "Ignorer le brouillon"
+  },
+  "titles": {
+    "login": "Connexion",
+    "dashboard": "Mes quiz",
+    "editor": "Éditeur",
+    "preview": "Aperçu",
+    "feedback": "Avis",
+    "sessions": "Historique",
+    "session": "Session",
+    "player": "Participant",
+    "control": "Console",
+    "screen": "Projection",
+    "join": "Rejoindre"
   }
 }

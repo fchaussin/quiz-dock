@@ -28,5 +28,18 @@
   "draft": {
     "restored": "Borrador restaurado — se recuperaron tus cambios sin guardar.",
     "discard": "Descartar el borrador"
+  },
+  "titles": {
+    "login": "Iniciar sesión",
+    "dashboard": "Mis cuestionarios",
+    "editor": "Editor",
+    "preview": "Vista previa",
+    "feedback": "Opiniones",
+    "sessions": "Historial",
+    "session": "Sesión",
+    "player": "Participante",
+    "control": "Consola",
+    "screen": "Proyección",
+    "join": "Unirse"
   }
 }

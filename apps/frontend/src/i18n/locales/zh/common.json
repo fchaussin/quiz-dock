@@ -28,5 +28,18 @@
   "draft": {
     "restored": "已恢复草稿 — 找回了你未保存的修改。",
     "discard": "放弃草稿"
+  },
+  "titles": {
+    "login": "登录",
+    "dashboard": "我的测验",
+    "editor": "编辑器",
+    "preview": "预览",
+    "feedback": "评价",
+    "sessions": "历史",
+    "session": "会话",
+    "player": "参与者",
+    "control": "控制台",
+    "screen": "投影",
+    "join": "加入"
   }
 }

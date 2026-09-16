@@ -28,5 +28,18 @@
   "draft": {
     "restored": "Draft restored — your unsaved changes were recovered.",
     "discard": "Discard the draft"
+  },
+  "titles": {
+    "login": "Sign in",
+    "dashboard": "My quizzes",
+    "editor": "Editor",
+    "preview": "Preview",
+    "feedback": "Reviews",
+    "sessions": "History",
+    "session": "Session",
+    "player": "Participant",
+    "control": "Console",
+    "screen": "Projection",
+    "join": "Join"
   }
 }
