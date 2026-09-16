@@ -25,7 +25,7 @@ needed. Where you set them depends on how you run it:
 | Variable | Default | Applies to | Description |
 |---|---|---|---|
 | `APP_NAME` | `QuizDock` | app | Brand name shown in the header, tab title and share text. |
-| `APP_LANG` | `en` | app | UI language for the instance: `en` · `fr` · `es` · `zh`. One per deployment (no browser detection). |
+| `APP_LANG` | `en` | app | UI language for the instance: `en` · `fr` · `es` · `zh` · `zh-TW`. One per deployment (no browser detection). |
 | `AUTH_MODE` | `none` | app | `none` = local/guest mode (no IdP); `oidc` = validate JWTs from your IdP. See §3. |
 | `PORT` | `3000` | app | In-container HTTP port. Map it to a host port (`-p 18080:3000`). |
 | `DATABASE_URL` | — | app, migrate | PostgreSQL connection string, e.g. `postgresql://user:pass@host:5432/quizdock`. **Required** (provided by compose; baked into `:standalone`). |
@@ -64,7 +64,7 @@ Three things are brandable **at runtime**, without rebuilding the image:
 | What | How |
 |---|---|
 | **Name** | `APP_NAME` (header, tab, share messages). |
-| **Language** | `APP_LANG` (`en`/`fr`/`es`/`zh`). |
+| **Language** | `APP_LANG` (`en`/`fr`/`es`/`zh`/`zh-TW`). |
 | **Logo & CSS** | files served at fixed paths — replace them via a mounted folder. |
 
 ### How it works

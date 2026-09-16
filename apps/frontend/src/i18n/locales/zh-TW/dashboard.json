@@ -1,0 +1,18 @@
+{
+  "title": "我的測驗",
+  "newQuiz": "建立測驗",
+  "activeSessions": "進行中的會話",
+  "playerCount_one": "{{count}} 名玩家",
+  "playerCount_other": "{{count}} 名玩家",
+  "resume": "繼續",
+  "stop": "停止",
+  "stopConfirmTitle": "停止會話？",
+  "stopConfirmDescription": "當前會話將對所有已連接的玩家永久結束。",
+  "stopConfirmLabel": "停止會話",
+  "loadError": "無法載入測驗。",
+  "empty": "還沒有測驗。創建一個吧！",
+  "questionCount_one": "{{count}} 道題",
+  "questionCount_other": "{{count}} 道題",
+  "edit": "編輯",
+  "present": "示範"
+}
