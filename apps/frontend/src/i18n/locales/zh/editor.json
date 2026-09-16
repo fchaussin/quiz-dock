@@ -69,7 +69,9 @@
     "formTitle": "幻灯片",
     "add": "添加幻灯片",
     "kind": "幻灯片",
-    "deleteSlide": "删除幻灯片"
+    "deleteSlide": "删除幻灯片",
+    "durationDefault": "5 秒（默认）",
+    "durationManual": "手动"
   },
   "slideForm": {
     "bodyPlaceholder": "要显示的文字…",

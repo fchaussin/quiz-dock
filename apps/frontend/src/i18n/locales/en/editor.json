@@ -69,7 +69,9 @@
     "formTitle": "Slide",
     "add": "Add a slide",
     "kind": "Slide",
-    "deleteSlide": "Delete the slide"
+    "deleteSlide": "Delete the slide",
+    "durationDefault": "5 s (default)",
+    "durationManual": "manual"
   },
   "slideForm": {
     "bodyPlaceholder": "Text to display…",

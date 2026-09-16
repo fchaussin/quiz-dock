@@ -69,7 +69,9 @@
     "formTitle": "Diapositiva",
     "add": "Añadir una diapositiva",
     "kind": "Diapositiva",
-    "deleteSlide": "Eliminar la diapositiva"
+    "deleteSlide": "Eliminar la diapositiva",
+    "durationDefault": "5 s (por defecto)",
+    "durationManual": "manual"
   },
   "slideForm": {
     "bodyPlaceholder": "Texto a mostrar…",
