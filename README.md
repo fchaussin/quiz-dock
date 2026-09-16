@@ -134,7 +134,16 @@ docker compose -f docker-compose.prod.yml up -d
 open http://localhost:18080
 ```
 
-Pin a version with `QUIZDOCK_TAG=0.3.0 docker compose -f docker-compose.prod.yml up -d`.
+Pin a version with `QUIZDOCK_TAG=0.4.0 docker compose -f docker-compose.prod.yml up -d`.
+
+### Upgrading
+
+Database migrations run **automatically** on every start (the one-shot `migrate`
+service, or the `:standalone` entrypoint): pull the new tag and `up` again. Two rules:
+**back up PostgreSQL first** (`pg_dump`), and **don't roll back** an image once its
+migrations ran — restore the backup instead. Each release lists its schema changes
+under *Upgrading* in the [release notes](https://github.com/quizdock/quiz-dock/releases).
+See [docs/self-hosting](docs/self-hosting/README.md#upgrading) for the full procedure.
 
 ### Option B — build from source
 
