@@ -4,6 +4,42 @@ All notable changes to QuizDock are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com); versions follow
 [Semantic Versioning](https://semver.org). Generated from conventional commits.
 
+## [0.4.0] - 2026-09-16
+
+### Bug Fixes
+
+- Portal + fixed overlay instead of <dialog> top layer *(drawer)*
+- Reopen modally after a hot reload, hide the grip on the side sheet *(drawer)*
+
+### Documentation
+
+- Absolute link in the upgrading note (Docker Hub renders the README) *(readme)*
+- Upgrading procedure (auto migrations, backup, no rollback), engine knobs, release checklist
+- README features cover slides, rich text, explanations, backgrounds; drop the stale Docker Hub overview copy
+- Document the 0.x version bump rule *(release)*
+
+### Features
+
+- Confirm before deleting a question or a slide *(editor)*
+- Status bar replaces the folded settings box *(editor)*
+- Collapsible sequence rail and foldable slide preview *(editor)*
+- Per-block text alignment, centred by default *(slides)*
+- Backgrounds for slides and questions, gradient generator, column splits
+- Block composer replaces title/body/layout *(slides)*
+- Inline images, text contrast over covers, display-time semantics *(slides)*
+- Layouts and full-surface rendering *(slides)*
+- Master/detail builder, in-place title, option pairs, feedback page *(editor)*
+- Drag-and-drop ordering, unsaved-edit guard, mobile drawer *(editor)*
+- Content slides in the quiz sequence (quiz_item kind=slide)
+- Per-question reveal delay in auto mode (question.reveal_delay_s)
+- Answer explanation shown at reveal (question.answer_explanation)
+- WYSIWYG editor for Markdown fields, with source toggle *(frontend)*
+- Render restricted Markdown in text fields *(frontend)*
+
+### Security
+
+- Remediate transitive HIGH/CRITICAL CVEs, scan before audit gate *(security)*
+
 ## [0.3.2] - 2026-06-24
 
 ### Security
