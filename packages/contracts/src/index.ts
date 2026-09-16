@@ -18,7 +18,7 @@ export enum GameState {
   Answering = 'ANSWERING',
   Reveal = 'REVEAL',
   Leaderboard = 'LEADERBOARD',
-  /** A content slide (#7) is on screen: no answer, no timer — host click or `displayDelayS`. */
+  /** A content slide (#7) is on screen: no answer; advances on host click or, in auto mode, by `displayDelayS`. */
   SlideShow = 'SLIDE_SHOW',
   Podium = 'PODIUM',
   Ended = 'ENDED',
@@ -153,6 +153,8 @@ export interface QuestionStartPayload {
 
 /** How a slide composes its text and media (#7); `auto` = media above the text. */
 export type SlideLayout = 'auto' | 'media_left' | 'media_right' | 'media_full';
+/** Text over a full-cover image: light text on a darkened image, or dark text on a lightened one. */
+export type SlideTextTone = 'light' | 'dark';
 
 /**
  * A content slide on screen (#7). `questionIndex` is the question that follows
@@ -166,9 +168,12 @@ export interface SlideShowPayload {
   /** Markdown, block profile. */
   body: string | null;
   media?: { url: string; kind: 'image' | 'audio' } | null;
-  /** Seconds before the engine advances by itself; null = the host clicks. */
+  /** Auto-mode display time: null = engine default, 0 = the host clicks, else seconds. */
   displayDelayS: number | null;
   layout: SlideLayout;
+  textTone: SlideTextTone;
+  /** Subtitle-like halo around the text (contrast over any image). */
+  textOutline: boolean;
 }
 
 export interface GameStatePayload {

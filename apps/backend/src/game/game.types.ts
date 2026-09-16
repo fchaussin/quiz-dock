@@ -5,6 +5,7 @@ import type {
   OptionShape,
   QuestionType,
   SlideLayout,
+  SlideTextTone,
 } from '@quiz-dock/contracts';
 
 /**
@@ -60,6 +61,8 @@ export interface SnapshotSlide {
   media: { url: string; kind: 'image' | 'audio' } | null;
   displayDelayS: number | null;
   layout: SlideLayout;
+  textTone: SlideTextTone;
+  textOutline: boolean;
 }
 
 export interface QuizSnapshot {

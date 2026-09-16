@@ -83,9 +83,20 @@
       "media_right": "Image à droite",
       "media_full": "Image plein écran, texte par-dessus"
     },
-    "displayDelayLabel": "Durée d’affichage (s)",
-    "displayDelayPlaceholder": "manuel",
-    "displayDelayHint": "Passe à la suite automatiquement après ce délai. Vide = l’animateur clique.",
+    "contrastLegend": "Contraste du texte",
+    "tone": {
+      "light": "Texte clair sur image assombrie",
+      "dark": "Texte sombre sur image éclaircie"
+    },
+    "outline": "Contour (halo, comme des sous-titres)",
+    "displayLegend": "Enchaînement (mode automatique)",
+    "displayDelayLabel": "Durée (s)",
+    "display": {
+      "default": "Durée par défaut (5 s)",
+      "manual": "Manuel : l’animateur clique",
+      "custom": "Durée personnalisée…"
+    },
+    "displayHint": "En mode manuel, l’animateur passe toujours à la suite lui-même.",
     "invalidError": "La slide doit avoir un titre, un contenu ou un média.",
     "submitAdd": "Ajouter",
     "submitUpdate": "Enregistrer"

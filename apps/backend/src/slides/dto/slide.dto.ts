@@ -12,6 +12,8 @@ export const slideSchema = z.object({
   mediaId: z.string().nullable(),
   displayDelayS: z.number().int().nullable(),
   layout: z.enum(['auto', 'media_left', 'media_right', 'media_full']),
+  textTone: z.enum(['light', 'dark']),
+  textOutline: z.boolean(),
 });
 
 export class SlideDto extends createZodDto(slideSchema) {}

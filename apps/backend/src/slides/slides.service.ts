@@ -114,6 +114,8 @@ export class SlidesService {
       mediaId: dto.mediaId || null,
       displayDelayS: dto.displayDelayS ?? null,
       layout: dto.layout,
+      textTone: dto.textTone,
+      textOutline: dto.textOutline,
     };
   }
 

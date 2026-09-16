@@ -230,11 +230,24 @@ export function SlideView({ slide, large }: { slide: SlideShowPayload; large?: b
   );
 
   if (layout === 'media_full' && image) {
+    // Light text over a darkened image, or dark text over a lightened one; the optional
+    // outline is a subtitle-like halo so the text reads over any picture.
+    const light = slide.textTone !== 'dark';
     return (
       <article className="relative flex h-full min-h-[60vh] w-full items-center justify-center overflow-hidden">
         <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-black/45" />
-        <div className={cn('relative z-10 text-white', large ? 'max-w-5xl p-12' : 'p-6')}>
+        <div className={cn('absolute inset-0', light ? 'bg-black/40' : 'bg-white/55')} />
+        <div
+          className={cn(
+            'relative z-10',
+            light ? 'text-white' : 'text-neutral-900',
+            slide.textOutline &&
+              (light
+                ? '[text-shadow:0_0_2px_rgba(0,0,0,.95),0_0_8px_rgba(0,0,0,.9),0_2px_2px_rgba(0,0,0,.9)]'
+                : '[text-shadow:0_0_2px_rgba(255,255,255,.95),0_0_8px_rgba(255,255,255,.9),0_2px_2px_rgba(255,255,255,.9)]'),
+            large ? 'max-w-5xl p-12' : 'p-6',
+          )}
+        >
           {text}
         </div>
       </article>

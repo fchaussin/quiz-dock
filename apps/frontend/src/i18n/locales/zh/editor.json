@@ -83,9 +83,17 @@
       "media_right": "图片在右",
       "media_full": "全屏图片，文字覆盖"
     },
-    "displayDelayLabel": "显示时长（秒）",
-    "displayDelayPlaceholder": "手动",
-    "displayDelayHint": "到时后自动进入下一步。留空 = 由主持人点击。",
+    "contrastLegend": "文字对比度",
+    "tone": { "light": "浅色文字，图片压暗", "dark": "深色文字，图片提亮" },
+    "outline": "描边（光晕，如字幕）",
+    "displayLegend": "自动切换（自动模式）",
+    "displayDelayLabel": "时长（秒）",
+    "display": {
+      "default": "默认时长（5 秒）",
+      "manual": "手动：由主持人点击",
+      "custom": "自定义时长…"
+    },
+    "displayHint": "手动模式下，始终由主持人手动进入下一步。",
     "invalidError": "幻灯片需要标题、内容或媒体。",
     "submitAdd": "添加",
     "submitUpdate": "保存"

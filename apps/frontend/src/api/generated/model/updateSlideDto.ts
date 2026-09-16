@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { UpdateSlideDtoLayout } from './updateSlideDtoLayout';
+import type { UpdateSlideDtoTextTone } from './updateSlideDtoTextTone';
 
 export interface UpdateSlideDto {
   /**
@@ -25,10 +26,12 @@ export interface UpdateSlideDto {
      */
   mediaId?: string | null;
   /**
-     * @minimum 1
+     * @minimum 0
      * @maximum 600
      * @nullable
      */
   displayDelayS?: number | null;
   layout?: UpdateSlideDtoLayout;
+  textTone?: UpdateSlideDtoTextTone;
+  textOutline?: boolean;
 }

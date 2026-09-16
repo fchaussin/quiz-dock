@@ -83,9 +83,17 @@
       "media_right": "Image on the right",
       "media_full": "Full-screen image, text on top"
     },
-    "displayDelayLabel": "Display time (s)",
-    "displayDelayPlaceholder": "manual",
-    "displayDelayHint": "Moves on by itself after this delay. Empty = the host clicks.",
+    "contrastLegend": "Text contrast",
+    "tone": { "light": "Light text on a darkened image", "dark": "Dark text on a lightened image" },
+    "outline": "Outline (halo, like subtitles)",
+    "displayLegend": "Auto-advance (automatic mode)",
+    "displayDelayLabel": "Duration (s)",
+    "display": {
+      "default": "Default duration (5 s)",
+      "manual": "Manual: the host clicks",
+      "custom": "Custom duration…"
+    },
+    "displayHint": "In manual mode the host always moves on by hand.",
     "invalidError": "A slide needs a title, some content or a media.",
     "submitAdd": "Add",
     "submitUpdate": "Save"

@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { QuizDetailDtoSlidesItemLayout } from './quizDetailDtoSlidesItemLayout';
+import type { QuizDetailDtoSlidesItemTextTone } from './quizDetailDtoSlidesItemTextTone';
 
 export type QuizDetailDtoSlidesItem = {
   id: string;
@@ -30,4 +31,6 @@ export type QuizDetailDtoSlidesItem = {
      */
   displayDelayS: number | null;
   layout: QuizDetailDtoSlidesItemLayout;
+  textTone: QuizDetailDtoSlidesItemTextTone;
+  textOutline: boolean;
 };

@@ -847,8 +847,8 @@ export class GameEngine {
   private buildModePayload(meta: GameMeta): GameModePayload {
     // Countdown shown on a reveal in auto mode, or on a timed slide in any mode (#7).
     const onTimedStep =
-      (meta.mode === 'auto' && meta.state === GameState.Reveal) ||
-      meta.state === GameState.SlideShow;
+      meta.mode === 'auto' &&
+      (meta.state === GameState.Reveal || meta.state === GameState.SlideShow);
     const autoNextActive = onTimedStep && !meta.paused && (meta.autoNextAt ?? 0) > 0;
     return {
       mode: meta.mode,
@@ -930,15 +930,16 @@ export class GameEngine {
    */
   private async scheduleAutoNextIfNeeded(pin: string, meta?: GameMeta): Promise<void> {
     const m = meta ?? (await this.game.getMeta(pin));
-    if (!m || m.paused) return;
+    // Auto mode only: in manual mode the host clicks through slides and reveals alike.
+    if (!m || m.paused || m.mode !== 'auto') return;
     const snapshot = await this.game.getSnapshot(pin);
     let delay: number;
     if (m.state === GameState.SlideShow) {
-      // A slide advances by itself only when it carries a delay — in any mode (#7).
-      const slideDelay = snapshot?.slides[m.slideIndex ?? -1]?.displayDelayS;
-      if (!slideDelay) return;
-      delay = slideDelay * 1000;
-    } else if (m.mode === 'auto' && m.state === GameState.Reveal) {
+      // Slide (#7): null = engine default, N = N seconds, 0 = the host clicks (manual override).
+      const slideDelay = snapshot?.slides[m.slideIndex ?? -1]?.displayDelayS ?? null;
+      if (slideDelay === 0) return;
+      delay = slideDelay ? slideDelay * 1000 : defaultAutoAdvanceMs();
+    } else if (m.state === GameState.Reveal) {
       // Per-question override (#6), else the engine default.
       const perQuestion = snapshot?.questions[m.currentIndex]?.revealDelayS;
       delay = perQuestion ? perQuestion * 1000 : defaultAutoAdvanceMs();
@@ -974,9 +975,9 @@ export class GameEngine {
   private async autoAdvance(pin: string, hostUserId: string, step: number | string): Promise<void> {
     const meta = await this.game.getMeta(pin);
     if (!meta || meta.paused) return;
+    if (meta.mode !== 'auto') return;
     const onSlide = meta.state === GameState.SlideShow && step === `s${meta.slideIndex ?? 0}`;
-    const onReveal =
-      meta.mode === 'auto' && meta.state === GameState.Reveal && step === meta.currentIndex;
+    const onReveal = meta.state === GameState.Reveal && step === meta.currentIndex;
     if (!onSlide && !onReveal) return;
     await this.next(pin, hostUserId);
   }

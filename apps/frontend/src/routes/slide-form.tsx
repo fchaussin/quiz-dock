@@ -10,8 +10,9 @@ import { useUnsavedGuard } from '@/lib/use-unsaved-guard';
 import { MarkdownEditor } from '@/components/markdown-editor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import { apiErrorText } from '../api/http';
-import type { SlideLayout } from '@quiz-dock/contracts';
+import type { SlideLayout, SlideTextTone } from '@quiz-dock/contracts';
 import type { QuizDetailDtoSlidesItem } from '../api/generated/model';
 import { SlideStage } from '../game/slide-stage';
 import { MediaUpload } from './media-upload';
@@ -32,6 +33,8 @@ interface FormValues {
   mediaId: string | null;
   displayDelayS: number | null;
   layout: SlideLayout;
+  textTone: SlideTextTone;
+  textOutline: boolean;
 }
 
 function initialValues(s?: QuizDetailDtoSlidesItem): FormValues {
@@ -41,6 +44,8 @@ function initialValues(s?: QuizDetailDtoSlidesItem): FormValues {
     mediaId: s?.mediaId ?? null,
     displayDelayS: s?.displayDelayS ?? null,
     layout: (s?.layout as SlideLayout | undefined) ?? 'auto',
+    textTone: (s?.textTone as SlideTextTone | undefined) ?? 'light',
+    textOutline: s?.textOutline ?? false,
   };
 }
 
@@ -78,6 +83,8 @@ export function SlideForm({
         mediaId: value.mediaId,
         displayDelayS: value.displayDelayS,
         layout: value.layout,
+        textTone: value.textTone,
+        textOutline: value.textOutline,
       };
       try {
         if (slide) {
@@ -167,6 +174,40 @@ export function SlideForm({
           )}
         </form.Field>
       ) : null}
+      {mediaId && values.layout === 'media_full' ? (
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
+            {t('slideForm.contrastLegend')}
+          </legend>
+          <div className="flex flex-wrap items-center gap-4">
+            <form.Field name="textTone">
+              {(field) => (
+                <Select
+                  aria-label={t('slideForm.contrastLegend')}
+                  className="w-64"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value as SlideTextTone)}
+                >
+                  <option value="light">{t('slideForm.tone.light')}</option>
+                  <option value="dark">{t('slideForm.tone.dark')}</option>
+                </Select>
+              )}
+            </form.Field>
+            <form.Field name="textOutline">
+              {(field) => (
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.checked)}
+                  />
+                  {t('slideForm.outline')}
+                </label>
+              )}
+            </form.Field>
+          </div>
+        </fieldset>
+      ) : null}
 
       {/* What the projected screen will show, at slide proportions. */}
       <SlideStage
@@ -179,26 +220,52 @@ export function SlideForm({
           media: mediaId ? { url: `/api/v1/media/${mediaId}`, kind: 'image' } : null,
           displayDelayS: values.displayDelayS,
           layout: values.layout,
+          textTone: values.textTone,
+          textOutline: values.textOutline,
         }}
       />
 
       <form.Field name="displayDelayS">
-        {(field) => (
-          <Label title={t('slideForm.displayDelayHint')}>
-            {t('slideForm.displayDelayLabel')}
-            <Input
-              type="number"
-              min={1}
-              max={600}
-              className="w-28"
-              placeholder={t('slideForm.displayDelayPlaceholder')}
-              value={field.state.value ?? ''}
-              onChange={(e) =>
-                field.handleChange(e.target.value === '' ? null : Number(e.target.value))
-              }
-            />
-          </Label>
-        )}
+        {(field) => {
+          // null = engine default (auto mode), 0 = manual override, N = custom seconds.
+          const v = field.state.value;
+          const mode = v === null ? 'default' : v === 0 ? 'manual' : 'custom';
+          return (
+            <fieldset className="flex flex-col gap-2">
+              <legend className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
+                {t('slideForm.displayLegend')}
+              </legend>
+              <div className="flex flex-wrap items-center gap-2">
+                <Select
+                  aria-label={t('slideForm.displayLegend')}
+                  className="w-56"
+                  value={mode}
+                  onChange={(e) =>
+                    field.handleChange(
+                      e.target.value === 'default' ? null : e.target.value === 'manual' ? 0 : 10,
+                    )
+                  }
+                >
+                  <option value="default">{t('slideForm.display.default')}</option>
+                  <option value="manual">{t('slideForm.display.manual')}</option>
+                  <option value="custom">{t('slideForm.display.custom')}</option>
+                </Select>
+                {mode === 'custom' ? (
+                  <Input
+                    type="number"
+                    aria-label={t('slideForm.displayDelayLabel')}
+                    min={1}
+                    max={600}
+                    className="w-24"
+                    value={v ?? ''}
+                    onChange={(e) => field.handleChange(Math.max(1, Number(e.target.value) || 1))}
+                  />
+                ) : null}
+              </div>
+              <p className="text-muted-foreground text-xs">{t('slideForm.displayHint')}</p>
+            </fieldset>
+          );
+        }}
       </form.Field>
 
       {error && <p className="text-sm text-destructive">{error}</p>}

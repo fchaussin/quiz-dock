@@ -1450,6 +1450,16 @@
                     "media_right",
                     "media_full"
                   ]
+                },
+                "textTone": {
+                  "type": "string",
+                  "enum": [
+                    "light",
+                    "dark"
+                  ]
+                },
+                "textOutline": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -1461,7 +1471,9 @@
                 "body",
                 "mediaId",
                 "displayDelayS",
-                "layout"
+                "layout",
+                "textTone",
+                "textOutline"
               ]
             }
           }
@@ -2436,7 +2448,7 @@
           },
           "displayDelayS": {
             "type": "integer",
-            "minimum": 1,
+            "minimum": 0,
             "maximum": 600,
             "nullable": true
           },
@@ -2449,6 +2461,18 @@
               "media_right",
               "media_full"
             ]
+          },
+          "textTone": {
+            "default": "light",
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "textOutline": {
+            "default": false,
+            "type": "boolean"
           }
         }
       },
@@ -2496,6 +2520,16 @@
               "media_right",
               "media_full"
             ]
+          },
+          "textTone": {
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "textOutline": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -2507,7 +2541,9 @@
           "body",
           "mediaId",
           "displayDelayS",
-          "layout"
+          "layout",
+          "textTone",
+          "textOutline"
         ]
       },
       "ReorderItemsDto": {
@@ -2564,7 +2600,7 @@
           },
           "displayDelayS": {
             "type": "integer",
-            "minimum": 1,
+            "minimum": 0,
             "maximum": 600,
             "nullable": true
           },
@@ -2577,6 +2613,18 @@
               "media_right",
               "media_full"
             ]
+          },
+          "textTone": {
+            "default": "light",
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "textOutline": {
+            "default": false,
+            "type": "boolean"
           }
         }
       },

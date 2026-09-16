@@ -74,6 +74,8 @@ function QuizPreview({ quiz }: { quiz: QuizDetailDto }) {
                   : null,
                 displayDelayS: item.slide.displayDelayS,
                 layout: item.slide.layout,
+                textTone: item.slide.textTone,
+                textOutline: item.slide.textOutline,
               }}
             />
           )}

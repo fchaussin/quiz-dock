@@ -130,4 +130,11 @@
     background: none;
     padding: 0;
   }
+  .tiptap img {
+    max-height: 40vh;
+    border-radius: 0.5rem;
+  }
+  .tiptap img.ProseMirror-selectednode {
+    outline: 2px solid var(--ring);
+  }
 }

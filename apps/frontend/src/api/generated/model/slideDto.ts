@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { SlideDtoLayout } from './slideDtoLayout';
+import type { SlideDtoTextTone } from './slideDtoTextTone';
 
 export interface SlideDto {
   id: string;
@@ -30,4 +31,6 @@ export interface SlideDto {
      */
   displayDelayS: number | null;
   layout: SlideDtoLayout;
+  textTone: SlideDtoTextTone;
+  textOutline: boolean;
 }

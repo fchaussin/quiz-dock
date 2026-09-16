@@ -15,6 +15,8 @@
     "italic": "Italic",
     "code": "Code",
     "codeBlock": "Code block",
+    "image": "Insert an image",
+    "uploading": "Uploading…",
     "bulletList": "Bulleted list",
     "orderedList": "Numbered list"
   }

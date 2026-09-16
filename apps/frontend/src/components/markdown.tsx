@@ -5,8 +5,8 @@ import { cn } from '@/lib/utils';
 /**
  * **Restricted** Markdown rendering for text fields typed in the builder (#4).
  * Two profiles:
- * - `block` (description, prompt, explanation): paragraphs, bold, italic,
- *   lists, inline/block code. No links (content is shown live on a projected
+ * - `block` (description, prompt, explanation, slide body): paragraphs, bold,
+ *   italic, lists, inline/block code, images served by this app. No links (content is shown live on a projected
  *   screen or a phone mid-answer).
  * - `inline` (option label): bold, italic, inline code only — no link (the
  *   label is clickable) and no block element.
@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 export type MarkdownProfile = 'block' | 'inline';
 
 const ALLOWED: Record<MarkdownProfile, string[]> = {
-  block: ['p', 'strong', 'em', 'ul', 'ol', 'li', 'code', 'pre', 'br'],
+  block: ['p', 'strong', 'em', 'ul', 'ol', 'li', 'code', 'pre', 'br', 'img'],
   inline: ['strong', 'em', 'code'],
 };
 
@@ -31,6 +31,11 @@ function dom<T extends { node?: unknown }>(props: T): Omit<T, 'node'> {
 }
 
 const COMPONENTS: Components = {
+  // Only media served by this app: no third-party images (tracking pixels, hotlinking).
+  img: (p) =>
+    typeof p.src === 'string' && p.src.startsWith('/api/v1/media/') ? (
+      <img {...dom(p)} alt={p.alt ?? ''} className="mx-auto max-h-[60vh] rounded-lg" />
+    ) : null,
   ul: (p) => <ul {...dom(p)} className="list-disc pl-6 text-left" />,
   ol: (p) => <ol {...dom(p)} className="list-decimal pl-6 text-left" />,
   code: (p) => <code {...dom(p)} className="rounded bg-black/10 px-1 font-mono text-[0.9em]" />,

@@ -83,9 +83,20 @@
       "media_right": "Imagen a la derecha",
       "media_full": "Imagen a pantalla completa, texto encima"
     },
-    "displayDelayLabel": "Tiempo de visualización (s)",
-    "displayDelayPlaceholder": "manual",
-    "displayDelayHint": "Avanza sola tras este tiempo. Vacío = el presentador hace clic.",
+    "contrastLegend": "Contraste del texto",
+    "tone": {
+      "light": "Texto claro sobre imagen oscurecida",
+      "dark": "Texto oscuro sobre imagen aclarada"
+    },
+    "outline": "Contorno (halo, como subtítulos)",
+    "displayLegend": "Avance (modo automático)",
+    "displayDelayLabel": "Duración (s)",
+    "display": {
+      "default": "Duración por defecto (5 s)",
+      "manual": "Manual: el presentador hace clic",
+      "custom": "Duración personalizada…"
+    },
+    "displayHint": "En modo manual, el presentador siempre avanza a mano.",
     "invalidError": "La diapositiva necesita un título, un contenido o un medio.",
     "submitAdd": "Añadir",
     "submitUpdate": "Guardar"

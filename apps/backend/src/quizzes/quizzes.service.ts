@@ -312,6 +312,8 @@ export class QuizzesService {
           mediaId: s.mediaId,
           displayDelayS: s.displayDelayS,
           layout: s.layout,
+          textTone: s.textTone,
+          textOutline: s.textOutline,
         })),
       });
     }

@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CreateSlideDtoLayout } from './createSlideDtoLayout';
+import type { CreateSlideDtoTextTone } from './createSlideDtoTextTone';
 
 export interface CreateSlideDto {
   /**
@@ -25,10 +26,12 @@ export interface CreateSlideDto {
      */
   mediaId?: string | null;
   /**
-     * @minimum 1
+     * @minimum 0
      * @maximum 600
      * @nullable
      */
   displayDelayS?: number | null;
   layout?: CreateSlideDtoLayout;
+  textTone?: CreateSlideDtoTextTone;
+  textOutline?: boolean;
 }

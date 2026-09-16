@@ -219,6 +219,14 @@ model AcceptedAnswer {
   @@map("accepted_answer")
 }
 
+/// Text tone over a full-cover image: light text on a darkened image, or dark text on a lightened one.
+enum SlideTextTone {
+  light
+  dark
+
+  @@map("slide_text_tone")
+}
+
 /// How a slide composes text and media on screen (#7).
 enum SlideLayout {
   auto
@@ -233,19 +241,22 @@ enum SlideLayout {
 /// no answer, no score. Positioned **before** a question (`before_question_id`),
 /// or at the end of the quiz when null; `order_index` orders slides sharing an anchor.
 model Slide {
-  id               String      @id @default(ulid()) @db.Char(26)
-  quizId           String      @map("quiz_id") @db.Char(26)
-  beforeQuestionId String?     @map("before_question_id") @db.Char(26)
-  orderIndex       Int         @map("order_index")
+  id               String        @id @default(ulid()) @db.Char(26)
+  quizId           String        @map("quiz_id") @db.Char(26)
+  beforeQuestionId String?       @map("before_question_id") @db.Char(26)
+  orderIndex       Int           @map("order_index")
   title            String?
   /// Markdown (block profile).
   body             String?
-  mediaId          String?     @map("media_id") @db.Char(26)
-  /// Seconds before auto-advancing; null = the host clicks.
-  displayDelayS    Int?        @map("display_delay_s")
-  layout           SlideLayout @default(auto)
-  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  mediaId          String?       @map("media_id") @db.Char(26)
+  /// Auto-mode display time in seconds: null = engine default, 0 = the host clicks (manual override).
+  displayDelayS    Int?          @map("display_delay_s")
+  layout           SlideLayout   @default(auto)
+  textTone         SlideTextTone @default(light) @map("text_tone")
+  /// Subtitle-like halo around the text to keep it readable over any image.
+  textOutline      Boolean       @default(false) @map("text_outline")
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   quiz           Quiz        @relation(fields: [quizId], references: [id], onDelete: Cascade)
   beforeQuestion Question?   @relation(fields: [beforeQuestionId], references: [id], onDelete: SetNull)
