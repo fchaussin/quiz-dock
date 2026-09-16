@@ -103,7 +103,7 @@ export const resources = {
     errors: errorsZh,
     validation: validationZh,
   },
-  "zh-TW": {
+  'zh-TW': {
     common: commonZhTW,
     dashboard: dashboardZhTW,
     editor: editorZhTW,
