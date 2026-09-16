@@ -109,13 +109,11 @@ export class SlidesService {
 
   private contentData(dto: SlideContent) {
     return {
-      title: dto.title || null,
-      body: dto.body || null,
+      blocks: dto.blocks,
       mediaId: dto.mediaId || null,
-      displayDelayS: dto.displayDelayS ?? null,
-      layout: dto.layout,
       textTone: dto.textTone,
       textOutline: dto.textOutline,
+      displayDelayS: dto.displayDelayS ?? null,
     };
   }
 

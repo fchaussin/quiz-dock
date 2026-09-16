@@ -151,10 +151,31 @@ export interface QuestionStartPayload {
   endsAt: number;
 }
 
-/** How a slide composes its text and media (#7); `auto` = media above the text. */
-export type SlideLayout = 'auto' | 'media_left' | 'media_right' | 'media_full';
-/** Text over a full-cover image: light text on a darkened image, or dark text on a lightened one. */
+/** Text over a full-cover background: light text on a darkened image, or dark text on a lightened one. */
 export type SlideTextTone = 'light' | 'dark';
+
+/** Width of an image block on the slide surface. */
+export type SlideImageSize = 'small' | 'medium' | 'large' | 'full';
+
+/**
+ * Slide content (#7) is a composition of blocks, top to bottom; `columns` lays
+ * leaf blocks side by side. `id` is a stable client key (reorder, edit).
+ */
+export type SlideLeafBlock =
+  | { type: 'heading'; id: string; text: string; level: 1 | 2 }
+  | { type: 'text'; id: string; md: string }
+  | {
+      type: 'image';
+      id: string;
+      /** Media id when stored/edited; the live payload also carries the resolved `url`. */
+      mediaId: string;
+      url?: string;
+      size: SlideImageSize;
+      align: 'left' | 'center' | 'right';
+    };
+export type SlideBlock =
+  | SlideLeafBlock
+  | { type: 'columns'; id: string; columns: SlideLeafBlock[][] };
 
 /**
  * A content slide on screen (#7). `questionIndex` is the question that follows
@@ -164,16 +185,14 @@ export type SlideTextTone = 'light' | 'dark';
 export interface SlideShowPayload {
   slideIndex: number;
   questionIndex: number;
-  title: string | null;
-  /** Markdown, block profile. */
-  body: string | null;
-  media?: { url: string; kind: 'image' | 'audio' } | null;
+  blocks: SlideBlock[];
+  /** Optional full-cover background image. */
+  background: { url: string } | null;
+  textTone: SlideTextTone;
+  /** Subtitle-like halo around the text (contrast over any background). */
+  textOutline: boolean;
   /** Auto-mode display time: null = engine default, 0 = the host clicks, else seconds. */
   displayDelayS: number | null;
-  layout: SlideLayout;
-  textTone: SlideTextTone;
-  /** Subtitle-like halo around the text (contrast over any image). */
-  textOutline: boolean;
 }
 
 export interface GameStatePayload {

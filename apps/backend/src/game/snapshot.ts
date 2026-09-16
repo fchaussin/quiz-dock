@@ -9,7 +9,12 @@ import type {
 } from '@quiz-dock/contracts';
 import { basePointsFor } from './scoring';
 import type { QuizSnapshot, SnapshotQuestion, SnapshotSlide } from './game.types';
-import type { SlideLayout, SlideShowPayload, SlideTextTone } from '@quiz-dock/contracts';
+import type {
+  SlideBlock,
+  SlideLeafBlock,
+  SlideShowPayload,
+  SlideTextTone,
+} from '@quiz-dock/contracts';
 
 /** Forme Prisma attendue par le constructeur de snapshot (relations incluses). */
 const quizWithContent = Prisma.validator<Prisma.QuizDefaultArgs>()({
@@ -89,14 +94,21 @@ function buildSnapshotSlides(quiz: QuizWithContent): SnapshotSlide[] {
     .map(({ slide, anchor }) => ({
       id: slide.id,
       beforeQuestionIndex: anchor,
-      title: slide.title,
-      body: slide.body,
-      media: mediaOf(slide.media),
-      displayDelayS: slide.displayDelayS,
-      layout: slide.layout as SlideLayout,
+      blocks: resolveBlocks(slide.blocks as SlideBlock[]),
+      background: slide.media ? { url: slide.media.url } : null,
       textTone: slide.textTone as SlideTextTone,
       textOutline: slide.textOutline,
+      displayDelayS: slide.displayDelayS,
     }));
+}
+
+/** Image blocks get their served URL so the clients never build one from an id. */
+function resolveBlocks(blocks: SlideBlock[]): SlideBlock[] {
+  const leaf = (b: SlideLeafBlock): SlideLeafBlock =>
+    b.type === 'image' ? { ...b, url: `/api/v1/media/${b.mediaId}` } : b;
+  return blocks.map((b) =>
+    b.type === 'columns' ? { ...b, columns: b.columns.map((c) => c.map(leaf)) } : leaf(b),
+  );
 }
 
 /** Public `slide:show` payload (#7): everything in a slide is meant to be shown. */
@@ -104,13 +116,11 @@ export function buildSlideShow(slide: SnapshotSlide, slideIndex: number): SlideS
   return {
     slideIndex,
     questionIndex: slide.beforeQuestionIndex,
-    title: slide.title,
-    body: slide.body,
-    media: slide.media,
-    displayDelayS: slide.displayDelayS,
-    layout: slide.layout,
+    blocks: slide.blocks,
+    background: slide.background,
     textTone: slide.textTone,
     textOutline: slide.textOutline,
+    displayDelayS: slide.displayDelayS,
   };
 }
 

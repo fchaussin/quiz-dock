@@ -1,3 +1,4 @@
+import type { SlideBlock } from '@quiz-dock/contracts';
 import { ChevronLeft, ChevronRight, Maximize, Minimize } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -67,15 +68,13 @@ function QuizPreview({ quiz }: { quiz: QuizDetailDto }) {
               slide={{
                 slideIndex: index,
                 questionIndex: 0,
-                title: item.slide.title,
-                body: item.slide.body,
-                media: item.slide.mediaId
-                  ? { url: `/api/v1/media/${item.slide.mediaId}`, kind: 'image' }
+                blocks: item.slide.blocks as SlideBlock[],
+                background: item.slide.mediaId
+                  ? { url: `/api/v1/media/${item.slide.mediaId}` }
                   : null,
-                displayDelayS: item.slide.displayDelayS,
-                layout: item.slide.layout,
                 textTone: item.slide.textTone,
                 textOutline: item.slide.textOutline,
+                displayDelayS: item.slide.displayDelayS,
               }}
             />
           )}

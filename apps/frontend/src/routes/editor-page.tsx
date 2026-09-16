@@ -49,7 +49,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { createSession } from '../game/game-client';
 import type { QuizDetailDto } from '../api/generated/model';
-import { quizItems, moveItem, type QuizItem } from '@/lib/quiz-items';
+import { quizItems, moveItem, slideLabel, type QuizItem } from '@/lib/quiz-items';
 import { useMediaQuery } from '@/lib/use-media-query';
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard';
 import { Drawer } from '@/components/ui/drawer';
@@ -753,7 +753,7 @@ function ItemRow({
 }) {
   const { t } = useTranslation('editor');
   const isSlide = item.kind === 'slide';
-  const label = isSlide ? item.slide.title || item.slide.body || '' : item.question.prompt;
+  const label = isSlide ? slideLabel(item.slide) : item.question.prompt;
   const meta = isSlide
     ? t('slides.kind')
     : `${t(`questionType.${item.question.type}`, { defaultValue: item.question.type })} · ${item.question.timeLimitS} s`;

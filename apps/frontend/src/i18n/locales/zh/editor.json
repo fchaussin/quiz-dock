@@ -72,19 +72,12 @@
     "deleteSlide": "删除幻灯片"
   },
   "slideForm": {
-    "titleLabel": "标题",
-    "titlePlaceholder": "幻灯片标题（可选）",
-    "bodyLabel": "内容",
     "bodyPlaceholder": "要显示的文字…",
-    "layoutLegend": "版式",
-    "layout": {
-      "auto": "图片在文字上方",
-      "media_left": "图片在左",
-      "media_right": "图片在右",
-      "media_full": "全屏图片，文字覆盖"
-    },
     "contrastLegend": "文字对比度",
-    "tone": { "light": "浅色文字，图片压暗", "dark": "深色文字，图片提亮" },
+    "tone": {
+      "light": "浅色文字，图片压暗",
+      "dark": "深色文字，图片提亮"
+    },
     "outline": "描边（光晕，如字幕）",
     "displayLegend": "自动切换（自动模式）",
     "displayDelayLabel": "时长（秒）",
@@ -96,7 +89,34 @@
     "displayHint": "手动模式下，始终由主持人手动进入下一步。",
     "invalidError": "幻灯片需要标题、内容或媒体。",
     "submitAdd": "添加",
-    "submitUpdate": "保存"
+    "submitUpdate": "保存",
+    "blocksLegend": "内容",
+    "backgroundLegend": "背景",
+    "block": {
+      "heading": "标题",
+      "subheading": "副标题",
+      "text": "文字",
+      "image": "图片",
+      "columns2": "两栏",
+      "columns3": "三栏"
+    },
+    "dragBlock": "拖动以排序区块",
+    "removeBlock": "移除区块",
+    "headingLevel": "级别",
+    "headingPlaceholder": "标题…",
+    "imageSize": "大小",
+    "imageAlign": "对齐",
+    "size": {
+      "small": "小",
+      "medium": "中",
+      "large": "大",
+      "full": "全宽"
+    },
+    "align": {
+      "left": "左",
+      "center": "居中",
+      "right": "右"
+    }
   },
   "discardConfirm": {
     "title": "放弃修改？",

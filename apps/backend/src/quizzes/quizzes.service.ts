@@ -307,11 +307,9 @@ export class QuizzesService {
               ? null
               : (newIdByIndex.get(srcIndexById.get(s.beforeQuestionId) ?? -1) ?? null),
           orderIndex: s.orderIndex,
-          title: s.title,
-          body: s.body,
+          blocks: s.blocks as Prisma.InputJsonValue,
           mediaId: s.mediaId,
           displayDelayS: s.displayDelayS,
-          layout: s.layout,
           textTone: s.textTone,
           textOutline: s.textOutline,
         })),

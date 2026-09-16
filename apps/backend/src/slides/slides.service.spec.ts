@@ -32,12 +32,10 @@ describe('SlidesService', () => {
   });
 
   describe('add', () => {
-    it('appends after the last end-anchored slide, with empty fields as null', async () => {
+    it('appends after the last end-anchored slide, with the blocks and no background', async () => {
       prisma.slide.aggregate.mockResolvedValue({ _max: { orderIndex: 1 } });
       await service.add(OWNER, 'quiz-1', {
-        title: 'Intro',
-        body: '',
-        layout: 'auto',
+        blocks: [{ type: 'heading', id: 'h', text: 'Intro', level: 1 }],
         textTone: 'light',
         textOutline: false,
       });
@@ -46,8 +44,7 @@ describe('SlidesService', () => {
         quizId: 'quiz-1',
         beforeQuestionId: null,
         orderIndex: 2,
-        title: 'Intro',
-        body: null,
+        blocks: [{ type: 'heading', id: 'h', text: 'Intro', level: 1 }],
         mediaId: null,
         displayDelayS: null,
       });
@@ -57,8 +54,7 @@ describe('SlidesService', () => {
       prisma.quiz.findFirst.mockResolvedValue(null);
       await expect(
         service.add(OWNER, 'quiz-x', {
-          title: 'x',
-          layout: 'auto',
+          blocks: [{ type: 'heading', id: 'h', text: 'x', level: 1 }],
           textTone: 'light',
           textOutline: false,
         }),

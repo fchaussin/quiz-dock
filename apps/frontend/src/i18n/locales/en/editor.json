@@ -72,19 +72,12 @@
     "deleteSlide": "Delete the slide"
   },
   "slideForm": {
-    "titleLabel": "Title",
-    "titlePlaceholder": "Slide title (optional)",
-    "bodyLabel": "Content",
     "bodyPlaceholder": "Text to display…",
-    "layoutLegend": "Layout",
-    "layout": {
-      "auto": "Image above the text",
-      "media_left": "Image on the left",
-      "media_right": "Image on the right",
-      "media_full": "Full-screen image, text on top"
-    },
     "contrastLegend": "Text contrast",
-    "tone": { "light": "Light text on a darkened image", "dark": "Dark text on a lightened image" },
+    "tone": {
+      "light": "Light text on a darkened image",
+      "dark": "Dark text on a lightened image"
+    },
     "outline": "Outline (halo, like subtitles)",
     "displayLegend": "Auto-advance (automatic mode)",
     "displayDelayLabel": "Duration (s)",
@@ -96,7 +89,34 @@
     "displayHint": "In manual mode the host always moves on by hand.",
     "invalidError": "A slide needs a title, some content or a media.",
     "submitAdd": "Add",
-    "submitUpdate": "Save"
+    "submitUpdate": "Save",
+    "blocksLegend": "Content",
+    "backgroundLegend": "Background",
+    "block": {
+      "heading": "Heading",
+      "subheading": "Subheading",
+      "text": "Text",
+      "image": "Image",
+      "columns2": "2 columns",
+      "columns3": "3 columns"
+    },
+    "dragBlock": "Drag to reorder the block",
+    "removeBlock": "Remove the block",
+    "headingLevel": "Level",
+    "headingPlaceholder": "Heading…",
+    "imageSize": "Size",
+    "imageAlign": "Alignment",
+    "size": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "full": "Full width"
+    },
+    "align": {
+      "left": "Left",
+      "center": "Centre",
+      "right": "Right"
+    }
   },
   "discardConfirm": {
     "title": "Discard changes?",

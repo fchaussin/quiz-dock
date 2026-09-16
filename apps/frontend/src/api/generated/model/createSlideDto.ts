@@ -5,33 +5,24 @@
  * API REST du builder de quiz et des restitutions
  * OpenAPI spec version: 0.1.0
  */
-import type { CreateSlideDtoLayout } from './createSlideDtoLayout';
+import type { CreateSlideDtoBlocksItem } from './createSlideDtoBlocksItem';
 import type { CreateSlideDtoTextTone } from './createSlideDtoTextTone';
 
 export interface CreateSlideDto {
-  /**
-     * @maxLength 200
-     * @nullable
-     */
-  title?: string | null;
-  /**
-     * @maxLength 5000
-     * @nullable
-     */
-  body?: string | null;
+  /** @maxItems 30 */
+  blocks?: CreateSlideDtoBlocksItem[];
   /**
      * @minLength 26
      * @maxLength 26
      * @nullable
      */
   mediaId?: string | null;
+  textTone?: CreateSlideDtoTextTone;
+  textOutline?: boolean;
   /**
      * @minimum 0
      * @maximum 600
      * @nullable
      */
   displayDelayS?: number | null;
-  layout?: CreateSlideDtoLayout;
-  textTone?: CreateSlideDtoTextTone;
-  textOutline?: boolean;
 }

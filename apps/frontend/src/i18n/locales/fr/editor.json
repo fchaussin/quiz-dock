@@ -72,17 +72,7 @@
     "deleteSlide": "Supprimer la slide"
   },
   "slideForm": {
-    "titleLabel": "Titre",
-    "titlePlaceholder": "Titre de la slide (facultatif)",
-    "bodyLabel": "Contenu",
     "bodyPlaceholder": "Texte à afficher…",
-    "layoutLegend": "Mise en page",
-    "layout": {
-      "auto": "Image au-dessus du texte",
-      "media_left": "Image à gauche",
-      "media_right": "Image à droite",
-      "media_full": "Image plein écran, texte par-dessus"
-    },
     "contrastLegend": "Contraste du texte",
     "tone": {
       "light": "Texte clair sur image assombrie",
@@ -99,7 +89,34 @@
     "displayHint": "En mode manuel, l’animateur passe toujours à la suite lui-même.",
     "invalidError": "La slide doit avoir un titre, un contenu ou un média.",
     "submitAdd": "Ajouter",
-    "submitUpdate": "Enregistrer"
+    "submitUpdate": "Enregistrer",
+    "blocksLegend": "Contenu",
+    "backgroundLegend": "Fond",
+    "block": {
+      "heading": "Titre",
+      "subheading": "Sous-titre",
+      "text": "Texte",
+      "image": "Image",
+      "columns2": "2 colonnes",
+      "columns3": "3 colonnes"
+    },
+    "dragBlock": "Glisser pour réordonner le bloc",
+    "removeBlock": "Retirer le bloc",
+    "headingLevel": "Niveau",
+    "headingPlaceholder": "Titre…",
+    "imageSize": "Taille",
+    "imageAlign": "Alignement",
+    "size": {
+      "small": "Petite",
+      "medium": "Moyenne",
+      "large": "Grande",
+      "full": "Pleine largeur"
+    },
+    "align": {
+      "left": "Gauche",
+      "center": "Centre",
+      "right": "Droite"
+    }
   },
   "discardConfirm": {
     "title": "Abandonner les modifications ?",

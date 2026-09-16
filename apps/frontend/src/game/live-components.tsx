@@ -3,6 +3,8 @@ import type {
   PublicOption,
   QuestionRevealPayload,
   QuestionStartPayload,
+  SlideImageSize,
+  SlideLeafBlock,
   SlideShowPayload,
 } from '@quiz-dock/contracts';
 import { useTranslation } from 'react-i18next';
@@ -190,106 +192,96 @@ export function AnswerExplanation({
 }
 
 /**
- * A content slide (#7). It owns its whole surface — no max-width: the
- * projected screen is a slide, not a document. `layout` composes text and
- * media: `auto` = media above the text, `media_left` / `media_right` = two
- * columns, `media_full` = the image fills the surface, text overlaid.
+ * A content slide (#7): a composition of blocks on the whole surface — no
+ * max-width, the projected screen is a slide, not a document. Optional
+ * full-cover background with light/dark text and a subtitle-like outline.
  */
 export function SlideView({ slide, large }: { slide: SlideShowPayload; large?: boolean }) {
-  const image = slide.media?.kind === 'image' ? slide.media.url : null;
-  const audio = slide.media?.kind === 'audio' ? slide.media.url : null;
-  const layout = image ? slide.layout : 'auto';
-
-  const text = (
-    <div
-      className={cn(
-        'flex min-w-0 flex-col justify-center gap-4',
-        // Text stands alone or over a full image → centred; next to an image → aligned to it.
-        layout === 'media_full' || !image ? 'items-center text-center' : 'items-start text-left',
-      )}
-    >
-      {slide.title ? (
-        <h1
-          className={cn(
-            'font-bold text-balance',
-            large ? 'text-5xl leading-tight md:text-6xl' : 'text-2xl',
-          )}
-        >
-          {slide.title}
-        </h1>
-      ) : null}
-      {audio ? <audio controls src={audio} className="w-full max-w-md" /> : null}
-      {slide.body ? (
-        <Markdown
-          className={cn('w-full', large ? 'text-2xl leading-relaxed md:text-3xl' : 'text-base')}
-        >
-          {slide.body}
-        </Markdown>
-      ) : null}
-    </div>
-  );
-
-  if (layout === 'media_full' && image) {
-    // Light text over a darkened image, or dark text over a lightened one; the optional
-    // outline is a subtitle-like halo so the text reads over any picture.
-    const light = slide.textTone !== 'dark';
-    return (
-      <article className="relative flex h-full min-h-[60vh] w-full items-center justify-center overflow-hidden">
-        <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className={cn('absolute inset-0', light ? 'bg-black/40' : 'bg-white/55')} />
-        <div
-          className={cn(
-            'relative z-10',
-            light ? 'text-white' : 'text-neutral-900',
-            slide.textOutline &&
-              (light
-                ? '[text-shadow:0_0_2px_rgba(0,0,0,.95),0_0_8px_rgba(0,0,0,.9),0_2px_2px_rgba(0,0,0,.9)]'
-                : '[text-shadow:0_0_2px_rgba(255,255,255,.95),0_0_8px_rgba(255,255,255,.9),0_2px_2px_rgba(255,255,255,.9)]'),
-            large ? 'max-w-5xl p-12' : 'p-6',
-          )}
-        >
-          {text}
-        </div>
-      </article>
-    );
-  }
-  if ((layout === 'media_left' || layout === 'media_right') && image) {
-    const media = (
-      <img
-        src={image}
-        alt=""
-        className={cn('h-full w-full object-contain', large ? 'max-h-[80vh]' : 'max-h-72')}
-      />
-    );
-    return (
-      <article
-        className={cn(
-          'grid h-full w-full items-center',
-          large ? 'grid-cols-2 gap-12 p-12' : 'grid-cols-1 gap-4 sm:grid-cols-2',
-        )}
-      >
-        {layout === 'media_left' ? media : text}
-        {layout === 'media_left' ? text : media}
-      </article>
-    );
-  }
+  const bg = slide.background?.url ?? null;
+  const light = slide.textTone !== 'dark';
+  const outline = bg && slide.textOutline;
   return (
     <article
       className={cn(
-        'flex h-full w-full flex-col items-center justify-center',
-        large ? 'gap-8 p-12' : 'gap-4',
+        'relative flex h-full min-h-full w-full flex-col justify-center overflow-hidden',
+        large ? 'gap-8 p-12' : 'gap-4 p-4',
+        bg && (light ? 'text-white' : 'text-neutral-900'),
+        outline &&
+          (light
+            ? '[text-shadow:0_0_2px_rgba(0,0,0,.95),0_0_8px_rgba(0,0,0,.9),0_2px_2px_rgba(0,0,0,.9)]'
+            : '[text-shadow:0_0_2px_rgba(255,255,255,.95),0_0_8px_rgba(255,255,255,.9),0_2px_2px_rgba(255,255,255,.9)]'),
       )}
     >
-      {image ? (
-        <img
-          src={image}
-          alt=""
-          className={cn('w-full object-contain', large ? 'max-h-[55vh]' : 'max-h-72')}
-        />
+      {bg ? (
+        <>
+          <img src={bg} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <div className={cn('absolute inset-0', light ? 'bg-black/40' : 'bg-white/55')} />
+        </>
       ) : null}
-      <div className={cn('w-full', large ? 'max-w-6xl' : '')}>{text}</div>
+      <div className={cn('relative z-10 flex w-full flex-col', large ? 'gap-8' : 'gap-4')}>
+        {slide.blocks.map((b) =>
+          b.type === 'columns' ? (
+            <div
+              key={b.id}
+              className={cn('grid items-start', large ? 'gap-12' : 'gap-4')}
+              style={{ gridTemplateColumns: `repeat(${b.columns.length}, minmax(0, 1fr))` }}
+            >
+              {b.columns.map((col, i) => (
+                <div key={i} className={cn('flex min-w-0 flex-col', large ? 'gap-6' : 'gap-3')}>
+                  {col.map((leaf) => (
+                    <SlideBlockView key={leaf.id} block={leaf} large={large} />
+                  ))}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <SlideBlockView key={b.id} block={b} large={large} />
+          ),
+        )}
+      </div>
     </article>
   );
+}
+
+const IMAGE_WIDTH: Record<SlideImageSize, string> = {
+  small: 'w-1/3',
+  medium: 'w-1/2',
+  large: 'w-3/4',
+  full: 'w-full',
+};
+
+function SlideBlockView({ block, large }: { block: SlideLeafBlock; large?: boolean }) {
+  switch (block.type) {
+    case 'heading':
+      return block.level === 1 ? (
+        <h1 className={cn('font-bold text-balance', large ? 'text-6xl leading-tight' : 'text-2xl')}>
+          {block.text}
+        </h1>
+      ) : (
+        <h2 className={cn('font-semibold text-balance', large ? 'text-4xl' : 'text-xl')}>
+          {block.text}
+        </h2>
+      );
+    case 'text':
+      return (
+        <Markdown className={cn('w-full', large ? 'text-3xl leading-relaxed' : 'text-base')}>
+          {block.md}
+        </Markdown>
+      );
+    case 'image':
+      return (
+        <img
+          src={block.url ?? `/api/v1/media/${block.mediaId}`}
+          alt=""
+          className={cn(
+            'rounded-lg object-contain',
+            IMAGE_WIDTH[block.size],
+            block.align === 'center' ? 'mx-auto' : block.align === 'right' ? 'ml-auto' : 'mr-auto',
+            large ? 'max-h-[70vh]' : 'max-h-72',
+          )}
+        />
+      );
+  }
 }
 
 /**

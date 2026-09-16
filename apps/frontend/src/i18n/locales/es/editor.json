@@ -72,17 +72,7 @@
     "deleteSlide": "Eliminar la diapositiva"
   },
   "slideForm": {
-    "titleLabel": "Título",
-    "titlePlaceholder": "Título de la diapositiva (opcional)",
-    "bodyLabel": "Contenido",
     "bodyPlaceholder": "Texto a mostrar…",
-    "layoutLegend": "Disposición",
-    "layout": {
-      "auto": "Imagen encima del texto",
-      "media_left": "Imagen a la izquierda",
-      "media_right": "Imagen a la derecha",
-      "media_full": "Imagen a pantalla completa, texto encima"
-    },
     "contrastLegend": "Contraste del texto",
     "tone": {
       "light": "Texto claro sobre imagen oscurecida",
@@ -99,7 +89,34 @@
     "displayHint": "En modo manual, el presentador siempre avanza a mano.",
     "invalidError": "La diapositiva necesita un título, un contenido o un medio.",
     "submitAdd": "Añadir",
-    "submitUpdate": "Guardar"
+    "submitUpdate": "Guardar",
+    "blocksLegend": "Contenido",
+    "backgroundLegend": "Fondo",
+    "block": {
+      "heading": "Título",
+      "subheading": "Subtítulo",
+      "text": "Texto",
+      "image": "Imagen",
+      "columns2": "2 columnas",
+      "columns3": "3 columnas"
+    },
+    "dragBlock": "Arrastrar para reordenar el bloque",
+    "removeBlock": "Quitar el bloque",
+    "headingLevel": "Nivel",
+    "headingPlaceholder": "Título…",
+    "imageSize": "Tamaño",
+    "imageAlign": "Alineación",
+    "size": {
+      "small": "Pequeña",
+      "medium": "Mediana",
+      "large": "Grande",
+      "full": "Ancho completo"
+    },
+    "align": {
+      "left": "Izquierda",
+      "center": "Centro",
+      "right": "Derecha"
+    }
   },
   "discardConfirm": {
     "title": "¿Descartar los cambios?",

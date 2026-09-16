@@ -5,7 +5,7 @@
  * API REST du builder de quiz et des restitutions
  * OpenAPI spec version: 0.1.0
  */
-import type { SlideDtoLayout } from './slideDtoLayout';
+import type { SlideDtoBlocksItem } from './slideDtoBlocksItem';
 import type { SlideDtoTextTone } from './slideDtoTextTone';
 
 export interface SlideDto {
@@ -18,19 +18,15 @@ export interface SlideDto {
      * @maximum 9007199254740991
      */
   orderIndex: number;
-  /** @nullable */
-  title: string | null;
-  /** @nullable */
-  body: string | null;
+  blocks: SlideDtoBlocksItem[];
   /** @nullable */
   mediaId: string | null;
+  textTone: SlideDtoTextTone;
+  textOutline: boolean;
   /**
      * @minimum -9007199254740991
      * @maximum 9007199254740991
      * @nullable
      */
   displayDelayS: number | null;
-  layout: SlideDtoLayout;
-  textTone: SlideDtoTextTone;
-  textOutline: boolean;
 }
