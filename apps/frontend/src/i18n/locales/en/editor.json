@@ -72,7 +72,6 @@
     "add": "Add a slide",
     "kind": "Slide",
     "deleteSlide": "Delete the slide",
-    "durationDefault": "5 s (default)",
     "durationManual": "manual"
   },
   "slideForm": {

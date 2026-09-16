@@ -787,6 +787,9 @@ function GameAccessPanel({ pin }: { pin: string }) {
   );
 }
 
+/** Engine default for a slide's auto-mode display time (GAME_AUTO_ADVANCE_MS). */
+const DEFAULT_SLIDE_SECONDS = 5;
+
 /** 1-based number of a question among questions only (slides are not numbered). */
 function questionNumber(items: QuizItem[], index: number): number | null {
   if (items[index].kind !== 'question') return null;
@@ -857,15 +860,12 @@ function ItemRow({
   const { t } = useTranslation('editor');
   const isSlide = item.kind === 'slide';
   const label = isSlide ? slideLabel(item.slide) : item.question.prompt;
-  // Same shape for both kinds: "<kind> · <duration>". A slide's duration is its auto-mode
-  // display time: default (5 s), manual (the host clicks) or a custom value.
+  // Same shape for both kinds: "<kind> · <effective duration>".
   const meta = isSlide
     ? `${t('slides.kind')} · ${
-        item.slide.displayDelayS === null
-          ? t('slides.durationDefault')
-          : item.slide.displayDelayS === 0
-            ? t('slides.durationManual')
-            : `${item.slide.displayDelayS} s`
+        item.slide.displayDelayS === 0
+          ? t('slides.durationManual')
+          : `${item.slide.displayDelayS ?? DEFAULT_SLIDE_SECONDS} s`
       }`
     : `${t(`questionType.${item.question.type}`, { defaultValue: item.question.type })} · ${item.question.timeLimitS} s`;
   const hover =
