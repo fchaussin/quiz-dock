@@ -7,6 +7,7 @@ import {
   ExternalLink,
   Eye,
   History,
+  LayoutTemplate,
   MonitorPlay,
   Pencil,
   Play,
@@ -30,7 +31,13 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { createSession } from '../game/game-client';
 import type { QuizDetailDto } from '../api/generated/model';
+import { quizItems, moveItem, type QuizItem } from '@/lib/quiz-items';
 import { QuestionForm } from './question-form';
+import { SlideForm } from './slide-form';
+import {
+  useSlidesControllerRemove,
+  useSlidesControllerReorderItems,
+} from '../api/generated/slides/slides';
 import {
   getQuizzesControllerGetQueryKey,
   getQuizzesControllerListQueryKey,
@@ -40,10 +47,7 @@ import {
   useQuizzesControllerTransition,
   useQuizzesControllerUpdate,
 } from '../api/generated/quizzes/quizzes';
-import {
-  useQuestionsControllerRemove,
-  useQuestionsControllerReorder,
-} from '../api/generated/questions/questions';
+import { useQuestionsControllerRemove } from '../api/generated/questions/questions';
 import { editorRoute } from '../router';
 
 export function EditorPage() {
@@ -64,8 +68,9 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
   const transition = useQuizzesControllerTransition();
   const removeQuiz = useQuizzesControllerRemove();
   const removeQuestion = useQuestionsControllerRemove();
-  const reorder = useQuestionsControllerReorder();
-  const [editing, setEditing] = useState<string | 'new' | null>(null);
+  const removeSlide = useSlidesControllerRemove();
+  const reorder = useSlidesControllerReorderItems();
+  const [editing, setEditing] = useState<string | 'new' | 'new-slide' | null>(null);
   const [livePin, setLivePin] = useState<string | null>(null);
   const [presenting, setPresenting] = useState(false);
   const [presentError, setPresentError] = useState<string | null>(null);
@@ -132,14 +137,19 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
     await invalidate();
   };
 
-  const moveQuestion = async (index: number, direction: -1 | 1) => {
-    const next = [...quiz.questions];
-    const target = index + direction;
-    if (target < 0 || target >= next.length) return;
-    [next[index], next[target]] = [next[target], next[index]];
+  const onDeleteSlide = async (sid: string) => {
+    await removeSlide.mutateAsync({ sid });
+    await invalidate();
+  };
+
+  // Questions and slides share one sequence (#7): the server re-anchors slides from it.
+  const items = quizItems(quiz);
+  const move = async (index: number, direction: -1 | 1) => {
+    const next = moveItem(items, index, direction);
+    if (next === items) return;
     await reorder.mutateAsync({
       id: quiz.id,
-      data: { items: next.map((q, idx) => ({ questionId: q.id, orderIndex: idx })) },
+      data: { items: next.map((it) => ({ kind: it.kind, id: it.id })) },
     });
     await invalidate();
   };
@@ -317,85 +327,71 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
         <Card className="order-2 min-w-0 sm:col-span-2 lg:col-span-2 lg:col-start-2 lg:row-span-3 lg:row-start-1">
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
             <CardTitle>{t('questions.title', { count: quiz.questionCount })}</CardTitle>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => setEditing('new')}
-              disabled={editing === 'new'}
-            >
-              <Plus className="size-4" />
-              {t('questions.add')}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setEditing('new-slide')}
+                disabled={editing === 'new-slide'}
+              >
+                <LayoutTemplate className="size-4" />
+                {t('slides.add')}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setEditing('new')}
+                disabled={editing === 'new'}
+              >
+                <Plus className="size-4" />
+                {t('questions.add')}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             {editing === 'new' && (
               <QuestionForm quizId={quiz.id} onClose={() => setEditing(null)} />
             )}
+            {editing === 'new-slide' && (
+              <SlideForm quizId={quiz.id} onClose={() => setEditing(null)} />
+            )}
 
             <ul className="flex flex-col gap-2">
-              {quiz.questions.map((q, i) =>
-                editing === q.id ? (
-                  <li key={q.id}>
-                    <QuestionForm quizId={quiz.id} question={q} onClose={() => setEditing(null)} />
-                  </li>
-                ) : (
-                  <li
-                    key={q.id}
-                    className="bg-card flex flex-wrap items-center gap-2 rounded-lg border p-3 transition-colors hover:bg-accent/40 sm:flex-nowrap sm:gap-3"
-                  >
-                    <span className="bg-muted text-muted-foreground flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-bold">
-                      {i + 1}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <Markdown profile="inline" className="block truncate font-medium">
-                        {q.prompt}
-                      </Markdown>
-                      <p className="text-muted-foreground text-xs">
-                        {t(`questionType.${q.type}`, { defaultValue: q.type })}
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label={t('questions.moveUp')}
-                      disabled={i === 0 || reorder.isPending}
-                      onClick={() => void moveQuestion(i, -1)}
-                    >
-                      <ArrowUp className="size-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label={t('questions.moveDown')}
-                      disabled={i === quiz.questions.length - 1 || reorder.isPending}
-                      onClick={() => void moveQuestion(i, 1)}
-                    >
-                      <ArrowDown className="size-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditing(q.id)}
-                    >
-                      <Pencil className="size-4" />
-                      {t('questions.edit')}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      aria-label={t('questions.deleteQuestion')}
-                      onClick={() => void onDeleteQuestion(q.id)}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </li>
-                ),
-              )}
-              {quiz.questions.length === 0 && editing !== 'new' && (
+              {items.map((item, i) => (
+                <li key={item.id}>
+                  {editing === item.id ? (
+                    item.kind === 'question' ? (
+                      <QuestionForm
+                        quizId={quiz.id}
+                        question={item.question}
+                        onClose={() => setEditing(null)}
+                      />
+                    ) : (
+                      <SlideForm
+                        quizId={quiz.id}
+                        slide={item.slide}
+                        onClose={() => setEditing(null)}
+                      />
+                    )
+                  ) : (
+                    <ItemRow
+                      item={item}
+                      number={questionNumber(items, i)}
+                      canMoveUp={i > 0 && !reorder.isPending}
+                      canMoveDown={i < items.length - 1 && !reorder.isPending}
+                      onMove={(d) => void move(i, d)}
+                      onEdit={() => setEditing(item.id)}
+                      onDelete={() =>
+                        void (item.kind === 'question'
+                          ? onDeleteQuestion(item.id)
+                          : onDeleteSlide(item.id))
+                      }
+                    />
+                  )}
+                </li>
+              ))}
+              {items.length === 0 && editing === null && (
                 <li className="text-muted-foreground py-4 text-center text-sm">
                   {t('questions.empty')}
                 </li>
@@ -526,6 +522,93 @@ function GameAccessPanel({ pin }: { pin: string }) {
           {t('gameAccess.invitationScreen')}
         </Button>
       </div>
+    </div>
+  );
+}
+
+/** 1-based number of a question among questions only (slides are not numbered). */
+function questionNumber(items: QuizItem[], index: number): number | null {
+  if (items[index].kind !== 'question') return null;
+  return items.slice(0, index + 1).filter((it) => it.kind === 'question').length;
+}
+
+/** One row of the quiz sequence: a question (numbered) or a content slide (#7). */
+function ItemRow({
+  item,
+  number,
+  canMoveUp,
+  canMoveDown,
+  onMove,
+  onEdit,
+  onDelete,
+}: {
+  item: QuizItem;
+  number: number | null;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMove: (direction: -1 | 1) => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const { t } = useTranslation('editor');
+  const isSlide = item.kind === 'slide';
+  const label = isSlide ? item.slide.title || item.slide.body || '' : item.question.prompt;
+  return (
+    <div
+      className={cn(
+        'bg-card flex flex-wrap items-center gap-2 rounded-lg border p-3 transition-colors hover:bg-accent/40 sm:flex-nowrap sm:gap-3',
+        isSlide && 'border-dashed',
+      )}
+    >
+      <span
+        className="bg-muted text-muted-foreground flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+        aria-label={isSlide ? t('slides.kind') : undefined}
+      >
+        {isSlide ? <LayoutTemplate className="size-4" /> : number}
+      </span>
+      <div className="min-w-0 flex-1">
+        <Markdown profile="inline" className="block truncate font-medium">
+          {label}
+        </Markdown>
+        <p className="text-muted-foreground text-xs">
+          {isSlide
+            ? t('slides.kind')
+            : t(`questionType.${item.question.type}`, { defaultValue: item.question.type })}
+        </p>
+      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={t('questions.moveUp')}
+        disabled={!canMoveUp}
+        onClick={() => onMove(-1)}
+      >
+        <ArrowUp className="size-4" />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={t('questions.moveDown')}
+        disabled={!canMoveDown}
+        onClick={() => onMove(1)}
+      >
+        <ArrowDown className="size-4" />
+      </Button>
+      <Button type="button" variant="outline" size="sm" onClick={onEdit}>
+        <Pencil className="size-4" />
+        {t('questions.edit')}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={isSlide ? t('slides.deleteSlide') : t('questions.deleteQuestion')}
+        onClick={onDelete}
+      >
+        <Trash2 className="size-4" />
+      </Button>
     </div>
   );
 }

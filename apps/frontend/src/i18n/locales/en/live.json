@@ -26,6 +26,7 @@
     "leaderboard": "Leaderboard",
     "autoPaused": "Auto paused — sequencing suspended.",
     "nextQuestion": "Next question",
+    "continue": "Continue",
     "endSession": "End the session",
     "questionProgress": "Question {{current}} / {{total}}",
     "freeAnswer": "Free answer (numeric or text).",

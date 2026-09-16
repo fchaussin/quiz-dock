@@ -5,7 +5,9 @@ import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
 import { COLOR_BG, OPTION_BG_FALLBACK, SHAPE_GLYPH } from '@/lib/option-style';
 import { cn } from '@/lib/utils';
+import { quizItems } from '@/lib/quiz-items';
 import { useFullscreen } from '@/lib/use-fullscreen';
+import { SlideView } from '../game/live-components';
 import type { QuizDetailDto, QuizDetailDtoQuestionsItem } from '../api/generated/model';
 import { useQuizzesControllerGet } from '../api/generated/quizzes/quizzes';
 import { previewRoute } from '../router';
@@ -23,7 +25,10 @@ export function PreviewPage() {
 function QuizPreview({ quiz }: { quiz: QuizDetailDto }) {
   const { t } = useTranslation('editor');
   const [index, setIndex] = useState(0);
-  const total = quiz.questions.length;
+  // The preview walks the full sequence — questions and slides (#7) — like the live game.
+  const items = quizItems(quiz);
+  const total = items.length;
+  const item = items[index];
   const { ref, isFullscreen, toggle, supported } = useFullscreen<HTMLDivElement>();
 
   return (
@@ -54,7 +59,25 @@ function QuizPreview({ quiz }: { quiz: QuizDetailDto }) {
         <p className="text-muted-foreground">{t('preview.noQuestions')}</p>
       ) : (
         <>
-          <QuestionPreview question={quiz.questions[index]} large={isFullscreen} />
+          {item.kind === 'question' ? (
+            <QuestionPreview question={item.question} large={isFullscreen} />
+          ) : (
+            <div className="rounded-xl border p-6">
+              <SlideView
+                large={isFullscreen}
+                slide={{
+                  slideIndex: index,
+                  questionIndex: 0,
+                  title: item.slide.title,
+                  body: item.slide.body,
+                  media: item.slide.mediaId
+                    ? { url: `/api/v1/media/${item.slide.mediaId}`, kind: 'image' }
+                    : null,
+                  displayDelayS: item.slide.displayDelayS,
+                }}
+              />
+            </div>
+          )}
           <nav className="flex items-center justify-between">
             <Button
               type="button"

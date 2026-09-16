@@ -49,6 +49,7 @@ export class QuizzesService {
             acceptedAnswers: true,
           },
         },
+        slides: { orderBy: { orderIndex: 'asc' } },
       },
     });
     if (!quiz) {
@@ -219,12 +220,13 @@ export class QuizzesService {
             acceptedAnswers: true,
           },
         },
+        slides: true,
       },
     });
     if (!src) {
       throw new NotFoundException('quiz.not_found');
     }
-    return this.prisma.quiz.create({
+    const copy = await this.prisma.quiz.create({
       data: {
         ownerId,
         title: `${src.title} (copie)`,
@@ -264,7 +266,28 @@ export class QuizzesService {
           })),
         },
       },
+      include: { questions: { select: { id: true, orderIndex: true } } },
     });
+    // Slides (#7) anchor on question ids: re-map them onto the copied questions.
+    if (src.slides.length > 0) {
+      const srcIndexById = new Map(src.questions.map((q) => [q.id, q.orderIndex]));
+      const newIdByIndex = new Map(copy.questions.map((q) => [q.orderIndex, q.id]));
+      await this.prisma.slide.createMany({
+        data: src.slides.map((s) => ({
+          quizId: copy.id,
+          beforeQuestionId:
+            s.beforeQuestionId === null
+              ? null
+              : (newIdByIndex.get(srcIndexById.get(s.beforeQuestionId) ?? -1) ?? null),
+          orderIndex: s.orderIndex,
+          title: s.title,
+          body: s.body,
+          mediaId: s.mediaId,
+          displayDelayS: s.displayDelayS,
+        })),
+      });
+    }
+    return copy;
   }
 
   async update(ownerId: string, id: string, dto: UpdateQuizDto): Promise<Quiz> {

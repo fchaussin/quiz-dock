@@ -136,6 +136,7 @@ model Quiz {
   owner       User             @relation(fields: [ownerId], references: [id])
   coverMedia  MediaAsset?      @relation("QuizCover", fields: [coverMediaId], references: [id])
   questions   Question[]
+  slides      Slide[]
   sessionLogs GameSessionLog[]
   feedback    QuizFeedback[]
 
@@ -168,6 +169,7 @@ model Question {
   acceptedAnswers AcceptedAnswer[]
   resultStats     QuestionResultStat[]
   answerLogs      AnswerLog[]
+  slidesBefore    Slide[]
 
   @@unique([quizId, orderIndex])
   @@index([quizId])
@@ -207,6 +209,31 @@ model AcceptedAnswer {
   @@map("accepted_answer")
 }
 
+/// Content slide (#7): a `quiz_item` of kind `slide` — shown in the live sequence,
+/// no answer, no score. Positioned **before** a question (`before_question_id`),
+/// or at the end of the quiz when null; `order_index` orders slides sharing an anchor.
+model Slide {
+  id               String   @id @default(ulid()) @db.Char(26)
+  quizId           String   @map("quiz_id") @db.Char(26)
+  beforeQuestionId String?  @map("before_question_id") @db.Char(26)
+  orderIndex       Int      @map("order_index")
+  title            String?
+  /// Markdown (block profile).
+  body             String?
+  mediaId          String?  @map("media_id") @db.Char(26)
+  /// Seconds before auto-advancing; null = the host clicks.
+  displayDelayS    Int?     @map("display_delay_s")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  quiz           Quiz        @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  beforeQuestion Question?   @relation(fields: [beforeQuestionId], references: [id], onDelete: SetNull)
+  media          MediaAsset? @relation("SlideMedia", fields: [mediaId], references: [id])
+
+  @@index([quizId])
+  @@map("slide")
+}
+
 /// §2.6 — médias.
 model MediaAsset {
   id        String    @id @default(ulid()) @db.Char(26)
@@ -220,6 +247,7 @@ model MediaAsset {
   owner           User           @relation(fields: [ownerId], references: [id])
   coverForQuizzes Quiz[]         @relation("QuizCover")
   questions       Question[]     @relation("QuestionMedia")
+  slides          Slide[]        @relation("SlideMedia")
   options         AnswerOption[] @relation("OptionMedia")
 
   @@index([ownerId])

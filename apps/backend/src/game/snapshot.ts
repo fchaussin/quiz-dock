@@ -8,7 +8,8 @@ import type {
   QuestionType,
 } from '@quiz-dock/contracts';
 import { basePointsFor } from './scoring';
-import type { QuizSnapshot, SnapshotQuestion } from './game.types';
+import type { QuizSnapshot, SnapshotQuestion, SnapshotSlide } from './game.types';
+import type { SlideShowPayload } from '@quiz-dock/contracts';
 
 /** Forme Prisma attendue par le constructeur de snapshot (relations incluses). */
 const quizWithContent = Prisma.validator<Prisma.QuizDefaultArgs>()({
@@ -21,6 +22,7 @@ const quizWithContent = Prisma.validator<Prisma.QuizDefaultArgs>()({
         acceptedAnswers: true,
       },
     },
+    slides: { orderBy: { orderIndex: 'asc' }, include: { media: true } },
   },
 });
 export type QuizWithContent = Prisma.QuizGetPayload<typeof quizWithContent>;
@@ -66,6 +68,42 @@ export function buildSnapshot(quiz: QuizWithContent): QuizSnapshot {
         })),
       }),
     ),
+    slides: buildSnapshotSlides(quiz),
+  };
+}
+
+/**
+ * Slides (#7) resolved onto question indexes: anchored before the question they
+ * reference, or after the last one when unanchored. Sorted by (anchor, orderIndex).
+ */
+function buildSnapshotSlides(quiz: QuizWithContent): SnapshotSlide[] {
+  const indexById = new Map(quiz.questions.map((q, i) => [q.id, i]));
+  const end = quiz.questions.length;
+  return quiz.slides
+    .map((s) => ({
+      slide: s,
+      anchor: s.beforeQuestionId === null ? end : (indexById.get(s.beforeQuestionId) ?? end),
+    }))
+    .sort((a, b) => a.anchor - b.anchor || a.slide.orderIndex - b.slide.orderIndex)
+    .map(({ slide, anchor }) => ({
+      id: slide.id,
+      beforeQuestionIndex: anchor,
+      title: slide.title,
+      body: slide.body,
+      media: mediaOf(slide.media),
+      displayDelayS: slide.displayDelayS,
+    }));
+}
+
+/** Public `slide:show` payload (#7): everything in a slide is meant to be shown. */
+export function buildSlideShow(slide: SnapshotSlide, slideIndex: number): SlideShowPayload {
+  return {
+    slideIndex,
+    questionIndex: slide.beforeQuestionIndex,
+    title: slide.title,
+    body: slide.body,
+    media: slide.media,
+    displayDelayS: slide.displayDelayS,
   };
 }
 

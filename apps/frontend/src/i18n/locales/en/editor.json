@@ -50,6 +50,23 @@
     "deleteQuestion": "Delete question",
     "empty": "No questions. Add one!"
   },
+  "slides": {
+    "add": "Add a slide",
+    "kind": "Slide",
+    "deleteSlide": "Delete the slide"
+  },
+  "slideForm": {
+    "titleLabel": "Title",
+    "titlePlaceholder": "Slide title (optional)",
+    "bodyLabel": "Content",
+    "bodyPlaceholder": "Text to display…",
+    "displayDelayLabel": "Display time (s)",
+    "displayDelayPlaceholder": "manual",
+    "displayDelayHint": "Moves on by itself after this delay. Empty = the host clicks.",
+    "invalidError": "A slide needs a title, some content or a media.",
+    "submitAdd": "Add",
+    "submitUpdate": "Save"
+  },
   "deleteConfirm": {
     "title": "Delete this quiz?",
     "description": "“{{title}}” and its questions will be permanently deleted. This action cannot be undone.",
@@ -103,7 +120,7 @@
     "noQuestions": "This quiz has no questions yet.",
     "previous": "Previous",
     "next": "Next",
-    "questionPosition": "Question {{index}} / {{total}}",
+    "questionPosition": "{{index}} / {{total}}",
     "correctAnswer": "correct answer",
     "optionFallback": "Option {{index}}",
     "acceptedAnswers": "Accepted answers: {{answers}}",

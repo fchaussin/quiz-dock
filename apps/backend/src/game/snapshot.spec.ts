@@ -7,6 +7,7 @@ const quiz = (over: Partial<QuizWithContent> = {}): QuizWithContent =>
     title: 'Mon quiz',
     language: 'fr',
     questions: [],
+    slides: [],
     ...over,
   }) as QuizWithContent;
 
@@ -105,5 +106,43 @@ describe('buildSnapshot', () => {
       }),
     );
     expect(snap.questions[0].acceptedAnswersNormalized).toEqual(['paris', 'ville lumiere']);
+  });
+
+  it('slides (#7): anchored on question indexes, end when unanchored, sorted by anchor then order', () => {
+    const q = (id: string, orderIndex: number) => ({
+      ...baseQuestion,
+      id,
+      orderIndex,
+      type: 'single_choice',
+      pointsMode: 'standard',
+    });
+    const slide = (id: string, beforeQuestionId: string | null, orderIndex: number) => ({
+      id,
+      beforeQuestionId,
+      orderIndex,
+      title: id,
+      body: null,
+      media: null,
+      displayDelayS: null,
+    });
+    const snap = buildSnapshot(
+      quiz({
+        questions: [q('qa', 0), q('qb', 1)] as never,
+        slides: [
+          slide('end-1', null, 1),
+          slide('before-b', 'qb', 0),
+          slide('end-0', null, 0),
+          slide('before-a', 'qa', 0),
+          slide('orphan', 'gone', 0), // deleted anchor → end
+        ] as never,
+      }),
+    );
+    expect(snap.slides.map((s) => [s.id, s.beforeQuestionIndex])).toEqual([
+      ['before-a', 0],
+      ['before-b', 1],
+      ['end-0', 2],
+      ['orphan', 2],
+      ['end-1', 2],
+    ]);
   });
 });

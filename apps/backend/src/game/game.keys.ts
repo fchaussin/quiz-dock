@@ -59,5 +59,6 @@ export const gameKeys = {
   /** Verrou atomique de passage en REVEAL (1 seul gagnant, anti double-reveal). */
   revealLock: (pin: string, questionIndex: number) => `game:${pin}:reveal-lock:${questionIndex}`,
   /** Verrou atomique de passage à la question suivante (anti double-clic). */
-  advanceLock: (pin: string, questionIndex: number) => `game:${pin}:advance-lock:${questionIndex}`,
+  /** Step = question index, or `s<slideIndex>` for a content slide (#7). */
+  advanceLock: (pin: string, step: number | string) => `game:${pin}:advance-lock:${step}`,
 };

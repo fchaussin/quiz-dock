@@ -26,6 +26,7 @@
     "leaderboard": "排行榜",
     "autoPaused": "自动模式已暂停 — 连续推进已暂停。",
     "nextQuestion": "下一题",
+    "continue": "继续",
     "endSession": "结束会话",
     "questionProgress": "第 {{current}} / {{total}} 题",
     "freeAnswer": "自由作答（数字或文本）。",

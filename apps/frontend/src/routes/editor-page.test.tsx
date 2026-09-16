@@ -35,10 +35,25 @@ const detail = (over: Record<string, unknown> = {}) => ({
       acceptedAnswers: [],
     },
   ],
+  slides: [],
   ...over,
 });
 
 describe('EditorPage', () => {
+  const q = (id: string, prompt: string, orderIndex: number) => ({
+    id,
+    quizId: 'q1',
+    orderIndex,
+    type: 'single_choice',
+    prompt,
+    mediaId: null,
+    timeLimitS: 20,
+    pointsMode: 'standard',
+    numericValue: null,
+    numericTolerance: null,
+    options: [],
+    acceptedAnswers: [],
+  });
   beforeEach(() => localStorage.setItem('live.localUser', 'Marc'));
   afterEach(() => {
     localStorage.clear();
@@ -162,21 +177,7 @@ describe('EditorPage', () => {
     await waitFor(() => expect(deleted()).toBe(true));
   });
 
-  it('réordonne les questions (↓ → PATCH reorder avec le nouvel ordre)', async () => {
-    const q = (id: string, prompt: string, orderIndex: number) => ({
-      id,
-      quizId: 'q1',
-      orderIndex,
-      type: 'single_choice',
-      prompt,
-      mediaId: null,
-      timeLimitS: 20,
-      pointsMode: 'standard',
-      numericValue: null,
-      numericTolerance: null,
-      options: [],
-      acceptedAnswers: [],
-    });
+  it('reorders the sequence (↓ → PATCH items/reorder with the new order)', async () => {
     const fetchMock = mockApi([
       {
         method: 'GET',
@@ -186,7 +187,7 @@ describe('EditorPage', () => {
           questions: [q('a', 'Première', 0), q('b', 'Seconde', 1)],
         }),
       },
-      { method: 'PATCH', path: '/quizzes/q1/questions/reorder', body: [] },
+      { method: 'PATCH', path: '/quizzes/q1/items/reorder', body: [] },
     ]);
     renderApp('/quizzes/q1');
 
@@ -194,13 +195,60 @@ describe('EditorPage', () => {
     fireEvent.click(down[0]); // descend la 1re question
     await waitFor(() => {
       const call = fetchMock.mock.calls.find(
-        ([url, opts]) => String(url).includes('/questions/reorder') && opts?.method === 'PATCH',
+        ([url, opts]) => String(url).includes('/items/reorder') && opts?.method === 'PATCH',
       );
       expect(call).toBeTruthy();
       const items = JSON.parse(String((call![1] as RequestInit).body)).items;
       expect(items).toEqual([
-        { questionId: 'b', orderIndex: 0 },
-        { questionId: 'a', orderIndex: 1 },
+        { kind: 'question', id: 'b' },
+        { kind: 'question', id: 'a' },
+      ]);
+    });
+  });
+
+  it('lists slides in the sequence before their anchor question and moves them with it (#7)', async () => {
+    const fetchMock = mockApi([
+      {
+        method: 'GET',
+        path: '/quizzes/q1',
+        body: detail({
+          questionCount: 2,
+          questions: [q('a', 'Première', 0), q('b', 'Seconde', 1)],
+          slides: [
+            {
+              id: 's1',
+              quizId: 'q1',
+              beforeQuestionId: 'b',
+              orderIndex: 0,
+              title: 'Interlude',
+              body: null,
+              mediaId: null,
+              displayDelayS: null,
+            },
+          ],
+        }),
+      },
+      { method: 'PATCH', path: '/quizzes/q1/items/reorder', body: [] },
+    ]);
+    renderApp('/quizzes/q1');
+
+    const rows = await screen.findAllByRole('listitem');
+    expect(rows.map((r) => r.textContent)).toEqual([
+      expect.stringContaining('Première'),
+      expect.stringContaining('Interlude'),
+      expect.stringContaining('Seconde'),
+    ]);
+    const up = screen.getAllByLabelText('Monter');
+    fireEvent.click(up[1]); // the slide moves above « Première »
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find(
+        ([url, opts]) => String(url).includes('/items/reorder') && opts?.method === 'PATCH',
+      );
+      expect(call).toBeTruthy();
+      expect(JSON.parse(String((call![1] as RequestInit).body)).items).toEqual([
+        { kind: 'slide', id: 's1' },
+        { kind: 'question', id: 'a' },
+        { kind: 'question', id: 'b' },
       ]);
     });
   });

@@ -3,6 +3,7 @@ import type {
   PublicOption,
   QuestionRevealPayload,
   QuestionStartPayload,
+  SlideShowPayload,
 } from '@quiz-dock/contracts';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
@@ -185,6 +186,41 @@ export function AnswerExplanation({
       </h3>
       <Markdown>{reveal.answerExplanation}</Markdown>
     </section>
+  );
+}
+
+/**
+ * A content slide (#7): title, Markdown body and media. Same block on the projected
+ * screen (`large`), the host console and the participant's phone.
+ */
+export function SlideView({ slide, large }: { slide: SlideShowPayload; large?: boolean }) {
+  return (
+    <article
+      className={cn(
+        'flex w-full flex-col items-center gap-4 text-center',
+        large ? 'max-w-4xl' : 'max-w-3xl',
+      )}
+    >
+      {slide.title ? (
+        <h1 className={cn('font-bold text-balance', large ? 'text-4xl md:text-5xl' : 'text-2xl')}>
+          {slide.title}
+        </h1>
+      ) : null}
+      {slide.media?.kind === 'image' ? (
+        <img
+          src={slide.media.url}
+          alt=""
+          className={cn('self-center object-contain', large ? 'max-h-[45vh]' : 'max-h-64')}
+        />
+      ) : slide.media?.kind === 'audio' ? (
+        <audio controls src={slide.media.url} className="w-full max-w-md" />
+      ) : null}
+      {slide.body ? (
+        <Markdown className={cn('w-full text-left', large ? 'text-2xl' : 'text-base')}>
+          {slide.body}
+        </Markdown>
+      ) : null}
+    </article>
   );
 }
 

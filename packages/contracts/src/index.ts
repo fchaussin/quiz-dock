@@ -18,6 +18,8 @@ export enum GameState {
   Answering = 'ANSWERING',
   Reveal = 'REVEAL',
   Leaderboard = 'LEADERBOARD',
+  /** A content slide (#7) is on screen: no answer, no timer — host click or `displayDelayS`. */
+  SlideShow = 'SLIDE_SHOW',
   Podium = 'PODIUM',
   Ended = 'ENDED',
   HostDisconnected = 'HOST_DISCONNECTED',
@@ -139,6 +141,22 @@ export interface QuestionStartPayload {
   basePoints: number;
   startedAt: number; // ms epoch serveur (§6)
   endsAt: number;
+}
+
+/**
+ * A content slide on screen (#7). `questionIndex` is the question that follows
+ * the slide (`totalQuestions` when the slide closes the quiz). Sent to everyone:
+ * participants see the full content on their device.
+ */
+export interface SlideShowPayload {
+  slideIndex: number;
+  questionIndex: number;
+  title: string | null;
+  /** Markdown, block profile. */
+  body: string | null;
+  media?: { url: string; kind: 'image' | 'audio' } | null;
+  /** Seconds before the engine advances by itself; null = the host clicks. */
+  displayDelayS: number | null;
 }
 
 export interface GameStatePayload {
@@ -294,6 +312,8 @@ export interface ServerToClientEvents {
   }) => void;
   'game:state': (p: GameStatePayload) => void;
   'question:start': (p: QuestionStartPayload) => void;
+  /** A content slide is shown (state `SLIDE_SHOW`, #7); re-sent on (re)attach. */
+  'slide:show': (p: SlideShowPayload) => void;
   'answer:ack': (p: { accepted: boolean; receivedAt: number }) => void;
   'answer:count': (p: { answered: number; total: number }) => void;
   'question:reveal': (p: QuestionRevealPayload) => void;

@@ -26,7 +26,7 @@ import { RedisService } from '../redis/redis.service';
 import { buildRevealCommon } from './reveal';
 import { scoreAnswer } from './scoring';
 import { SessionArchiveService } from './session-archive.service';
-import { buildQuestionStart } from './snapshot';
+import { buildQuestionStart, buildSlideShow } from './snapshot';
 
 type GameServer = Server<Record<string, never>, ServerToClientEvents>;
 
@@ -86,7 +86,7 @@ export class GameEngine {
       throw new BadRequestException('session.already_started');
     }
     const snapshot = await this.requireSnapshot(pin);
-    await this.beginQuestion(pin, snapshot, 0);
+    await this.enterStep(pin, snapshot, 0);
   }
 
   /**
@@ -102,6 +102,50 @@ export class GameEngine {
     }
     await this.redis.hset(gameKeys.game(pin), { fullCapture: fullCapture ? '1' : '0' });
     this.server.to(pin).emit('notice', { fullCapture });
+  }
+
+  /**
+   * Moves the sequence to question `index`: shows the slides anchored before it
+   * first (#7), then the question itself; past the last question, the podium.
+   */
+  private async enterStep(pin: string, snapshot: QuizSnapshot, index: number): Promise<void> {
+    const slideIndex = snapshot.slides.findIndex((s) => s.beforeQuestionIndex === index);
+    if (slideIndex >= 0) {
+      await this.showSlide(pin, snapshot, slideIndex);
+    } else if (index >= snapshot.questions.length) {
+      const meta = await this.game.getMeta(pin);
+      if (meta) await this.toPodium(pin, meta);
+    } else {
+      await this.beginQuestion(pin, snapshot, index);
+    }
+  }
+
+  /**
+   * Shows content slide `slideIndex` (state `SLIDE_SHOW`, #7). `currentIndex`
+   * points at the question that follows, so `game:state.questionIndex` stays
+   * meaningful for progress displays. Arms the display timer when the slide has one.
+   */
+  private async showSlide(pin: string, snapshot: QuizSnapshot, slideIndex: number): Promise<void> {
+    const slide = snapshot.slides[slideIndex];
+    this.clearTimer(pin);
+    this.cancelTimer(this.autoNextTimers, pin);
+    await this.redis.hset(gameKeys.game(pin), {
+      state: GameState.SlideShow,
+      slideIndex: String(slideIndex),
+      currentIndex: String(slide.beforeQuestionIndex),
+      clockFrozen: '0',
+      pausedRemainingMs: '',
+      autoNextAt: '0',
+    });
+    this.server.to(pin).emit('game:state', {
+      state: GameState.SlideShow,
+      questionIndex: slide.beforeQuestionIndex,
+      totalQuestions: snapshot.questions.length,
+    });
+    this.server.to(pin).emit('slide:show', buildSlideShow(slide, slideIndex));
+    const meta = await this.game.getMeta(pin);
+    if (meta) await this.scheduleAutoNextIfNeeded(pin, meta);
+    this.server.to(pin).emit('game:mode', await this.readMode(pin));
   }
 
   /**
@@ -122,6 +166,7 @@ export class GameEngine {
     await this.redis.hset(gameKeys.game(pin), {
       state: GameState.Answering,
       currentIndex: String(index),
+      slideIndex: '-1',
       questionStartedAt: String(startedAt),
       questionEndsAt: String(endsAt),
       clockFrozen: '0',
@@ -284,12 +329,15 @@ export class GameEngine {
    */
   async next(pin: string, hostUserId: string): Promise<void> {
     const meta = await this.requireHost(pin, hostUserId);
-    if (meta.state !== GameState.Reveal) {
+    if (meta.state !== GameState.Reveal && meta.state !== GameState.SlideShow) {
       throw new BadRequestException('session.reveal_required');
     }
     this.cancelTimer(this.autoNextTimers, pin); // un enchaînement (auto/manuel) annule l'autre
+    // A slide gets its own lock key: it shares `currentIndex` with the question it precedes.
+    const lockStep =
+      meta.state === GameState.SlideShow ? `s${meta.slideIndex ?? 0}` : String(meta.currentIndex);
     const won = await this.redis.set(
-      gameKeys.advanceLock(pin, meta.currentIndex),
+      gameKeys.advanceLock(pin, lockStep),
       '1',
       'EX',
       GAME_TTL_S,
@@ -298,13 +346,21 @@ export class GameEngine {
     if (won !== 'OK') {
       return; // suivant déjà déclenché (double-clic)
     }
-    const nextIndex = meta.currentIndex + 1;
-    if (nextIndex >= meta.totalQuestions) {
-      await this.toPodium(pin, meta);
+    const snapshot = await this.requireSnapshot(pin);
+    if (meta.state === GameState.SlideShow) {
+      // Next slide sharing the anchor, else the anchored question (or the podium).
+      const current = meta.slideIndex ?? 0;
+      const following = snapshot.slides[current + 1];
+      if (following && following.beforeQuestionIndex === meta.currentIndex) {
+        await this.showSlide(pin, snapshot, current + 1);
+      } else if (meta.currentIndex >= meta.totalQuestions) {
+        await this.toPodium(pin, meta);
+      } else {
+        await this.beginQuestion(pin, snapshot, meta.currentIndex);
+      }
       return;
     }
-    const snapshot = await this.requireSnapshot(pin);
-    await this.beginQuestion(pin, snapshot, nextIndex);
+    await this.enterStep(pin, snapshot, meta.currentIndex + 1);
   }
 
   /** Dernière question révélée → PODIUM (top 3 + rang perso). */
@@ -373,6 +429,11 @@ export class GameEngine {
     const snapshot = await this.game.getSnapshot(pin);
     if (!snapshot || meta.currentIndex < 0) return;
 
+    if (meta.state === GameState.SlideShow) {
+      const slide = snapshot.slides[meta.slideIndex ?? -1];
+      if (slide) socket.emit('slide:show', buildSlideShow(slide, meta.slideIndex ?? 0));
+      return;
+    }
     if (meta.state === GameState.Answering) {
       const question = snapshot.questions[meta.currentIndex];
       // Chrono gelé (pause / hôte parti) : recalcule un timing d'affichage cohérent
@@ -639,7 +700,13 @@ export class GameEngine {
           .emit('question:start', buildQuestionStart(q, meta.currentIndex, startedAt, endsAt));
       }
     } else {
-      // Reprise en REVEAL en mode auto : ré-arme l'enchaînement automatique.
+      if (prev === GameState.SlideShow) {
+        const snapshot = await this.game.getSnapshot(pin);
+        const slide = snapshot?.slides[meta.slideIndex ?? -1];
+        if (slide)
+          this.server.to(pin).emit('slide:show', buildSlideShow(slide, meta.slideIndex ?? 0));
+      }
+      // Reprise en REVEAL en mode auto (ou sur une slide minutée) : ré-arme l'enchaînement.
       await this.scheduleAutoNextIfNeeded(pin, meta);
     }
     this.server.to(pin).emit('game:mode', this.buildModePayload(meta));
@@ -769,11 +836,11 @@ export class GameEngine {
 
   /** Construit le payload mode/pause (restant figé + deadline d'enchaînement auto). */
   private buildModePayload(meta: GameMeta): GameModePayload {
-    const autoNextActive =
-      meta.mode === 'auto' &&
-      !meta.paused &&
-      meta.state === GameState.Reveal &&
-      (meta.autoNextAt ?? 0) > 0;
+    // Countdown shown on a reveal in auto mode, or on a timed slide in any mode (#7).
+    const onTimedStep =
+      (meta.mode === 'auto' && meta.state === GameState.Reveal) ||
+      meta.state === GameState.SlideShow;
+    const autoNextActive = onTimedStep && !meta.paused && (meta.autoNextAt ?? 0) > 0;
     return {
       mode: meta.mode,
       paused: meta.paused,
@@ -854,12 +921,22 @@ export class GameEngine {
    */
   private async scheduleAutoNextIfNeeded(pin: string, meta?: GameMeta): Promise<void> {
     const m = meta ?? (await this.game.getMeta(pin));
-    if (!m || m.mode !== 'auto' || m.paused || m.state !== GameState.Reveal) return;
-    this.cancelTimer(this.autoNextTimers, pin);
-    // Per-question override (#6), else the engine default.
+    if (!m || m.paused) return;
     const snapshot = await this.game.getSnapshot(pin);
-    const perQuestion = snapshot?.questions[m.currentIndex]?.revealDelayS;
-    const delay = perQuestion ? perQuestion * 1000 : defaultAutoAdvanceMs();
+    let delay: number;
+    if (m.state === GameState.SlideShow) {
+      // A slide advances by itself only when it carries a delay — in any mode (#7).
+      const slideDelay = snapshot?.slides[m.slideIndex ?? -1]?.displayDelayS;
+      if (!slideDelay) return;
+      delay = slideDelay * 1000;
+    } else if (m.mode === 'auto' && m.state === GameState.Reveal) {
+      // Per-question override (#6), else the engine default.
+      const perQuestion = snapshot?.questions[m.currentIndex]?.revealDelayS;
+      delay = perQuestion ? perQuestion * 1000 : defaultAutoAdvanceMs();
+    } else {
+      return;
+    }
+    this.cancelTimer(this.autoNextTimers, pin);
     // Deadline diffusée à la console (compte à rebours + barre de progression).
     const autoNextAt = Date.now() + delay;
     m.autoNextAt = autoNextAt;
@@ -869,11 +946,12 @@ export class GameEngine {
       autoNextMs: String(delay),
     });
     const hostUserId = m.hostUserId;
-    const index = m.currentIndex;
+    // The timer only fires for the exact step it was armed on (question or slide).
+    const step = m.state === GameState.SlideShow ? `s${m.slideIndex ?? 0}` : m.currentIndex;
     const timer = setTimeout(
       () => {
         this.autoNextTimers.delete(pin);
-        this.autoAdvance(pin, hostUserId, index).catch((err: Error) =>
+        this.autoAdvance(pin, hostUserId, step).catch((err: Error) =>
           this.log.error(`autoAdvance ${pin}: ${err.message}`),
         );
       },
@@ -883,11 +961,14 @@ export class GameEngine {
     this.autoNextTimers.set(pin, timer);
   }
 
-  /** Tir du minuteur auto : enchaîne si l'on est toujours sur le même reveal auto. */
-  private async autoAdvance(pin: string, hostUserId: string, index: number): Promise<void> {
+  /** Timer fired: advance only if the game still sits on the step it was armed for. */
+  private async autoAdvance(pin: string, hostUserId: string, step: number | string): Promise<void> {
     const meta = await this.game.getMeta(pin);
-    if (!meta || meta.mode !== 'auto' || meta.paused) return;
-    if (meta.state !== GameState.Reveal || meta.currentIndex !== index) return;
+    if (!meta || meta.paused) return;
+    const onSlide = meta.state === GameState.SlideShow && step === `s${meta.slideIndex ?? 0}`;
+    const onReveal =
+      meta.mode === 'auto' && meta.state === GameState.Reveal && step === meta.currentIndex;
+    if (!onSlide && !onReveal) return;
     await this.next(pin, hostUserId);
   }
 

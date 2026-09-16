@@ -50,6 +50,23 @@
     "deleteQuestion": "Eliminar la pregunta",
     "empty": "No hay preguntas. ¡Añade una!"
   },
+  "slides": {
+    "add": "Añadir una diapositiva",
+    "kind": "Diapositiva",
+    "deleteSlide": "Eliminar la diapositiva"
+  },
+  "slideForm": {
+    "titleLabel": "Título",
+    "titlePlaceholder": "Título de la diapositiva (opcional)",
+    "bodyLabel": "Contenido",
+    "bodyPlaceholder": "Texto a mostrar…",
+    "displayDelayLabel": "Tiempo de visualización (s)",
+    "displayDelayPlaceholder": "manual",
+    "displayDelayHint": "Avanza sola tras este tiempo. Vacío = el presentador hace clic.",
+    "invalidError": "La diapositiva necesita un título, un contenido o un medio.",
+    "submitAdd": "Añadir",
+    "submitUpdate": "Guardar"
+  },
   "deleteConfirm": {
     "title": "¿Eliminar este quiz?",
     "description": "«{{title}}» y sus preguntas se eliminarán definitivamente. Esta acción es irreversible.",
@@ -103,7 +120,7 @@
     "noQuestions": "Este quiz aún no tiene preguntas.",
     "previous": "Anterior",
     "next": "Siguiente",
-    "questionPosition": "Pregunta {{index}} / {{total}}",
+    "questionPosition": "{{index}} / {{total}}",
     "correctAnswer": "respuesta correcta",
     "optionFallback": "Opción {{index}}",
     "acceptedAnswers": "Respuestas aceptadas: {{answers}}",

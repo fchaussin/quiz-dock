@@ -30,6 +30,7 @@ import {
   OptionGrid,
   Podium,
   RevealAnswer,
+  SlideView,
 } from '../game/live-components';
 import { useGameRemaining } from '../game/use-countdown';
 import { type GameView, useGameSession } from '../game/use-game-session';
@@ -237,6 +238,32 @@ export function ControlPage() {
     );
   }
 
+  // ── SLIDE_SHOW (#7) ────────────────────────────────────────────────────────
+  if (view.state === 'SLIDE_SHOW' && view.slide) {
+    return (
+      <section className="mx-auto flex w-full max-w-3xl flex-col gap-5 py-6">
+        {controlBar}
+        <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
+        <div className="bg-card rounded-xl border p-5 sm:p-6">
+          <SlideView slide={view.slide} />
+        </div>
+        <div className="flex items-end justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            {view.paused && view.slide.displayDelayS ? (
+              <span className="text-muted-foreground text-sm">{t('control.autoPaused')}</span>
+            ) : view.autoNextAt ? (
+              <AutoAdvanceCountdown deadline={view.autoNextAt} totalMs={view.autoNextMs ?? 0} />
+            ) : null}
+          </div>
+          <Button type="button" onClick={() => emit('host:next')}>
+            <SkipForward className="size-4" />
+            {t('control.continue')}
+          </Button>
+        </div>
+      </section>
+    );
+  }
+
   // ── REVEAL / LEADERBOARD ───────────────────────────────────────────────────
   if (view.state === 'REVEAL' || view.state === 'LEADERBOARD') {
     return (
@@ -420,7 +447,9 @@ function RecapHeader({ view, pin }: { view: GameView; pin: string }) {
     <div className="flex flex-col gap-0.5">
       <h1 className="text-xl font-bold">{view.quizTitle ?? t('control.sessionInProgress')}</h1>
       {view.quizDescription ? (
-        <p className="text-muted-foreground max-w-prose text-sm">{view.quizDescription}</p>
+        <Markdown profile="inline" className="text-muted-foreground block max-w-prose text-sm">
+          {view.quizDescription}
+        </Markdown>
       ) : null}
       <span className="text-muted-foreground text-sm">
         PIN <span className="font-mono tracking-widest">{pin}</span>

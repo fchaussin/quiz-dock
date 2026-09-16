@@ -26,6 +26,7 @@
     "leaderboard": "Classement",
     "autoPaused": "Auto en pause — enchaînement suspendu.",
     "nextQuestion": "Question suivante",
+    "continue": "Continuer",
     "endSession": "Terminer la session",
     "questionProgress": "Question {{current}} / {{total}}",
     "freeAnswer": "Réponse libre (numérique ou texte).",

@@ -50,6 +50,23 @@
     "deleteQuestion": "删除题目",
     "empty": "还没有题目。添加一道吧！"
   },
+  "slides": {
+    "add": "添加幻灯片",
+    "kind": "幻灯片",
+    "deleteSlide": "删除幻灯片"
+  },
+  "slideForm": {
+    "titleLabel": "标题",
+    "titlePlaceholder": "幻灯片标题（可选）",
+    "bodyLabel": "内容",
+    "bodyPlaceholder": "要显示的文字…",
+    "displayDelayLabel": "显示时长（秒）",
+    "displayDelayPlaceholder": "手动",
+    "displayDelayHint": "到时后自动进入下一步。留空 = 由主持人点击。",
+    "invalidError": "幻灯片需要标题、内容或媒体。",
+    "submitAdd": "添加",
+    "submitUpdate": "保存"
+  },
   "deleteConfirm": {
     "title": "删除此测验？",
     "description": "“{{title}}”及其题目将被永久删除。此操作不可撤销。",
@@ -103,7 +120,7 @@
     "noQuestions": "该测验还没有题目。",
     "previous": "上一题",
     "next": "下一题",
-    "questionPosition": "第 {{index}} / {{total}} 题",
+    "questionPosition": "{{index}} / {{total}}",
     "correctAnswer": "正确答案",
     "optionFallback": "选项 {{index}}",
     "acceptedAnswers": "可接受的答案：{{answers}}",

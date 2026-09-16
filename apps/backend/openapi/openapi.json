@@ -637,6 +637,170 @@
         ]
       }
     },
+    "/api/v1/quizzes/{id}/slides": {
+      "post": {
+        "operationId": "SlidesController_add",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSlideDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlideDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "slides"
+        ]
+      }
+    },
+    "/api/v1/quizzes/{id}/items/reorder": {
+      "patch": {
+        "operationId": "SlidesController_reorderItems",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderItemsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SlideDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "slides"
+        ]
+      }
+    },
+    "/api/v1/slides/{sid}": {
+      "put": {
+        "operationId": "SlidesController_update",
+        "parameters": [
+          {
+            "name": "sid",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSlideDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlideDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "slides"
+        ]
+      },
+      "delete": {
+        "operationId": "SlidesController_remove",
+        "parameters": [
+          {
+            "name": "sid",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "slides"
+        ]
+      }
+    },
     "/api/v1/media": {
       "post": {
         "operationId": "MediaController_upload",
@@ -1189,6 +1353,57 @@
                 "acceptedAnswers"
               ]
             }
+          },
+          "slides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "quizId": {
+                  "type": "string"
+                },
+                "beforeQuestionId": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "orderIndex": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "title": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "body": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "mediaId": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "displayDelayS": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "quizId",
+                "beforeQuestionId",
+                "orderIndex",
+                "title",
+                "body",
+                "mediaId",
+                "displayDelayS"
+              ]
+            }
           }
         },
         "required": [
@@ -1204,7 +1419,8 @@
           "createdAt",
           "updatedAt",
           "archivedAt",
-          "questions"
+          "questions",
+          "slides"
         ]
       },
       "QuizFeedbackSummaryDto": {
@@ -2081,6 +2297,141 @@
           "type",
           "prompt"
         ]
+      },
+      "CreateSlideDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 5000,
+            "nullable": true
+          },
+          "mediaId": {
+            "type": "string",
+            "minLength": 26,
+            "maxLength": 26,
+            "nullable": true
+          },
+          "displayDelayS": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 600,
+            "nullable": true
+          }
+        }
+      },
+      "SlideDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "quizId": {
+            "type": "string"
+          },
+          "beforeQuestionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "orderIndex": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "nullable": true
+          },
+          "mediaId": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayDelayS": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "quizId",
+          "beforeQuestionId",
+          "orderIndex",
+          "title",
+          "body",
+          "mediaId",
+          "displayDelayS"
+        ]
+      },
+      "ReorderItemsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "question",
+                    "slide"
+                  ]
+                },
+                "id": {
+                  "type": "string",
+                  "minLength": 26,
+                  "maxLength": 26
+                }
+              },
+              "required": [
+                "kind",
+                "id"
+              ]
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "UpdateSlideDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 5000,
+            "nullable": true
+          },
+          "mediaId": {
+            "type": "string",
+            "minLength": 26,
+            "maxLength": 26,
+            "nullable": true
+          },
+          "displayDelayS": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 600,
+            "nullable": true
+          }
+        }
       },
       "MediaUploadResultDto": {
         "type": "object",
