@@ -213,7 +213,7 @@ export function ControlPage() {
           </span>
         </label>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap items-center justify-between gap-3">
           <ModeToggle mode={view.mode} onChange={setMode} />
           <div className="flex items-center gap-2">
             <EndGameButton label={t('control.stopSession')} onConfirm={endGame} />
@@ -264,7 +264,7 @@ export function ControlPage() {
         <div className="bg-card rounded-xl border p-5 sm:p-6">
           <SlideView slide={view.slide} />
         </div>
-        <div className="flex items-end justify-between gap-3">
+        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">
           <div className="min-w-0 flex-1">
             {view.paused && view.slide.displayDelayS ? (
               <span className="text-muted-foreground text-sm">{t('control.autoPaused')}</span>
@@ -297,7 +297,7 @@ export function ControlPage() {
             <LeaderboardList rows={view.leaderboard.top} />
           </div>
         ) : null}
-        <div className="flex items-end justify-between gap-3">
+        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">
           <div className="min-w-0 flex-1">
             {view.mode === 'auto' && view.paused ? (
               <span className="text-muted-foreground text-sm">{t('control.autoPaused')}</span>
@@ -320,7 +320,9 @@ export function ControlPage() {
       <section className="mx-auto flex w-full max-w-4xl flex-col items-center gap-6 py-8">
         <h2 className="text-2xl font-bold">{t('control.podium')}</h2>
         {view.podium ? <Podium rows={view.podium.podium} /> : null}
-        <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
+        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex w-full justify-center">
+          <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
+        </div>
       </section>
     );
   }
@@ -391,7 +393,7 @@ export function ControlPage() {
       {/* Déroulé du quiz (vue d'ensemble). */}
       <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
 
-      <div className="flex flex-wrap gap-2">
+      <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap gap-2">
         <Button type="button" onClick={() => emit('host:reveal')}>
           <Eye className="size-4" />
           {t('control.revealNow')}
