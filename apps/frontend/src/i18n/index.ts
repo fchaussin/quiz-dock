@@ -56,7 +56,8 @@ import validationZhTW from './locales/zh-TW/validation.json';
  * → `window.__APP_CONFIG__.lang`, comme `APP_NAME`). Pas de détection navigateur
  * ni de bascule par utilisateur : l'instance est self-hosted et le contenu des
  * quiz n'est pas multilingue, on évite donc toute incohérence langue UI / contenu.
- * Langues fournies : `en` (défaut), `fr`, `es`, `zh` (chinois simplifié).
+ * Langues fournies : `en` (défaut), `fr`, `es`, `zh` (chinois simplifié),
+ * `zh-TW` (chinois traditionnel).
  */
 export const resources = {
   en: {
