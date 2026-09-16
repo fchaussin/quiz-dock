@@ -1549,6 +1549,14 @@
                                   "center",
                                   "right"
                                 ]
+                              },
+                              "size": {
+                                "type": "string",
+                                "enum": [
+                                  "small",
+                                  "medium",
+                                  "large"
+                                ]
                               }
                             },
                             "required": [
@@ -1703,6 +1711,14 @@
                                           "left",
                                           "center",
                                           "right"
+                                        ]
+                                      },
+                                      "size": {
+                                        "type": "string",
+                                        "enum": [
+                                          "small",
+                                          "medium",
+                                          "large"
                                         ]
                                       }
                                     },
@@ -3002,6 +3018,14 @@
                             "center",
                             "right"
                           ]
+                        },
+                        "size": {
+                          "type": "string",
+                          "enum": [
+                            "small",
+                            "medium",
+                            "large"
+                          ]
                         }
                       },
                       "required": [
@@ -3156,6 +3180,14 @@
                                     "left",
                                     "center",
                                     "right"
+                                  ]
+                                },
+                                "size": {
+                                  "type": "string",
+                                  "enum": [
+                                    "small",
+                                    "medium",
+                                    "large"
                                   ]
                                 }
                               },
@@ -3383,6 +3415,14 @@
                             "center",
                             "right"
                           ]
+                        },
+                        "size": {
+                          "type": "string",
+                          "enum": [
+                            "small",
+                            "medium",
+                            "large"
+                          ]
                         }
                       },
                       "required": [
@@ -3537,6 +3577,14 @@
                                     "left",
                                     "center",
                                     "right"
+                                  ]
+                                },
+                                "size": {
+                                  "type": "string",
+                                  "enum": [
+                                    "small",
+                                    "medium",
+                                    "large"
                                   ]
                                 }
                               },
@@ -3792,6 +3840,14 @@
                             "center",
                             "right"
                           ]
+                        },
+                        "size": {
+                          "type": "string",
+                          "enum": [
+                            "small",
+                            "medium",
+                            "large"
+                          ]
                         }
                       },
                       "required": [
@@ -3946,6 +4002,14 @@
                                     "left",
                                     "center",
                                     "right"
+                                  ]
+                                },
+                                "size": {
+                                  "type": "string",
+                                  "enum": [
+                                    "small",
+                                    "medium",
+                                    "large"
                                   ]
                                 }
                               },

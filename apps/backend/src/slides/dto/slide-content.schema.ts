@@ -20,6 +20,7 @@ const leafBlockSchema = z.discriminatedUnion('type', [
     /** Markdown, block profile (images inside are allowed too). */
     md: z.string().trim().min(1).max(5000),
     align: z.enum(['left', 'center', 'right']).optional(),
+    size: z.enum(['small', 'medium', 'large']).optional(),
   }),
   z.object({
     type: z.literal('image'),

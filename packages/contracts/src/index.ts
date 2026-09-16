@@ -161,6 +161,9 @@ export type SlideTextTone = 'light' | 'dark';
 /** Horizontal alignment of a text-like block; centred when absent. */
 export type SlideTextAlign = 'left' | 'center' | 'right';
 
+/** Base font size of a text block on the 1280×720 stage: 20 / 30 / 40 px; medium when absent. */
+export type SlideTextSize = 'small' | 'medium' | 'large';
+
 /** Width of an image block on the slide surface. */
 export type SlideImageSize = 'small' | 'medium' | 'large' | 'full';
 
@@ -170,7 +173,7 @@ export type SlideImageSize = 'small' | 'medium' | 'large' | 'full';
  */
 export type SlideLeafBlock =
   | { type: 'heading'; id: string; text: string; level: 1 | 2; align?: SlideTextAlign }
-  | { type: 'text'; id: string; md: string; align?: SlideTextAlign }
+  | { type: 'text'; id: string; md: string; align?: SlideTextAlign; size?: SlideTextSize }
   | {
       type: 'image';
       id: string;

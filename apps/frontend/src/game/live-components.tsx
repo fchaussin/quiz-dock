@@ -8,6 +8,7 @@ import type {
   SlideLeafBlock,
   SlideShowPayload,
   SlideTextAlign,
+  SlideTextSize,
 } from '@quiz-dock/contracts';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
@@ -251,6 +252,18 @@ const TEXT_ALIGN: Record<SlideTextAlign, string> = {
   right: 'text-right [&_ul]:text-left [&_ol]:text-left',
 };
 
+/** Text block sizes: 20 / 30 / 40 px on the 1280×720 stage, scaled down on a phone. */
+const TEXT_SIZE_STAGE: Record<SlideTextSize, string> = {
+  small: 'text-[20px]',
+  medium: 'text-[30px]',
+  large: 'text-[40px]',
+};
+const TEXT_SIZE_PHONE: Record<SlideTextSize, string> = {
+  small: 'text-base',
+  medium: 'text-xl',
+  large: 'text-2xl',
+};
+
 const IMAGE_WIDTH: Record<SlideImageSize, string> = {
   small: 'w-1/3',
   medium: 'w-1/2',
@@ -286,9 +299,9 @@ function SlideBlockView({ block, large }: { block: SlideLeafBlock; large?: boole
       return (
         <Markdown
           className={cn(
-            'w-full',
+            'w-full leading-relaxed',
             TEXT_ALIGN[block.align ?? 'center'],
-            large ? 'text-3xl leading-relaxed' : 'text-base',
+            (large ? TEXT_SIZE_STAGE : TEXT_SIZE_PHONE)[block.size ?? 'medium'],
           )}
         >
           {block.md}

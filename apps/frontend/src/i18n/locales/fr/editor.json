@@ -125,7 +125,13 @@
     "textAlign": "Alignement du texte",
     "previewLegend": "Aperçu",
     "hidePreview": "Masquer",
-    "showPreview": "Afficher"
+    "showPreview": "Afficher",
+    "textSize": "Taille du texte",
+    "sizeShort": {
+      "small": "S",
+      "medium": "M",
+      "large": "L"
+    }
   },
   "discardConfirm": {
     "title": "Abandonner les modifications ?",

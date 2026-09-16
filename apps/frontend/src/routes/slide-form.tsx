@@ -21,6 +21,7 @@ import type {
   SlideGradient,
   SlideLeafBlock,
   SlideTextAlign,
+  SlideTextSize,
   SlideTextTone,
 } from '@quiz-dock/contracts';
 import { useQueryClient } from '@tanstack/react-query';
@@ -564,6 +565,7 @@ function LeafEditor({
               {t('slideForm.block.text')}
             </span>
             <AlignPicker value={block.align} onChange={(align) => onChange({ ...block, align })} />
+            <SizePicker value={block.size} onChange={(size) => onChange({ ...block, size })} />
           </div>
           <MarkdownEditor
             aria-label={t('slideForm.block.text')}
@@ -640,6 +642,37 @@ function AlignPicker({
           onClick={() => onChange(align)}
         >
           <Icon className="size-3.5" />
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+/** Small / medium / large text (20 / 30 / 40 px on the stage); medium is the default. */
+function SizePicker({
+  value,
+  onChange,
+}: {
+  value: SlideTextSize | undefined;
+  onChange: (size: SlideTextSize) => void;
+}) {
+  const { t } = useTranslation('editor');
+  const current = value ?? 'medium';
+  return (
+    <div className="flex shrink-0 gap-0.5" role="radiogroup" aria-label={t('slideForm.textSize')}>
+      {(['small', 'medium', 'large'] as SlideTextSize[]).map((size) => (
+        <Button
+          key={size}
+          type="button"
+          variant={current === size ? 'default' : 'ghost'}
+          size="sm"
+          className="h-7 px-2 text-xs"
+          role="radio"
+          aria-checked={current === size}
+          title={t(`slideForm.size.${size}`)}
+          onClick={() => onChange(size)}
+        >
+          {t(`slideForm.sizeShort.${size}`)}
         </Button>
       ))}
     </div>
