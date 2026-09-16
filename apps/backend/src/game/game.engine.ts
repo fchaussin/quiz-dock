@@ -6,6 +6,7 @@ import type {
   GameModePayload,
   LeaderboardPayload,
   LeaderboardRow,
+  PodiumPayload,
   QuestionRevealPayload,
   ServerToClientEvents,
 } from '@quiz-dock/contracts';
@@ -381,7 +382,10 @@ export class GameEngine {
     const sockets = await this.server.in(pin).fetchSockets();
     for (const socket of sockets) {
       const playerId = (socket.data as { playerId?: string }).playerId;
-      socket.emit('game:podium', this.personalPodium(podium, ranked, rankOf, playerId));
+      socket.emit(
+        'game:podium',
+        this.personalPodium(podium, ranked, rankOf, playerId, await this.feedbackEnabled(pin)),
+      );
       // Classement général (top 10) aussi au podium : alimente l'écran projeté et
       // survit à un rechargement (sendStateTo le ré-émet en PODIUM).
       socket.emit('leaderboard', this.personalLeaderboard(top, ranked, rankOf, playerId));
@@ -394,10 +398,12 @@ export class GameEngine {
     ranked: RankedPlayer[],
     rankOf: Map<string, number>,
     playerId: string | undefined,
-  ): { podium: LeaderboardRow[]; you?: { score: number; rank: number } } {
+    feedbackEnabled: boolean,
+  ): PodiumPayload {
     const me = playerId ? ranked.find((p) => p.id === playerId) : undefined;
     return {
       podium,
+      feedbackEnabled,
       you: me ? { score: me.score, rank: rankOf.get(me.id) ?? ranked.length } : undefined,
     };
   }
@@ -468,7 +474,10 @@ export class GameEngine {
       const podium = ranked
         .slice(0, 3)
         .map((p, i) => ({ nickname: p.nickname, score: p.score, rank: i + 1 }));
-      socket.emit('game:podium', this.personalPodium(podium, ranked, rankOf, playerId));
+      socket.emit(
+        'game:podium',
+        this.personalPodium(podium, ranked, rankOf, playerId, await this.feedbackEnabled(pin)),
+      );
       // Classement général : un projecteur qui (re)charge au podium doit le revoir.
       socket.emit(
         'leaderboard',
@@ -661,7 +670,7 @@ export class GameEngine {
     this.server
       .to(pin)
       .emit('game:state', { state: GameState.Ended, questionIndex: -1, totalQuestions: 0 });
-    this.server.to(pin).emit('game:ended', {});
+    this.server.to(pin).emit('game:ended', { feedbackEnabled: await this.feedbackEnabled(pin) });
   }
 
   /**
@@ -747,7 +756,7 @@ export class GameEngine {
     this.server
       .to(pin)
       .emit('game:state', { state: GameState.Ended, questionIndex: -1, totalQuestions: 0 });
-    this.server.to(pin).emit('game:ended', {});
+    this.server.to(pin).emit('game:ended', { feedbackEnabled: await this.feedbackEnabled(pin) });
   }
 
   // ── Mode / pause / chrono (§8) ─────────────────────────────────────────────
@@ -970,6 +979,12 @@ export class GameEngine {
       meta.mode === 'auto' && meta.state === GameState.Reveal && step === meta.currentIndex;
     if (!onSlide && !onReveal) return;
     await this.next(pin, hostUserId);
+  }
+
+  /** Whether players may rate this quiz (§2.11); defaults to true when the snapshot is gone. */
+  private async feedbackEnabled(pin: string): Promise<boolean> {
+    const snapshot = await this.game.getSnapshot(pin);
+    return snapshot?.feedbackEnabled ?? true;
   }
 
   /** Lit les réponses gradées d'une question (playerId → enregistrement). */

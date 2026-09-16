@@ -16,8 +16,8 @@ export function normalizeAnswer(text: string): string {
 const optionInputSchema = z.object({
   text: z.string().trim().max(500).optional(),
   mediaId: z.string().length(26).optional(),
-  color: z.enum(['red', 'blue', 'yellow', 'green']),
-  shape: z.enum(['triangle', 'diamond', 'circle', 'square']),
+  color: z.enum(['red', 'blue', 'yellow', 'green', 'purple', 'orange', 'pink', 'teal']),
+  shape: z.enum(['triangle', 'diamond', 'circle', 'square', 'star', 'hexagon', 'heart', 'cross']),
   isCorrect: z.boolean().default(false),
   correctOrderIndex: z.number().int().min(0).optional(),
 });
@@ -62,7 +62,7 @@ export const questionContentSchema = z
     pointsMode: z.enum(['standard', 'double', 'none']).default('standard'),
     numericValue: z.number().optional(),
     numericTolerance: z.number().min(0).optional(),
-    options: z.array(optionInputSchema).max(6).default([]),
+    options: z.array(optionInputSchema).max(8).default([]),
     acceptedAnswers: z.array(acceptedAnswerInputSchema).max(20).default([]),
   })
   .superRefine((d, ctx) => {
@@ -83,13 +83,13 @@ export const questionContentSchema = z
 
     switch (d.type) {
       case 'single_choice':
-        if (d.options.length < 2 || d.options.length > 6)
-          err('Entre 2 et 6 options requises.', ['options']);
+        if (d.options.length < 2 || d.options.length > 8)
+          err('Entre 2 et 8 options requises.', ['options']);
         if (correct !== 1) err('Exactement une option correcte requise.', ['options']);
         break;
       case 'multiple_choice':
-        if (d.options.length < 2 || d.options.length > 6)
-          err('Entre 2 et 6 options requises.', ['options']);
+        if (d.options.length < 2 || d.options.length > 8)
+          err('Entre 2 et 8 options requises.', ['options']);
         if (correct < 1) err('Au moins une option correcte requise.', ['options']);
         break;
       case 'true_false':
@@ -97,13 +97,13 @@ export const questionContentSchema = z
         if (correct !== 1) err('Exactement une option correcte requise.', ['options']);
         break;
       case 'poll':
-        if (d.options.length < 2 || d.options.length > 6)
-          err('Entre 2 et 6 options requises.', ['options']);
+        if (d.options.length < 2 || d.options.length > 8)
+          err('Entre 2 et 8 options requises.', ['options']);
         if (correct > 0) err('Un sondage n’a pas de bonne réponse.', ['options']);
         break;
       case 'ordering': {
-        if (d.options.length < 2 || d.options.length > 6)
-          err('Entre 2 et 6 options requises.', ['options']);
+        if (d.options.length < 2 || d.options.length > 8)
+          err('Entre 2 et 8 options requises.', ['options']);
         const idx = d.options.map((o) => o.correctOrderIndex);
         if (idx.some((i) => i == null)) {
           err('Chaque option doit porter un correctOrderIndex (type ordering).', ['options']);

@@ -20,6 +20,7 @@
     "title": "Ajustes",
     "titleLabel": "Título",
     "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Descripción (opcional)…",
     "save": "Guardar"
   },
   "broadcast": {
@@ -35,9 +36,19 @@
     "presentError": "No se pudo iniciar la sesión."
   },
   "feedback": {
+    "enableLabel": "Permitir opiniones de los participantes",
+    "enableHelp": "Se ofrece un panel de valoración al final de cada sesión.",
     "title": "Opiniones de los jugadores",
     "empty": "Aún no hay opiniones. Los jugadores pueden valorar el quiz al final de la sesión.",
     "starsAriaLabel": "{{value}} de 5",
+    "seeAll_one": "Ver la opinión",
+    "seeAll_other": "Ver las {{count}} opiniones",
+    "backToEditor": "Volver al editor",
+    "loadError": "No se pudieron cargar las opiniones.",
+    "noneForFilter": "Ninguna opinión con esta nota.",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pagePosition": "Página {{page}} / {{pages}}",
     "count_one": "{{count}} opinión",
     "count_other": "{{count}} opiniones"
   },
@@ -49,6 +60,8 @@
     "edit": "Editar",
     "deleteQuestion": "Eliminar la pregunta",
     "dragHandle": "Arrastrar para reordenar",
+    "itemsCount_one": "{{count}} elemento",
+    "itemsCount_other": "{{count}} elementos",
     "formTitle": "Pregunta",
     "empty": "No hay preguntas. ¡Añade una!"
   },
@@ -75,7 +88,14 @@
     "description": "Los cambios no guardados se perderán.",
     "confirmLabel": "Descartar"
   },
+  "emptyPane": {
+    "emptyTitle": "Este cuestionario está vacío",
+    "emptyHint": "Empieza con una pregunta o con una diapositiva de introducción.",
+    "selectTitle": "Nada seleccionado",
+    "selectHint": "Elige un elemento de la lista para editarlo."
+  },
   "deleteConfirm": {
+    "hint": "Eliminar este cuestionario y todo su historial.",
     "title": "¿Eliminar este quiz?",
     "description": "«{{title}}» y sus preguntas se eliminarán definitivamente. Esta acción es irreversible.",
     "confirmLabel": "Eliminar"
@@ -103,6 +123,7 @@
     },
     "optionsLegend": "Opciones",
     "optionAriaLabel": "opción {{index}}",
+    "dragOption": "Arrastrar para reordenar la opción",
     "optionPlaceholder": "Opción {{index}}",
     "colorAriaLabel": "color {{index}}",
     "shapeAriaLabel": "forma {{index}}",

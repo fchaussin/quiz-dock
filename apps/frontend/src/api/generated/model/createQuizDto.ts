@@ -19,6 +19,7 @@ export interface CreateQuizDto {
      * @maxLength 5
      */
   language?: string;
+  feedbackEnabled?: boolean;
   /**
      * @minLength 26
      * @maxLength 26

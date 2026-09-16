@@ -11,6 +11,7 @@ import { PlayerPage } from './routes/player-page';
 import { PreviewPage } from './routes/preview-page';
 import { ScreenPage } from './routes/screen-page';
 import { SessionDetailPage, SessionPlayerPage, SessionsPage } from './routes/sessions-page';
+import { FeedbackPage } from './routes/feedback-page';
 import { RootLayout } from './routes/root-layout';
 
 const requireAuth = () => {
@@ -58,6 +59,14 @@ export const previewRoute = createRoute({
   path: '/quizzes/$quizId/preview',
   beforeLoad: requireAuth,
   component: PreviewPage,
+});
+
+// Player reviews of a quiz (§2.11), paginated — owner only.
+export const feedbackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/quizzes/$quizId/feedback',
+  beforeLoad: requireAuth,
+  component: FeedbackPage,
 });
 
 // Historique des parties archivées d'un quiz (§2.7) — propriétaire uniquement.
@@ -128,6 +137,7 @@ export const routeTree = rootRoute.addChildren([
   editorRoute,
   previewRoute,
   sessionsRoute,
+  feedbackRoute,
   sessionDetailRoute,
   sessionPlayerRoute,
   controlRoute,

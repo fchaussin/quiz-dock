@@ -52,9 +52,10 @@ export function SlideForm({
   const update = useSlidesControllerUpdate();
   const [error, setError] = useState<string | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const [initial] = useState(() => initialValues(slide));
 
   const form = useForm({
-    defaultValues: initialValues(slide),
+    defaultValues: initial,
     onSubmit: async ({ value }) => {
       setError(null);
       const data = {
@@ -79,17 +80,14 @@ export function SlideForm({
     },
   });
   const mediaId = useStore(form.store, (s) => s.values.mediaId);
-  const dirty = useStore(
-    form.store,
-    (s) => JSON.stringify(s.values) !== JSON.stringify(initialValues(slide)),
-  );
+  const dirty = useStore(form.store, (s) => JSON.stringify(s.values) !== JSON.stringify(initial));
   useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
   useUnsavedGuard(dirty);
   const cancel = () => (dirty ? setConfirmDiscard(true) : onClose());
 
   return (
     <form
-      className="bg-muted/50 flex flex-col gap-5 rounded-2xl p-6"
+      className="flex flex-col gap-5"
       onSubmit={(e) => {
         e.preventDefault();
         void form.handleSubmit();

@@ -20,6 +20,7 @@
     "title": "Settings",
     "titleLabel": "Title",
     "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Description (optional)…",
     "save": "Save"
   },
   "broadcast": {
@@ -35,9 +36,19 @@
     "presentError": "Failed to start the session."
   },
   "feedback": {
+    "enableLabel": "Allow player feedback",
+    "enableHelp": "A rating panel is offered at the end of every session.",
     "title": "Player feedback",
     "empty": "No feedback yet. Players can rate the quiz at the end of a session.",
     "starsAriaLabel": "{{value}} out of 5",
+    "seeAll_one": "See the review",
+    "seeAll_other": "See all {{count}} reviews",
+    "backToEditor": "Back to the editor",
+    "loadError": "Could not load the reviews.",
+    "noneForFilter": "No review with this rating.",
+    "previous": "Previous",
+    "next": "Next",
+    "pagePosition": "Page {{page}} / {{pages}}",
     "count_one": "{{count}} review",
     "count_other": "{{count}} reviews"
   },
@@ -49,6 +60,8 @@
     "edit": "Edit",
     "deleteQuestion": "Delete question",
     "dragHandle": "Drag to reorder",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items",
     "formTitle": "Question",
     "empty": "No questions. Add one!"
   },
@@ -75,7 +88,14 @@
     "description": "Unsaved changes will be lost.",
     "confirmLabel": "Discard"
   },
+  "emptyPane": {
+    "emptyTitle": "This quiz is empty",
+    "emptyHint": "Start with a question, or with an intro slide.",
+    "selectTitle": "Nothing selected",
+    "selectHint": "Pick an item in the list to edit it."
+  },
   "deleteConfirm": {
+    "hint": "Delete this quiz and all its history.",
     "title": "Delete this quiz?",
     "description": "“{{title}}” and its questions will be permanently deleted. This action cannot be undone.",
     "confirmLabel": "Delete"
@@ -103,6 +123,7 @@
     },
     "optionsLegend": "Options",
     "optionAriaLabel": "option {{index}}",
+    "dragOption": "Drag to reorder the option",
     "optionPlaceholder": "Option {{index}}",
     "colorAriaLabel": "color {{index}}",
     "shapeAriaLabel": "shape {{index}}",

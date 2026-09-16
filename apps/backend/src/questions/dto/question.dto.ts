@@ -10,8 +10,8 @@ export const answerOptionSchema = z.object({
   orderIndex: z.number().int(),
   text: z.string().nullable(),
   mediaId: z.string().nullable(),
-  color: z.enum(['red', 'blue', 'yellow', 'green']),
-  shape: z.enum(['triangle', 'diamond', 'circle', 'square']),
+  color: z.enum(['red', 'blue', 'yellow', 'green', 'purple', 'orange', 'pink', 'teal']),
+  shape: z.enum(['triangle', 'diamond', 'circle', 'square', 'star', 'hexagon', 'heart', 'cross']),
   isCorrect: z.boolean(),
   correctOrderIndex: z.number().int().nullable(),
 });

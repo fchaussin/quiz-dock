@@ -46,6 +46,7 @@ export * from './quizDtoStatus';
 export * from './quizDtoVisibility';
 export * from './quizFeedbackSummaryDto';
 export * from './quizFeedbackSummaryDtoItemsItem';
+export * from './quizzesControllerFeedbackParams';
 export * from './reorderItemsDto';
 export * from './reorderItemsDtoItemsItem';
 export * from './reorderItemsDtoItemsItemKind';

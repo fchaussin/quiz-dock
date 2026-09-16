@@ -323,7 +323,7 @@ export function PlayerPage() {
             <p className="text-xl font-semibold">{t('player.thanks')}</p>
           </>
         )}
-        <RatingPanel pin={pin} socket={socket} />
+        {view.feedbackEnabled ? <RatingPanel pin={pin} socket={socket} /> : null}
       </>,
     );
   }

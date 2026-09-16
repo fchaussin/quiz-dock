@@ -11,6 +11,7 @@ export const quizSchema = z.object({
   status: z.enum(['draft', 'ready', 'archived']),
   visibility: z.enum(['private', 'unlisted']),
   language: z.string(),
+  feedbackEnabled: z.boolean(),
   questionCount: z.number().int(),
   createdAt: z.string(),
   updatedAt: z.string(),

@@ -4,7 +4,7 @@ import '../i18n'; // init i18n synchrone — t() renvoie le texte FR réel dans 
 // jsdom n'implémente pas scrollTo ; TanStack Router l'appelle (scroll restoration).
 window.scrollTo = () => undefined;
 
-// jsdom has no matchMedia; the editor picks its wide (inline form) layout from it.
+// jsdom has no matchMedia; the editor picks its wide (side-by-side) layout from it.
 window.matchMedia ??= (query: string) =>
   ({
     matches: query.includes('min-width'),

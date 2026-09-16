@@ -14,5 +14,27 @@ export interface QuizFeedbackSummaryDto {
      */
   count: number;
   average: number;
+  /**
+     * @minItems 5
+     * @maxItems 5
+     * @items.minimum -9007199254740991
+     * @items.maximum 9007199254740991
+     */
+  distribution: number[];
   items: QuizFeedbackSummaryDtoItemsItem[];
+  /**
+     * @minimum -9007199254740991
+     * @maximum 9007199254740991
+     */
+  page: number;
+  /**
+     * @minimum -9007199254740991
+     * @maximum 9007199254740991
+     */
+  pageSize: number;
+  /**
+     * @minimum -9007199254740991
+     * @maximum 9007199254740991
+     */
+  total: number;
 }

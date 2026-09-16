@@ -65,6 +65,8 @@ export interface QuizSnapshot {
   title: string;
   description: string | null;
   language: string;
+  /** End-of-session rating allowed (§2.11). */
+  feedbackEnabled: boolean;
   questions: SnapshotQuestion[];
   /** Sorted by (beforeQuestionIndex, orderIndex). */
   slides: SnapshotSlide[];

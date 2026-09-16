@@ -6,6 +6,7 @@ export const createQuizSchema = z.object({
   title: z.string().trim().min(1).max(200),
   description: z.string().trim().max(2000).optional(),
   language: z.string().trim().min(2).max(5).default('fr'),
+  feedbackEnabled: z.boolean().optional(),
   coverMediaId: z.string().length(26).optional(),
 });
 

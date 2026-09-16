@@ -43,6 +43,7 @@ export function buildSnapshot(quiz: QuizWithContent): QuizSnapshot {
     title: quiz.title,
     description: quiz.description,
     language: quiz.language,
+    feedbackEnabled: quiz.feedbackEnabled,
     questions: quiz.questions.map(
       (q): SnapshotQuestion => ({
         id: q.id,

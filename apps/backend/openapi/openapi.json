@@ -275,6 +275,38 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "default": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "rating",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 5,
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -1074,6 +1106,9 @@
           "language": {
             "type": "string"
           },
+          "feedbackEnabled": {
+            "type": "boolean"
+          },
           "questionCount": {
             "type": "integer",
             "minimum": -9007199254740991,
@@ -1099,6 +1134,7 @@
           "status",
           "visibility",
           "language",
+          "feedbackEnabled",
           "questionCount",
           "createdAt",
           "updatedAt",
@@ -1122,6 +1158,9 @@
             "type": "string",
             "minLength": 2,
             "maxLength": 5
+          },
+          "feedbackEnabled": {
+            "type": "boolean"
           },
           "coverMediaId": {
             "type": "string",
@@ -1170,6 +1209,9 @@
           },
           "language": {
             "type": "string"
+          },
+          "feedbackEnabled": {
+            "type": "boolean"
           },
           "questionCount": {
             "type": "integer",
@@ -1279,7 +1321,11 @@
                           "red",
                           "blue",
                           "yellow",
-                          "green"
+                          "green",
+                          "purple",
+                          "orange",
+                          "pink",
+                          "teal"
                         ]
                       },
                       "shape": {
@@ -1288,7 +1334,11 @@
                           "triangle",
                           "diamond",
                           "circle",
-                          "square"
+                          "square",
+                          "star",
+                          "hexagon",
+                          "heart",
+                          "cross"
                         ]
                       },
                       "isCorrect": {
@@ -1415,6 +1465,7 @@
           "status",
           "visibility",
           "language",
+          "feedbackEnabled",
           "questionCount",
           "createdAt",
           "updatedAt",
@@ -1433,6 +1484,16 @@
           },
           "average": {
             "type": "number"
+          },
+          "distribution": {
+            "minItems": 5,
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
           },
           "items": {
             "type": "array",
@@ -1466,12 +1527,31 @@
                 "createdAt"
               ]
             }
+          },
+          "page": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "pageSize": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           }
         },
         "required": [
           "count",
           "average",
-          "items"
+          "distribution",
+          "items",
+          "page",
+          "pageSize",
+          "total"
         ]
       },
       "SessionListDto": {
@@ -1814,6 +1894,9 @@
             "minLength": 2,
             "maxLength": 5
           },
+          "feedbackEnabled": {
+            "type": "boolean"
+          },
           "coverMediaId": {
             "type": "string",
             "minLength": 26,
@@ -1898,7 +1981,7 @@
           },
           "options": {
             "default": [],
-            "maxItems": 6,
+            "maxItems": 8,
             "type": "array",
             "items": {
               "type": "object",
@@ -1918,7 +2001,11 @@
                     "red",
                     "blue",
                     "yellow",
-                    "green"
+                    "green",
+                    "purple",
+                    "orange",
+                    "pink",
+                    "teal"
                   ]
                 },
                 "shape": {
@@ -1927,7 +2014,11 @@
                     "triangle",
                     "diamond",
                     "circle",
-                    "square"
+                    "square",
+                    "star",
+                    "hexagon",
+                    "heart",
+                    "cross"
                   ]
                 },
                 "isCorrect": {
@@ -2061,7 +2152,11 @@
                     "red",
                     "blue",
                     "yellow",
-                    "green"
+                    "green",
+                    "purple",
+                    "orange",
+                    "pink",
+                    "teal"
                   ]
                 },
                 "shape": {
@@ -2070,7 +2165,11 @@
                     "triangle",
                     "diamond",
                     "circle",
-                    "square"
+                    "square",
+                    "star",
+                    "hexagon",
+                    "heart",
+                    "cross"
                   ]
                 },
                 "isCorrect": {
@@ -2226,7 +2325,7 @@
           },
           "options": {
             "default": [],
-            "maxItems": 6,
+            "maxItems": 8,
             "type": "array",
             "items": {
               "type": "object",
@@ -2246,7 +2345,11 @@
                     "red",
                     "blue",
                     "yellow",
-                    "green"
+                    "green",
+                    "purple",
+                    "orange",
+                    "pink",
+                    "teal"
                   ]
                 },
                 "shape": {
@@ -2255,7 +2358,11 @@
                     "triangle",
                     "diamond",
                     "circle",
-                    "square"
+                    "square",
+                    "star",
+                    "hexagon",
+                    "heart",
+                    "cross"
                   ]
                 },
                 "isCorrect": {

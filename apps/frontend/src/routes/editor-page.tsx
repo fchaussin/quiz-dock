@@ -21,17 +21,19 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import {
   ArrowDown,
   ArrowUp,
+  ChevronRight,
   ExternalLink,
   Eye,
   GripVertical,
   History,
   LayoutTemplate,
+  MousePointerClick,
   MonitorPlay,
-  Pencil,
   Play,
   Plus,
   Radio,
   Save,
+  Sparkles,
   Star,
   Trash2,
   Users,
@@ -44,7 +46,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { createSession } from '../game/game-client';
 import type { QuizDetailDto } from '../api/generated/model';
@@ -54,6 +55,7 @@ import { useUnsavedGuard } from '@/lib/use-unsaved-guard';
 import { Drawer } from '@/components/ui/drawer';
 import { QuestionForm } from './question-form';
 import { SlideForm } from './slide-form';
+import { FeedbackSummary } from './feedback-page';
 import {
   useSlidesControllerRemove,
   useSlidesControllerReorderItems,
@@ -91,7 +93,9 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
   const removeSlide = useSlidesControllerRemove();
   const reorder = useSlidesControllerReorderItems();
   type Editing = string | 'new' | 'new-slide' | null;
-  const [editing, setEditing] = useState<Editing>(null);
+  const [editing, setEditing] = useState<Editing>(
+    () => quiz.questions[0]?.id ?? quiz.slides[0]?.id ?? 'new',
+  );
   // Unsaved edits in the open item form: switching item or closing asks first.
   const [formDirty, setFormDirty] = useState(false);
   const [pendingEdit, setPendingEdit] = useState<Editing | undefined>(undefined);
@@ -100,7 +104,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
     setFormDirty(false);
     setEditing(null);
   }, []);
-  // Below `lg` the open form lives in a bottom sheet instead of inline in the list.
+  // From `lg` the open item sits next to the list; below, in a bottom sheet.
   const wide = useMediaQuery('(min-width: 1024px)');
   const requestEditing = (next: Editing) => {
     if (editing !== null && formDirty && next !== editing) setPendingEdit(next);
@@ -113,6 +117,8 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
   const [presenting, setPresenting] = useState(false);
   const [presentError, setPresentError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  // The description reads as text until clicked (the title is always an inline input).
+  const [editingDescription, setEditingDescription] = useState(false);
   // Capture intégrale (§2.10) : conserve le détail des réponses par participant.
   // Décidée avant le lancement de la partie (fige le snapshot côté serveur).
   const [fullCapture, setFullCapture] = useState(false);
@@ -140,12 +146,18 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
       });
       await invalidate();
       form.reset(value); // valeurs enregistrées = nouvelle base « propre » → bouton inactif
+      setEditingDescription(false);
     },
   });
 
   // Le bouton « Enregistrer » n'est actif que si une modification est en cours.
   const isDirty = useStore(form.store, (s) => s.isDirty);
   useUnsavedGuard(isDirty);
+
+  const setFeedbackEnabled = async (feedbackEnabled: boolean) => {
+    await update.mutateAsync({ id: quiz.id, data: { feedbackEnabled } });
+    await invalidate();
+  };
 
   const changeStatus = async (status: 'draft' | 'ready' | 'archived') => {
     await transition.mutateAsync({ id: quiz.id, data: { status } });
@@ -206,13 +218,15 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
   };
 
   const editingItem = items.find((it) => it.id === editing);
-  const openForm =
+  const openForm: ReactNode =
     editing === 'new' ? (
-      <QuestionForm quizId={quiz.id} onClose={closeForm} onDirtyChange={onFormDirty} />
+      <QuestionForm key="new" quizId={quiz.id} onClose={closeForm} onDirtyChange={onFormDirty} />
     ) : editing === 'new-slide' ? (
-      <SlideForm quizId={quiz.id} onClose={closeForm} onDirtyChange={onFormDirty} />
+      <SlideForm key="new-slide" quizId={quiz.id} onClose={closeForm} onDirtyChange={onFormDirty} />
     ) : editingItem?.kind === 'question' ? (
+      // Keyed by item: switching items must remount the form (fresh defaults, fresh dirty state).
       <QuestionForm
+        key={editingItem.id}
         quizId={quiz.id}
         question={editingItem.question}
         onClose={closeForm}
@@ -220,6 +234,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
       />
     ) : editingItem?.kind === 'slide' ? (
       <SlideForm
+        key={editingItem.id}
         quizId={quiz.id}
         slide={editingItem.slide}
         onClose={closeForm}
@@ -235,116 +250,261 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
     quiz.status === 'ready' ? 'success' : quiz.status === 'archived' ? 'muted' : 'default';
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-      {/* Header: the quiz itself is the page title; the editor label is secondary. */}
-      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <div className="min-w-0">
-          <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-            {t('header.title')}
-          </p>
-          <div className="mt-1 flex flex-wrap items-center gap-3">
-            <h1 className="truncate text-3xl font-bold tracking-tight">{quiz.title}</h1>
+    <div className="flex w-full flex-col gap-6">
+      {/* Header: the quiz is the page title; the main action (publish / present) lives here. */}
+      <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+        {/* Title and description are edited in place (no settings box to open). */}
+        <form
+          className="flex min-w-0 flex-1 flex-col gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void form.handleSubmit();
+          }}
+        >
+          <div className="flex flex-wrap items-center gap-3">
+            <form.Field name="title">
+              {(field) => (
+                <Input
+                  aria-label={t('settings.titleLabel')}
+                  className="hover:bg-accent/60 focus-visible:bg-accent/60 -mx-2 h-auto min-w-64 flex-1 rounded-md border-0 bg-transparent px-2 text-3xl font-bold tracking-tight shadow-none focus-visible:ring-0"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+              )}
+            </form.Field>
             <Badge variant={statusVariant}>
               {t(`common:quizStatus.${quiz.status}`, { defaultValue: quiz.status })}
             </Badge>
           </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-1">
-          <a
-            className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
-            href={`/quizzes/${quiz.id}/preview`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ExternalLink className="size-4" />
-            {t('header.preview')}
-          </a>
-          <Link
-            to="/quizzes/$quizId/sessions"
-            params={{ quizId: quiz.id }}
-            className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
-          >
-            <History className="size-4" />
-            {t('header.history')}
-          </Link>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:text-destructive"
-            onClick={() => setConfirmDelete(true)}
-          >
-            <Trash2 className="size-4" />
-            {t('header.deleteQuiz')}
-          </Button>
-        </div>
-      </header>
-
-      {/* Working area first (the sequence), settings in a sticky sidebar on wide screens.
-          DOM order = mobile order, no `order-*` juggling. */}
-      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <main className="flex min-w-0 flex-col gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">
-              {t('questions.title', { count: quiz.questionCount })}
-            </h2>
-            <div className="flex gap-1">
+          <form.Field name="description">
+            {(field) => (
+              <div className="flex flex-col gap-1">
+                <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                  {t('settings.descriptionLabel')}
+                </span>
+                {editingDescription || isDirty ? (
+                  <MarkdownEditor
+                    aria-label={t('settings.descriptionLabel')}
+                    className="max-w-3xl"
+                    placeholder={t('settings.descriptionPlaceholder')}
+                    value={field.state.value}
+                    onChange={field.handleChange}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    className="text-muted-foreground hover:bg-accent/60 -mx-2 max-w-3xl rounded-md px-2 py-1 text-left text-sm"
+                    onClick={() => setEditingDescription(true)}
+                  >
+                    {field.state.value ? (
+                      <Markdown>{field.state.value}</Markdown>
+                    ) : (
+                      <span className="italic">{t('settings.descriptionPlaceholder')}</span>
+                    )}
+                  </button>
+                )}
+              </div>
+            )}
+          </form.Field>
+          {isDirty ? (
+            <div className="flex items-center gap-2">
+              <Button type="submit" size="sm" disabled={update.isPending}>
+                <Save className="size-4" />
+                {t('settings.save')}
+              </Button>
               <Button
                 type="button"
                 size="sm"
                 variant="ghost"
-                onClick={() => requestEditing('new-slide')}
-                disabled={editing === 'new-slide'}
+                onClick={() => {
+                  form.reset();
+                  setEditingDescription(false);
+                }}
               >
-                <LayoutTemplate className="size-4" />
-                {t('slides.add')}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => requestEditing('new')}
-                disabled={editing === 'new'}
-              >
-                <Plus className="size-4" />
-                {t('questions.add')}
+                {t('common:cancel')}
               </Button>
             </div>
+          ) : null}
+        </form>
+        <div className="flex flex-wrap items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1">
+            <a
+              className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
+              href={`/quizzes/${quiz.id}/preview`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="size-4" />
+              {t('header.preview')}
+            </a>
+            <Link
+              to="/quizzes/$quizId/sessions"
+              params={{ quizId: quiz.id }}
+              className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
+            >
+              <History className="size-4" />
+              {t('header.history')}
+            </Link>
           </div>
+          <span className="bg-border mx-1 hidden h-6 w-px sm:block" />
+          {quiz.status === 'draft' && (
+            <Button
+              type="button"
+              disabled={quiz.questionCount === 0 || transition.isPending}
+              onClick={() => void changeStatus('ready')}
+            >
+              {t('broadcast.publish')}
+            </Button>
+          )}
+          {quiz.status === 'ready' && (
+            <>
+              {!livePin && (
+                <Button
+                  type="button"
+                  variant="main-action"
+                  disabled={presenting}
+                  onClick={() => void onPresent()}
+                >
+                  <Play className="size-4" />
+                  {presenting ? t('broadcast.presenting') : t('broadcast.present')}
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+      </header>
+      {presentError ? <p className="text-destructive text-sm">{presentError}</p> : null}
+      {livePin ? <GameAccessPanel pin={livePin} /> : null}
 
-          {wide && (editing === 'new' || editing === 'new-slide') ? openForm : null}
+      {/* Quiz-level settings, folded away: they are touched once, the sequence is the work. */}
+      <details className="group rounded-xl border">
+        <summary className="flex cursor-pointer items-center gap-2 px-5 py-3 text-sm font-semibold select-none">
+          <ChevronRight className="text-muted-foreground size-4 transition-transform group-open:rotate-90" />
+          {t('settings.title')}
+        </summary>
+        <div className="flex flex-col gap-8 border-t px-5 py-5">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <Section title={t('broadcast.title')}>
+              {quiz.status === 'ready' && !livePin ? (
+                <label className="flex items-start gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5"
+                    checked={fullCapture}
+                    onChange={(e) => setFullCapture(e.target.checked)}
+                  />
+                  <span>
+                    <span className="font-medium">{t('broadcast.fullCaptureLabel')}</span>
+                    <span className="text-muted-foreground block">
+                      {t('broadcast.fullCaptureHelp')}
+                    </span>
+                  </span>
+                </label>
+              ) : null}
+              <div className="flex flex-wrap items-center gap-2">
+                {quiz.status === 'ready' && (
+                  <>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => void changeStatus('draft')}
+                    >
+                      {t('broadcast.backToDraft')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => void changeStatus('archived')}
+                    >
+                      {t('broadcast.archive')}
+                    </Button>
+                  </>
+                )}
+                {quiz.status === 'archived' && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => void changeStatus('draft')}
+                  >
+                    {t('broadcast.restore')}
+                  </Button>
+                )}
+              </div>
+            </Section>
+            <Section title={t('feedback.title')}>
+              <label className="flex items-start gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={quiz.feedbackEnabled}
+                  disabled={update.isPending}
+                  onChange={(e) => void setFeedbackEnabled(e.target.checked)}
+                />
+                <span>
+                  <span className="font-medium">{t('feedback.enableLabel')}</span>
+                  <span className="text-muted-foreground block">{t('feedback.enableHelp')}</span>
+                </span>
+              </label>
+              <FeedbackSection quizId={quiz.id} />
+            </Section>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-5">
+            <span className="text-muted-foreground text-sm">{t('deleteConfirm.hint')}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-destructive hover:text-destructive"
+              onClick={() => setConfirmDelete(true)}
+            >
+              <Trash2 className="size-4" />
+              {t('header.deleteQuiz')}
+            </Button>
+          </div>
+        </div>
+      </details>
 
+      {/* Master / detail: the sequence on the left, the open item on the right (a bottom
+          sheet below `lg`). */}
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[22rem_minmax(0,1fr)] xl:grid-cols-[24rem_minmax(0,1fr)]">
+        <aside className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-6">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-lg font-semibold">
+              {t('questions.title', { count: quiz.questionCount })}
+            </h2>
+            <span className="text-muted-foreground text-xs">
+              {t('questions.itemsCount', { count: items.length })}
+            </span>
+          </div>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext
               items={items.map((it) => it.id)}
               strategy={verticalListSortingStrategy}
             >
-              <ul className="divide-border flex flex-col divide-y">
-                {items.map((item, i) =>
-                  wide && editing === item.id ? (
-                    <li key={item.id} className="py-3">
-                      {openForm}
-                    </li>
-                  ) : (
-                    <SortableRow key={item.id} id={item.id}>
-                      {(handle) => (
-                        <ItemRow
-                          item={item}
-                          number={questionNumber(items, i)}
-                          handle={handle}
-                          canMoveUp={i > 0 && !reorder.isPending}
-                          canMoveDown={i < items.length - 1 && !reorder.isPending}
-                          onMove={(d) => move(i, d)}
-                          onEdit={() => requestEditing(item.id)}
-                          onDelete={() =>
-                            void (item.kind === 'question'
-                              ? onDeleteQuestion(item.id)
-                              : onDeleteSlide(item.id))
-                          }
-                        />
-                      )}
-                    </SortableRow>
-                  ),
-                )}
+              <ul className="flex flex-col gap-0.5">
+                {items.map((item, i) => (
+                  <SortableRow key={item.id} id={item.id}>
+                    {(handle) => (
+                      <ItemRow
+                        item={item}
+                        active={editing === item.id}
+                        number={questionNumber(items, i)}
+                        handle={handle}
+                        canMoveUp={i > 0 && !reorder.isPending}
+                        canMoveDown={i < items.length - 1 && !reorder.isPending}
+                        onMove={(d) => move(i, d)}
+                        onEdit={() => requestEditing(item.id)}
+                        onDelete={() =>
+                          void (item.kind === 'question'
+                            ? onDeleteQuestion(item.id)
+                            : onDeleteSlide(item.id))
+                        }
+                      />
+                    )}
+                  </SortableRow>
+                ))}
                 {items.length === 0 && editing === null && (
                   <li className="text-muted-foreground rounded-xl border border-dashed py-10 text-center text-sm">
                     {t('questions.empty')}
@@ -353,130 +513,49 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
               </ul>
             </SortableContext>
           </DndContext>
-          {!wide ? (
-            <Drawer open={editing !== null} title={formTitle} onClose={() => requestEditing(null)}>
-              {openForm}
-            </Drawer>
-          ) : null}
-        </main>
-
-        <aside className="divide-border bg-muted/50 flex flex-col divide-y rounded-2xl p-6 lg:sticky lg:top-6">
-          <Section title={t('settings.title')} className="pb-6">
-            <form
-              className="flex flex-col gap-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void form.handleSubmit();
-              }}
+          <div className="mt-1 flex gap-1">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="flex-1"
+              onClick={() => requestEditing('new')}
+              disabled={editing === 'new'}
             >
-              <form.Field name="title">
-                {(field) => (
-                  <Label>
-                    {t('settings.titleLabel')}
-                    <Input
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                    />
-                  </Label>
-                )}
-              </form.Field>
-              <form.Field name="description">
-                {(field) => (
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-sm font-medium leading-none">
-                      {t('settings.descriptionLabel')}
-                    </span>
-                    <MarkdownEditor
-                      aria-label={t('settings.descriptionLabel')}
-                      value={field.state.value}
-                      onChange={field.handleChange}
-                    />
-                  </div>
-                )}
-              </form.Field>
-              <Button
-                type="submit"
-                size="sm"
-                variant={isDirty ? 'default' : 'outline'}
-                disabled={!isDirty || update.isPending}
-                className="self-start"
-              >
-                <Save className="size-4" />
-                {t('settings.save')}
-              </Button>
-            </form>
-          </Section>
-
-          <Section title={t('broadcast.title')} className="py-6">
-            {quiz.status === 'ready' && !livePin ? (
-              <label className="flex items-start gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  className="mt-0.5"
-                  checked={fullCapture}
-                  onChange={(e) => setFullCapture(e.target.checked)}
-                />
-                <span>
-                  <span className="font-medium">{t('broadcast.fullCaptureLabel')}</span>
-                  <span className="text-muted-foreground block">
-                    {t('broadcast.fullCaptureHelp')}
-                  </span>
-                </span>
-              </label>
-            ) : null}
-            <div className="flex flex-wrap items-center gap-2">
-              {quiz.status === 'draft' && (
-                <Button
-                  type="button"
-                  disabled={quiz.questionCount === 0 || transition.isPending}
-                  onClick={() => void changeStatus('ready')}
-                >
-                  {t('broadcast.publish')}
-                </Button>
-              )}
-              {quiz.status === 'ready' && (
-                <>
-                  {!livePin && (
-                    <Button
-                      type="button"
-                      variant="main-action"
-                      disabled={presenting}
-                      onClick={() => void onPresent()}
-                    >
-                      <Play className="size-4" />
-                      {presenting ? t('broadcast.presenting') : t('broadcast.present')}
-                    </Button>
-                  )}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => void changeStatus('draft')}
-                  >
-                    {t('broadcast.backToDraft')}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => void changeStatus('archived')}
-                  >
-                    {t('broadcast.archive')}
-                  </Button>
-                </>
-              )}
-              {quiz.status === 'archived' && (
-                <Button type="button" variant="outline" onClick={() => void changeStatus('draft')}>
-                  {t('broadcast.restore')}
-                </Button>
-              )}
-            </div>
-            {presentError ? <p className="text-destructive text-sm">{presentError}</p> : null}
-            {livePin ? <GameAccessPanel pin={livePin} /> : null}
-          </Section>
-
-          <FeedbackSection quizId={quiz.id} className="pt-6" />
+              <Plus className="size-4" />
+              {t('questions.add')}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="flex-1"
+              onClick={() => requestEditing('new-slide')}
+              disabled={editing === 'new-slide'}
+            >
+              <LayoutTemplate className="size-4" />
+              {t('slides.add')}
+            </Button>
+          </div>
         </aside>
+
+        {wide ? (
+          <section className="min-h-[24rem] min-w-0">
+            {openForm ? (
+              <div className="bg-muted/40 max-w-4xl rounded-2xl p-6">{openForm}</div>
+            ) : (
+              <EmptyPane
+                variant={items.length === 0 ? 'empty' : 'select'}
+                onAddQuestion={() => requestEditing('new')}
+                onAddSlide={() => requestEditing('new-slide')}
+              />
+            )}
+          </section>
+        ) : (
+          <Drawer open={editing !== null} title={formTitle} onClose={() => requestEditing(null)}>
+            {openForm}
+          </Drawer>
+        )}
       </div>
 
       <ConfirmDialog
@@ -515,75 +594,47 @@ function Section({
   className,
   children,
 }: {
-  title: string;
+  title?: string;
   className?: string;
   children: ReactNode;
 }) {
   return (
     <section className={cn('flex flex-col gap-4', className)}>
-      <h2 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-        {title}
-      </h2>
+      {title ? (
+        <h2 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+          {title}
+        </h2>
+      ) : null}
       {children}
     </section>
   );
 }
 
-/** Étoiles pleines/vides pour une note `value` sur 5. */
-function StarRow({ value, size = 'size-4' }: { value: number; size?: string }) {
-  const { t } = useTranslation('editor');
-  return (
-    <span
-      className="inline-flex items-center gap-0.5"
-      aria-label={t('feedback.starsAriaLabel', { value })}
-    >
-      {[0, 1, 2, 3, 4].map((i) => (
-        <Star
-          key={i}
-          className={cn(
-            size,
-            i < value ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/40',
-          )}
-        />
-      ))}
-    </span>
-  );
-}
-
 /**
- * Avis des joueurs sur le quiz (§2.11) — réservé au propriétaire (l'endpoint refuse
- * les autres). Moyenne, nombre et liste des commentaires (récents d'abord).
+ * Player feedback at a glance (§2.11): whole-quiz summary and a link to the
+ * full, paginated list — reviews can be numerous, they do not belong here.
  */
 function FeedbackSection({ quizId, className }: { quizId: string; className?: string }) {
   const { t } = useTranslation(['editor', 'common']);
-  const { data, isLoading } = useQuizzesControllerFeedback(quizId);
+  const { data, isLoading } = useQuizzesControllerFeedback(quizId, { page: 1, pageSize: 1 });
   const summary = data?.data;
   return (
-    <Section title={t('feedback.title')} className={className}>
+    <Section className={className}>
       {isLoading ? <p className="text-muted-foreground text-sm">{t('common:loading')}</p> : null}
       {summary && summary.count === 0 ? (
         <p className="text-muted-foreground text-sm">{t('feedback.empty')}</p>
       ) : null}
       {summary && summary.count > 0 ? (
         <>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold tabular-nums">{summary.average.toFixed(1)}</span>
-            <StarRow value={Math.round(summary.average)} size="size-5" />
-            <span className="text-muted-foreground text-sm">
-              {t('feedback.count', { count: summary.count })}
-            </span>
-          </div>
-          <ul className="flex max-h-60 flex-col gap-2 overflow-auto">
-            {summary.items.map((f) => (
-              <li key={f.id} className="bg-muted/50 rounded-lg p-3 text-sm">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium">{f.nickname}</span>
-                  <StarRow value={f.rating} size="size-3.5" />
-                </div>
-                {f.comment ? <p className="text-muted-foreground mt-1">{f.comment}</p> : null}
-              </li>
-            ))}
-          </ul>
+          <FeedbackSummary summary={summary} compact />
+          <Link
+            to="/quizzes/$quizId/feedback"
+            params={{ quizId }}
+            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'self-start')}
+          >
+            <Star className="size-4" />
+            {t('feedback.seeAll', { count: summary.count })}
+          </Link>
         </>
       ) : null}
     </Section>
@@ -674,11 +725,15 @@ function SortableRow({ id, children }: { id: string; children: (handle: ReactNod
   );
 }
 
-/** One row of the quiz sequence: a question (numbered) or a content slide (#7). */
+/**
+ * One item of the sequence (#7): the whole row selects it for editing; the drag
+ * handle, the arrows and delete show on hover / focus so the title keeps the room.
+ */
 function ItemRow({
   item,
   number,
   handle,
+  active,
   canMoveUp,
   canMoveDown,
   onMove,
@@ -688,6 +743,8 @@ function ItemRow({
   item: QuizItem;
   number: number | null;
   handle?: ReactNode;
+  /** Currently open in the editing pane. */
+  active?: boolean;
   canMoveUp: boolean;
   canMoveDown: boolean;
   onMove: (direction: -1 | 1) => void;
@@ -697,67 +754,120 @@ function ItemRow({
   const { t } = useTranslation('editor');
   const isSlide = item.kind === 'slide';
   const label = isSlide ? item.slide.title || item.slide.body || '' : item.question.prompt;
+  const meta = isSlide
+    ? t('slides.kind')
+    : `${t(`questionType.${item.question.type}`, { defaultValue: item.question.type })} · ${item.question.timeLimitS} s`;
+  const hover =
+    'opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100';
   return (
-    <div className="group flex items-center gap-1 py-3 sm:gap-3">
-      {handle}
-      <span
-        className={cn(
-          'text-muted-foreground w-7 shrink-0 text-center text-sm tabular-nums',
-          isSlide && 'flex justify-center',
-        )}
-        aria-label={isSlide ? t('slides.kind') : undefined}
+    <div
+      className={cn(
+        'group relative flex items-stretch gap-1 rounded-xl border border-transparent transition-colors',
+        active ? 'bg-primary/5 border-primary/30' : 'hover:bg-accent/60',
+      )}
+    >
+      <div className={cn('flex items-center pl-1', hover)}>{handle}</div>
+      <button
+        type="button"
+        aria-current={active ? 'true' : undefined}
+        onClick={onEdit}
+        className="flex min-w-0 flex-1 items-start gap-3 py-3 pr-2 text-left"
       >
-        {isSlide ? <LayoutTemplate className="size-4" /> : number}
+        <span
+          className={cn(
+            'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md text-xs font-semibold tabular-nums',
+            isSlide ? 'text-muted-foreground' : 'bg-muted text-muted-foreground',
+            active && !isSlide && 'bg-primary text-primary-foreground',
+          )}
+          aria-label={isSlide ? t('slides.kind') : undefined}
+        >
+          {isSlide ? <LayoutTemplate className="size-4" /> : number}
+        </span>
+        <span className="min-w-0 flex-1">
+          <Markdown profile="inline" className="line-clamp-2 block text-sm font-medium">
+            {label}
+          </Markdown>
+          <span className="text-muted-foreground mt-0.5 block truncate text-xs">{meta}</span>
+        </span>
+      </button>
+      <div className={cn('flex items-center gap-0.5 pr-1', hover)}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          aria-label={t('questions.moveUp')}
+          disabled={!canMoveUp}
+          onClick={() => onMove(-1)}
+        >
+          <ArrowUp className="size-3.5" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          aria-label={t('questions.moveDown')}
+          disabled={!canMoveDown}
+          onClick={() => onMove(1)}
+        >
+          <ArrowDown className="size-3.5" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="hover:text-destructive size-7"
+          aria-label={isSlide ? t('slides.deleteSlide') : t('questions.deleteQuestion')}
+          onClick={onDelete}
+        >
+          <Trash2 className="size-3.5" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Right pane when nothing is open: an "empty quiz" state that invites the first
+ * item, or a "nothing selected" state that points at the list.
+ */
+function EmptyPane({
+  variant,
+  onAddQuestion,
+  onAddSlide,
+}: {
+  variant: 'empty' | 'select';
+  onAddQuestion: () => void;
+  onAddSlide: () => void;
+}) {
+  const { t } = useTranslation('editor');
+  const Icon = variant === 'empty' ? Sparkles : MousePointerClick;
+  return (
+    <div className="flex h-full min-h-[24rem] flex-col items-center justify-center gap-4 rounded-2xl border border-dashed px-6 text-center">
+      <span className="bg-muted text-muted-foreground flex size-16 items-center justify-center rounded-full">
+        <Icon className="size-8" />
       </span>
-      <div className="min-w-0 flex-1">
-        <Markdown profile="inline" className="block truncate font-medium">
-          {label}
-        </Markdown>
-        <p className="text-muted-foreground truncate text-xs">
-          {isSlide
-            ? t('slides.kind')
-            : t(`questionType.${item.question.type}`, { defaultValue: item.question.type })}
+      <div className="flex flex-col gap-1">
+        <p className="font-semibold">
+          {variant === 'empty' ? t('emptyPane.emptyTitle') : t('emptyPane.selectTitle')}
+        </p>
+        <p className="text-muted-foreground max-w-sm text-sm">
+          {variant === 'empty' ? t('emptyPane.emptyHint') : t('emptyPane.selectHint')}
         </p>
       </div>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label={t('questions.moveUp')}
-        disabled={!canMoveUp}
-        onClick={() => onMove(-1)}
-      >
-        <ArrowUp className="size-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label={t('questions.moveDown')}
-        disabled={!canMoveDown}
-        onClick={() => onMove(1)}
-      >
-        <ArrowDown className="size-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        aria-label={t('questions.edit')}
-        onClick={onEdit}
-      >
-        <Pencil className="size-4" />
-        <span className="hidden sm:inline">{t('questions.edit')}</span>
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label={isSlide ? t('slides.deleteSlide') : t('questions.deleteQuestion')}
-        onClick={onDelete}
-      >
-        <Trash2 className="size-4" />
-      </Button>
+      {variant === 'empty' ? (
+        <div className="flex gap-2">
+          <Button type="button" onClick={onAddQuestion}>
+            <Plus className="size-4" />
+            {t('questions.add')}
+          </Button>
+          <Button type="button" variant="outline" onClick={onAddSlide}>
+            <LayoutTemplate className="size-4" />
+            {t('slides.add')}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

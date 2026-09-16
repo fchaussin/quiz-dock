@@ -1,8 +1,25 @@
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useForm, useStore } from '@tanstack/react-form';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, X } from 'lucide-react';
+import { GripVertical, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard';
@@ -10,7 +27,7 @@ import { MarkdownEditor } from '@/components/markdown-editor';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
-import { COLOR_BG, OPTION_BG_FALLBACK } from '@/lib/option-style';
+import { COLOR_BG, OPTION_BG_FALLBACK, SHAPE_GLYPH } from '@/lib/option-style';
 import { cn } from '@/lib/utils';
 import { apiErrorText } from '../api/http';
 import type { QuizDetailDtoQuestionsItem } from '../api/generated/model';
@@ -40,8 +57,18 @@ const TYPES: QType[] = [
   'poll',
 ];
 
-const COLORS = ['red', 'blue', 'yellow', 'green'] as const;
-const SHAPES = ['triangle', 'diamond', 'circle', 'square'] as const;
+// Eight distinct colour+shape pairs, one per position: no two options ever look alike (max 8).
+const COLORS = ['red', 'blue', 'yellow', 'green', 'purple', 'orange', 'pink', 'teal'] as const;
+const SHAPES = [
+  'triangle',
+  'diamond',
+  'circle',
+  'square',
+  'star',
+  'hexagon',
+  'heart',
+  'cross',
+] as const;
 const OPTION_TYPES: QType[] = [
   'single_choice',
   'multiple_choice',
@@ -52,6 +79,8 @@ const OPTION_TYPES: QType[] = [
 const SINGLE_CORRECT: QType[] = ['single_choice', 'true_false'];
 
 interface OptionValue {
+  /** Client-only stable key (drag and drop); never sent. */
+  key: string;
   text: string;
   color: string;
   shape: string;
@@ -72,8 +101,12 @@ interface FormValues {
   acceptedAnswers: { text: string }[];
 }
 
+let optionSeq = 0;
+const optionKey = () => `opt-${++optionSeq}`;
+
 function newOption(i: number, text = ''): OptionValue {
   return {
+    key: optionKey(),
     text,
     color: COLORS[i % COLORS.length],
     shape: SHAPES[i % SHAPES.length],
@@ -109,6 +142,7 @@ function initialValues(q?: QuizDetailDtoQuestionsItem): FormValues {
     numericValue: q.numericValue ? Number(q.numericValue) : 0,
     numericTolerance: q.numericTolerance ? Number(q.numericTolerance) : 0,
     options: q.options.map((o, i) => ({
+      key: o.id,
       text: o.text ?? '',
       color: o.color,
       shape: o.shape,
@@ -137,9 +171,11 @@ export function QuestionForm({
   const update = useQuestionsControllerUpdate();
   const [error, setError] = useState<string | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+  // Computed once: option keys are generated, so a fresh copy per render would reset the form.
+  const [initial] = useState(() => initialValues(question));
 
   const form = useForm({
-    defaultValues: initialValues(question),
+    defaultValues: initial,
     onSubmit: async ({ value }) => {
       setError(null);
       const data = buildPayload(value);
@@ -161,10 +197,7 @@ export function QuestionForm({
 
   const type = useStore(form.store, (s) => s.values.type);
   // Dirty = values differ from what was loaded (a fresh question is dirty as soon as typed in).
-  const dirty = useStore(
-    form.store,
-    (s) => JSON.stringify(s.values) !== JSON.stringify(initialValues(question)),
-  );
+  const dirty = useStore(form.store, (s) => JSON.stringify(s.values) !== JSON.stringify(initial));
   useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
   useUnsavedGuard(dirty);
   const cancel = () => (dirty ? setConfirmDiscard(true) : onClose());
@@ -172,7 +205,27 @@ export function QuestionForm({
   const options = useStore(form.store, (s) => s.values.options);
   const answers = useStore(form.store, (s) => s.values.acceptedAnswers);
 
-  const setOptions = (next: OptionValue[]) => form.setFieldValue('options', next);
+  // Colour and shape are a pair fixed by position (red ▲, blue ◆, yellow ●, green ■):
+  // nothing to choose, and removing an option re-flows the ones after it.
+  const setOptions = (next: OptionValue[]) =>
+    form.setFieldValue(
+      'options',
+      next.map((o, i) => ({
+        ...o,
+        color: COLORS[i % COLORS.length],
+        shape: SHAPES[i % SHAPES.length],
+      })),
+    );
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+  const onOptionDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return;
+    const from = options.findIndex((o) => o.key === active.id);
+    const to = options.findIndex((o) => o.key === over.id);
+    if (from >= 0 && to >= 0) setOptions(arrayMove(options, from, to));
+  };
 
   const onTypeChange = (t: QType) => {
     form.setFieldValue('type', t);
@@ -196,12 +249,9 @@ export function QuestionForm({
     );
   };
 
-  const optionField =
-    'border-input h-9 rounded-md border bg-background px-2 text-sm shadow-sm focus-visible:ring-ring focus-visible:ring-1 focus-visible:outline-none';
-
   return (
     <form
-      className="bg-muted/50 flex flex-col gap-5 rounded-2xl p-6"
+      className="flex flex-col gap-5"
       onSubmit={(e) => {
         e.preventDefault();
         void form.handleSubmit();
@@ -291,99 +341,80 @@ export function QuestionForm({
           <legend className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">
             {t('questionForm.optionsLegend')}
           </legend>
-          {options.map((opt, i) => (
-            <div key={i} className="flex flex-wrap items-center gap-2">
-              <MarkdownEditor
-                profile="inline"
-                aria-label={t('questionForm.optionAriaLabel', { index: i + 1 })}
-                className="min-w-48 flex-1"
-                value={opt.text}
-                onChange={(text) =>
-                  setOptions(options.map((o, idx) => (idx === i ? { ...o, text } : o)))
-                }
-                placeholder={t('questionForm.optionPlaceholder', { index: i + 1 })}
-              />
-              <span
-                aria-hidden
-                className={cn(
-                  'size-3 shrink-0 rounded-full',
-                  COLOR_BG[opt.color] ?? OPTION_BG_FALLBACK,
-                )}
-              />
-              <select
-                aria-label={t('questionForm.colorAriaLabel', { index: i + 1 })}
-                className={optionField}
-                value={opt.color}
-                onChange={(e) =>
-                  setOptions(
-                    options.map((o, idx) => (idx === i ? { ...o, color: e.target.value } : o)),
-                  )
-                }
-              >
-                {COLORS.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-              <select
-                aria-label={t('questionForm.shapeAriaLabel', { index: i + 1 })}
-                className={optionField}
-                value={opt.shape}
-                onChange={(e) =>
-                  setOptions(
-                    options.map((o, idx) => (idx === i ? { ...o, shape: e.target.value } : o)),
-                  )
-                }
-              >
-                {SHAPES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-
-              {type === 'ordering' ? (
-                <Input
-                  type="number"
-                  aria-label={t('questionForm.orderAriaLabel', { index: i + 1 })}
-                  min={0}
-                  className="w-20"
-                  value={opt.correctOrderIndex}
-                  onChange={(e) =>
-                    setOptions(
-                      options.map((o, idx) =>
-                        idx === i ? { ...o, correctOrderIndex: Number(e.target.value) } : o,
-                      ),
-                    )
-                  }
-                />
-              ) : type === 'poll' ? null : (
-                <label className="flex items-center gap-1 text-sm">
-                  <input
-                    type={SINGLE_CORRECT.includes(type) ? 'radio' : 'checkbox'}
-                    name="correct"
-                    checked={opt.isCorrect}
-                    onChange={(e) => setCorrect(i, e.target.checked)}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={onOptionDragEnd}
+          >
+            <SortableContext
+              items={options.map((o) => o.key)}
+              strategy={verticalListSortingStrategy}
+            >
+              {options.map((opt, i) => (
+                <SortableOption key={opt.key} id={opt.key}>
+                  <span
+                    aria-hidden
+                    className={cn(
+                      'flex size-9 shrink-0 items-center justify-center rounded-md text-lg text-white',
+                      COLOR_BG[opt.color] ?? OPTION_BG_FALLBACK,
+                    )}
+                  >
+                    {SHAPE_GLYPH[opt.shape] ?? '●'}
+                  </span>
+                  <MarkdownEditor
+                    profile="inline"
+                    aria-label={t('questionForm.optionAriaLabel', { index: i + 1 })}
+                    className="min-w-48 flex-1"
+                    value={opt.text}
+                    onChange={(text) =>
+                      setOptions(options.map((o, idx) => (idx === i ? { ...o, text } : o)))
+                    }
+                    placeholder={t('questionForm.optionPlaceholder', { index: i + 1 })}
                   />
-                  {t('questionForm.correct')}
-                </label>
-              )}
 
-              {type !== 'true_false' && options.length > 2 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label={t('questionForm.removeOption', { index: i + 1 })}
-                  onClick={() => setOptions(options.filter((_, idx) => idx !== i))}
-                >
-                  <X className="size-4" />
-                </Button>
-              )}
-            </div>
-          ))}
-          {type !== 'true_false' && options.length < 6 && (
+                  {type === 'ordering' ? (
+                    <Input
+                      type="number"
+                      aria-label={t('questionForm.orderAriaLabel', { index: i + 1 })}
+                      min={0}
+                      className="w-20"
+                      value={opt.correctOrderIndex}
+                      onChange={(e) =>
+                        setOptions(
+                          options.map((o, idx) =>
+                            idx === i ? { ...o, correctOrderIndex: Number(e.target.value) } : o,
+                          ),
+                        )
+                      }
+                    />
+                  ) : type === 'poll' ? null : (
+                    <label className="flex items-center gap-1 text-sm">
+                      <input
+                        type={SINGLE_CORRECT.includes(type) ? 'radio' : 'checkbox'}
+                        name="correct"
+                        checked={opt.isCorrect}
+                        onChange={(e) => setCorrect(i, e.target.checked)}
+                      />
+                      {t('questionForm.correct')}
+                    </label>
+                  )}
+
+                  {type !== 'true_false' && options.length > 2 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t('questionForm.removeOption', { index: i + 1 })}
+                      onClick={() => setOptions(options.filter((_, idx) => idx !== i))}
+                    >
+                      <X className="size-4" />
+                    </Button>
+                  )}
+                </SortableOption>
+              ))}
+            </SortableContext>
+          </DndContext>
+          {type !== 'true_false' && options.length < COLORS.length && (
             <Button
               type="button"
               variant="ghost"
@@ -536,8 +567,8 @@ function buildPayload(v: FormValues) {
       ...base,
       options: v.options.map((o) => ({
         text: o.text || undefined,
-        color: o.color as 'red' | 'blue' | 'yellow' | 'green',
-        shape: o.shape as 'triangle' | 'diamond' | 'circle' | 'square',
+        color: o.color as (typeof COLORS)[number],
+        shape: o.shape as (typeof SHAPES)[number],
         isCorrect: o.isCorrect,
         correctOrderIndex: v.type === 'ordering' ? o.correctOrderIndex : undefined,
       })),
@@ -559,4 +590,40 @@ function buildPayload(v: FormValues) {
     };
   }
   return base;
+}
+
+/** Sortable option row: grip handle on the left, keyboard-sortable too. */
+function SortableOption({ id, children }: { id: string; children: ReactNode }) {
+  const { t } = useTranslation('editor');
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={cn(
+        'flex flex-wrap items-center gap-2 rounded-md',
+        isDragging && 'bg-background relative z-10 shadow-md',
+      )}
+    >
+      <button
+        type="button"
+        ref={setActivatorNodeRef}
+        aria-label={t('questionForm.dragOption')}
+        className="text-muted-foreground hover:text-foreground cursor-grab touch-none rounded p-1 active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="size-4" />
+      </button>
+      {children}
+    </div>
+  );
 }

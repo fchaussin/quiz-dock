@@ -50,12 +50,12 @@ export function Drawer({
         if (e.target === ref.current) onClose();
       }}
       className={cn(
-        'bg-background text-foreground m-0 mt-auto mb-0 flex max-h-[92dvh] w-full max-w-none flex-col rounded-t-2xl border-t p-0 shadow-2xl backdrop:bg-black/50',
+        'bg-background text-foreground m-0 mt-auto mb-0 flex max-h-[92dvh] w-full max-w-none flex-col rounded-t-2xl border-t p-0 shadow-2xl backdrop:bg-black/40',
         className,
       )}
     >
       <div className="flex items-center justify-between gap-3 px-5 pt-3 pb-2">
-        <span className="bg-muted-foreground/30 absolute top-2 left-1/2 h-1 w-10 -translate-x-1/2 rounded-full" />
+        <span className="bg-muted-foreground/30 absolute top-2 left-1/2 h-1 w-10 -translate-x-1/2 rounded-full " />
         <span className="text-sm font-semibold">{title}</span>
         <button
           type="button"
@@ -66,7 +66,7 @@ export function Drawer({
           <X className="size-5" />
         </button>
       </div>
-      <div className="overflow-y-auto px-4 pb-6">{children}</div>
+      <div className="flex-1 overflow-y-auto px-4 pb-6">{children}</div>
     </dialog>
   );
 }

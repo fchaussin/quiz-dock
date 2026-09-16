@@ -14,4 +14,8 @@ export const CreateQuestionDtoOptionsItemColor = {
   blue: 'blue',
   yellow: 'yellow',
   green: 'green',
+  purple: 'purple',
+  orange: 'orange',
+  pink: 'pink',
+  teal: 'teal',
 } as const;

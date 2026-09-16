@@ -66,6 +66,10 @@ enum OptionColor {
   blue
   yellow
   green
+  purple
+  orange
+  pink
+  teal
 
   @@map("option_color")
 }
@@ -75,6 +79,10 @@ enum OptionShape {
   diamond
   circle
   square
+  star
+  hexagon
+  heart
+  cross
 
   @@map("option_shape")
 }
@@ -120,18 +128,20 @@ model User {
 
 /// §2.2 — quiz (banque privée du animateur).
 model Quiz {
-  id            String         @id @default(ulid()) @db.Char(26)
-  ownerId       String         @map("owner_id") @db.Char(26)
-  title         String
-  description   String?
-  coverMediaId  String?        @map("cover_media_id") @db.Char(26)
-  status        QuizStatus     @default(draft)
-  visibility    QuizVisibility @default(private)
-  language      String         @default("fr")
-  questionCount Int            @default(0) @map("question_count")
-  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
-  archivedAt    DateTime?      @map("archived_at") @db.Timestamptz(6)
+  id              String         @id @default(ulid()) @db.Char(26)
+  ownerId         String         @map("owner_id") @db.Char(26)
+  title           String
+  description     String?
+  coverMediaId    String?        @map("cover_media_id") @db.Char(26)
+  status          QuizStatus     @default(draft)
+  visibility      QuizVisibility @default(private)
+  language        String         @default("fr")
+  questionCount   Int            @default(0) @map("question_count")
+  /// Players may rate the quiz at the end of a session (§2.11); off = no panel, `player:rate` refused.
+  feedbackEnabled Boolean        @default(true) @map("feedback_enabled")
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+  archivedAt      DateTime?      @map("archived_at") @db.Timestamptz(6)
 
   owner       User             @relation(fields: [ownerId], references: [id])
   coverMedia  MediaAsset?      @relation("QuizCover", fields: [coverMediaId], references: [id])

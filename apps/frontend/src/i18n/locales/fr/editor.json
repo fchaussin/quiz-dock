@@ -20,6 +20,7 @@
     "title": "Réglages",
     "titleLabel": "Titre",
     "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Description (facultative)…",
     "save": "Enregistrer"
   },
   "broadcast": {
@@ -35,9 +36,19 @@
     "presentError": "Échec du lancement de la session."
   },
   "feedback": {
+    "enableLabel": "Autoriser les avis des participants",
+    "enableHelp": "Un panneau de notation est proposé à la fin de chaque session.",
     "title": "Avis des participants",
     "empty": "Aucun avis pour l’instant. Les participants peuvent noter le quiz en fin de session.",
     "starsAriaLabel": "{{value}} sur 5",
+    "seeAll_one": "Voir l’avis",
+    "seeAll_other": "Voir les {{count}} avis",
+    "backToEditor": "Retour à l’éditeur",
+    "loadError": "Impossible de charger les avis.",
+    "noneForFilter": "Aucun avis avec cette note.",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "pagePosition": "Page {{page}} / {{pages}}",
     "count_one": "{{count}} avis",
     "count_other": "{{count}} avis"
   },
@@ -49,6 +60,8 @@
     "edit": "Éditer",
     "deleteQuestion": "Supprimer la question",
     "dragHandle": "Glisser pour réordonner",
+    "itemsCount_one": "{{count}} élément",
+    "itemsCount_other": "{{count}} éléments",
     "formTitle": "Question",
     "empty": "Aucune question. Ajoutez-en une !"
   },
@@ -75,7 +88,14 @@
     "description": "Les modifications non enregistrées seront perdues.",
     "confirmLabel": "Abandonner"
   },
+  "emptyPane": {
+    "emptyTitle": "Ce quiz est vide",
+    "emptyHint": "Commencez par une question, ou par une slide d’introduction.",
+    "selectTitle": "Rien de sélectionné",
+    "selectHint": "Choisissez un élément dans la liste pour l’éditer."
+  },
   "deleteConfirm": {
+    "hint": "Supprimer ce quiz et tout son historique.",
     "title": "Supprimer ce quiz ?",
     "description": "« {{title}} » et ses questions seront définitivement supprimés. Cette action est irréversible.",
     "confirmLabel": "Supprimer"
@@ -103,6 +123,7 @@
     },
     "optionsLegend": "Options",
     "optionAriaLabel": "option {{index}}",
+    "dragOption": "Glisser pour réordonner l’option",
     "optionPlaceholder": "Option {{index}}",
     "colorAriaLabel": "couleur {{index}}",
     "shapeAriaLabel": "forme {{index}}",

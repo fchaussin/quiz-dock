@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -10,7 +21,7 @@ import type { User } from '@prisma/client';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { CreateQuizDto } from './dto/create-quiz.dto';
 import { QuizDetailDto } from './dto/quiz-detail.dto';
-import { QuizFeedbackSummaryDto } from './dto/quiz-feedback.dto';
+import { QuizFeedbackQueryDto, QuizFeedbackSummaryDto } from './dto/quiz-feedback.dto';
 import { SessionDetailDto, SessionListDto, SessionPlayerDetailDto } from './dto/quiz-session.dto';
 import { QuizDto } from './dto/quiz.dto';
 import { TransitionQuizDto } from './dto/transition-quiz.dto';
@@ -49,8 +60,12 @@ export class QuizzesController {
 
   @Get(':id/feedback')
   @ApiOkResponse({ type: QuizFeedbackSummaryDto })
-  feedback(@CurrentUser() user: User, @Param('id') id: string) {
-    return this.quizzes.feedback(user.id, id);
+  feedback(
+    @CurrentUser() user: User,
+    @Param('id') id: string,
+    @Query() query: QuizFeedbackQueryDto,
+  ) {
+    return this.quizzes.feedback(user.id, id, query);
   }
 
   @Get(':id/sessions')

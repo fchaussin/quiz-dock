@@ -99,11 +99,11 @@ export function MarkdownEditor({
 
   return (
     <div data-markdown-editor className={cn('group flex flex-col gap-1', className)}>
-      {/* Inline fields (option labels) keep their row compact: tools appear on focus. */}
+      {/* The toolbar stays out of the way until the field has focus (source mode keeps its toggle). */}
       <div
         className={cn(
           'flex flex-wrap items-center gap-1',
-          profile === 'inline' && !source && 'hidden group-focus-within:flex',
+          !source && 'hidden group-focus-within:flex',
         )}
       >
         {editor && !source ? <Toolbar editor={editor} profile={profile} /> : null}

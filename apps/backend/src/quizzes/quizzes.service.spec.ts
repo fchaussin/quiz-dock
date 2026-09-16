@@ -4,6 +4,7 @@ import type { PrismaService } from '../prisma/prisma.service';
 import { QuizzesService } from './quizzes.service';
 
 const OWNER = 'owner-1';
+const PAGE = { page: 1, pageSize: 20 };
 
 function makeQuiz(over: Partial<Quiz> = {}): Quiz {
   return {
@@ -34,6 +35,8 @@ function makePrisma() {
     },
     quizFeedback: {
       findMany: jest.fn(),
+      count: jest.fn(),
+      groupBy: jest.fn(),
     },
     gameSessionLog: {
       findMany: jest.fn(),
@@ -83,22 +86,30 @@ describe('QuizzesService', () => {
 
     it('feedback renvoie 404 pour un non-propriétaire (et ne lit aucun avis)', async () => {
       prisma.quiz.findFirst.mockResolvedValue(null);
-      await expect(service.feedback('someone-else', 'q1')).rejects.toThrow(NotFoundException);
+      await expect(service.feedback('someone-else', 'q1', PAGE)).rejects.toThrow(NotFoundException);
       expect(prisma.quizFeedback.findMany).not.toHaveBeenCalled();
     });
 
-    it('feedback agrège moyenne + nombre pour le propriétaire', async () => {
+    it('feedback: whole-quiz summary (count, average, distribution) + one page, filterable by star', async () => {
       prisma.quiz.findFirst.mockResolvedValue(makeQuiz());
+      prisma.quizFeedback.groupBy.mockResolvedValue([
+        { rating: 5, _count: { _all: 3 } },
+        { rating: 2, _count: { _all: 1 } },
+      ]);
+      prisma.quizFeedback.count.mockResolvedValue(3);
       prisma.quizFeedback.findMany.mockResolvedValue([
         { id: 'f1', rating: 5, comment: 'top', nickname: 'A', createdAt: new Date() },
-        { id: 'f2', rating: 2, comment: null, nickname: 'B', createdAt: new Date() },
       ]);
-      const res = await service.feedback(OWNER, 'q1');
+      const res = await service.feedback(OWNER, 'q1', { page: 2, pageSize: 1, rating: 5 });
       expect(prisma.quizFeedback.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { quizId: 'q1' } }),
+        expect.objectContaining({ where: { quizId: 'q1', rating: 5 }, skip: 1, take: 1 }),
       );
-      expect(res.count).toBe(2);
-      expect(res.average).toBe(3.5);
+      expect(res.count).toBe(4); // summary ignores the star filter
+      expect(res.average).toBe(4.25);
+      expect(res.distribution).toEqual([0, 1, 0, 0, 3]);
+      expect(res.total).toBe(3);
+      expect(res.page).toBe(2);
+      expect(res.items).toHaveLength(1);
     });
   });
 

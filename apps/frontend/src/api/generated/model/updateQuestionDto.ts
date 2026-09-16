@@ -42,7 +42,7 @@ export interface UpdateQuestionDto {
   numericValue?: number;
   /** @minimum 0 */
   numericTolerance?: number;
-  /** @maxItems 6 */
+  /** @maxItems 8 */
   options?: UpdateQuestionDtoOptionsItem[];
   /** @maxItems 20 */
   acceptedAnswers?: UpdateQuestionDtoAcceptedAnswersItem[];

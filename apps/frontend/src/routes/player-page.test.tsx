@@ -35,6 +35,7 @@ const view = (partial: Partial<GameView>): GameView => ({
   result: null,
   leaderboard: null,
   podium: null,
+  feedbackEnabled: true,
   players: [],
   answerAccepted: null,
   fullCapture: false,

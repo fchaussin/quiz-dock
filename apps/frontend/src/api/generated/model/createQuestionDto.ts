@@ -42,7 +42,7 @@ export interface CreateQuestionDto {
   numericValue?: number;
   /** @minimum 0 */
   numericTolerance?: number;
-  /** @maxItems 6 */
+  /** @maxItems 8 */
   options?: CreateQuestionDtoOptionsItem[];
   /** @maxItems 20 */
   acceptedAnswers?: CreateQuestionDtoAcceptedAnswersItem[];

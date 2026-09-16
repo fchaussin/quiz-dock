@@ -53,6 +53,10 @@ export enum OptionColor {
   Blue = 'blue',
   Yellow = 'yellow',
   Green = 'green',
+  Purple = 'purple',
+  Orange = 'orange',
+  Pink = 'pink',
+  Teal = 'teal',
 }
 
 export enum OptionShape {
@@ -60,6 +64,10 @@ export enum OptionShape {
   Diamond = 'diamond',
   Circle = 'circle',
   Square = 'square',
+  Star = 'star',
+  Hexagon = 'hexagon',
+  Heart = 'heart',
+  Cross = 'cross',
 }
 
 /** Noms des événements WebSocket (technique §9). */
@@ -239,6 +247,8 @@ export interface LeaderboardPayload {
 export interface PodiumPayload {
   podium: LeaderboardRow[];
   you?: { score: number; rank: number };
+  /** Whether the end-of-session rating panel is offered (§2.11); absent = yes. */
+  feedbackEnabled?: boolean;
 }
 
 /** Map des events client → serveur (avec accusés de réception typés). */
@@ -319,7 +329,7 @@ export interface ServerToClientEvents {
   'question:reveal': (p: QuestionRevealPayload) => void;
   leaderboard: (p: LeaderboardPayload) => void;
   'game:podium': (p: PodiumPayload) => void;
-  'game:ended': (p: Record<string, never>) => void;
+  'game:ended': (p: { feedbackEnabled?: boolean }) => void;
   /** Mode/pause courants (à chaque changement et au (ré)attache). */
   'game:mode': (p: GameModePayload) => void;
   /** Sommaire des questions — émis aux seules fenêtres de contrôle hôte. */

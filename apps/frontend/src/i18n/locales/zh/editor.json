@@ -20,6 +20,7 @@
     "title": "设置",
     "titleLabel": "标题",
     "descriptionLabel": "描述",
+    "descriptionPlaceholder": "描述（可选）…",
     "save": "保存"
   },
   "broadcast": {
@@ -35,9 +36,19 @@
     "presentError": "启动会话失败。"
   },
   "feedback": {
+    "enableLabel": "允许参与者评价",
+    "enableHelp": "每场结束时向参与者提供评分面板。",
     "title": "玩家评价",
     "empty": "暂无评价。玩家可在会话结束时为测验评分。",
     "starsAriaLabel": "5 星中的 {{value}} 星",
+    "seeAll_one": "查看评价",
+    "seeAll_other": "查看全部 {{count}} 条评价",
+    "backToEditor": "返回编辑器",
+    "loadError": "无法加载评价。",
+    "noneForFilter": "没有此评分的评价。",
+    "previous": "上一页",
+    "next": "下一页",
+    "pagePosition": "第 {{page}} / {{pages}} 页",
     "count_one": "{{count}} 条评价",
     "count_other": "{{count}} 条评价"
   },
@@ -49,6 +60,8 @@
     "edit": "编辑",
     "deleteQuestion": "删除题目",
     "dragHandle": "拖动以排序",
+    "itemsCount_one": "{{count}} 个元素",
+    "itemsCount_other": "{{count}} 个元素",
     "formTitle": "题目",
     "empty": "还没有题目。添加一道吧！"
   },
@@ -75,7 +88,14 @@
     "description": "未保存的修改将丢失。",
     "confirmLabel": "放弃"
   },
+  "emptyPane": {
+    "emptyTitle": "这个测验还是空的",
+    "emptyHint": "先添加一道题，或一张开场幻灯片。",
+    "selectTitle": "未选择任何项",
+    "selectHint": "在列表中选择一项进行编辑。"
+  },
   "deleteConfirm": {
+    "hint": "删除此测验及其全部历史。",
     "title": "删除此测验？",
     "description": "“{{title}}”及其题目将被永久删除。此操作不可撤销。",
     "confirmLabel": "删除"
@@ -103,6 +123,7 @@
     },
     "optionsLegend": "选项",
     "optionAriaLabel": "选项 {{index}}",
+    "dragOption": "拖动以排序选项",
     "optionPlaceholder": "选项 {{index}}",
     "colorAriaLabel": "颜色 {{index}}",
     "shapeAriaLabel": "形状 {{index}}",
