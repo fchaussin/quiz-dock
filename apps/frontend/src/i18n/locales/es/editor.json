@@ -68,6 +68,9 @@
     "answerExplanationLabel": "Explicación de la respuesta (se muestra tras la revelación)",
     "answerExplanationPlaceholder": "Por qué esta es la respuesta correcta… (opcional)",
     "timeLimitLabel": "Tiempo (s)",
+    "revealDelayLabel": "Retraso de revelación (s)",
+    "revealDelayPlaceholder": "auto",
+    "revealDelayHint": "En modo automático: tiempo en la respuesta antes de la siguiente pregunta. Vacío = ajuste por defecto.",
     "pointsLabel": "Puntos",
     "pointsMode": {
       "standard": "Estándar",

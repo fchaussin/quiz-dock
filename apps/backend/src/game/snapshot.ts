@@ -50,6 +50,7 @@ export function buildSnapshot(quiz: QuizWithContent): QuizSnapshot {
         media: mediaOf(q.media),
         answerExplanation: q.answerExplanation ?? null,
         timeLimitS: q.timeLimitS,
+        revealDelayS: q.revealDelayS ?? null,
         basePoints: basePointsFor(q.pointsMode as PointsMode),
         numericValue: q.numericValue === null ? null : Number(q.numericValue),
         numericTolerance: q.numericTolerance === null ? null : Number(q.numericTolerance),

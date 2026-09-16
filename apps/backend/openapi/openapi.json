@@ -1066,6 +1066,12 @@
                   "minimum": -9007199254740991,
                   "maximum": 9007199254740991
                 },
+                "revealDelayS": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991,
+                  "nullable": true
+                },
                 "pointsMode": {
                   "type": "string",
                   "enum": [
@@ -1175,6 +1181,7 @@
                 "mediaId",
                 "answerExplanation",
                 "timeLimitS",
+                "revealDelayS",
                 "pointsMode",
                 "numericValue",
                 "numericTolerance",
@@ -1651,6 +1658,12 @@
             "minimum": 5,
             "maximum": 120
           },
+          "revealDelayS": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 300,
+            "nullable": true
+          },
           "pointsMode": {
             "default": "standard",
             "type": "string",
@@ -1783,6 +1796,12 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "revealDelayS": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "nullable": true
+          },
           "pointsMode": {
             "type": "string",
             "enum": [
@@ -1892,6 +1911,7 @@
           "mediaId",
           "answerExplanation",
           "timeLimitS",
+          "revealDelayS",
           "pointsMode",
           "numericValue",
           "numericTolerance",
@@ -1965,6 +1985,12 @@
             "type": "integer",
             "minimum": 5,
             "maximum": 120
+          },
+          "revealDelayS": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 300,
+            "nullable": true
           },
           "pointsMode": {
             "default": "standard",

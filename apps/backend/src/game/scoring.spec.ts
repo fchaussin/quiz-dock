@@ -24,6 +24,7 @@ const question = (over: Partial<SnapshotQuestion> = {}): SnapshotQuestion => ({
   media: null,
   answerExplanation: null,
   timeLimitS: 20,
+  revealDelayS: null,
   basePoints: 1000,
   numericValue: null,
   numericTolerance: null,

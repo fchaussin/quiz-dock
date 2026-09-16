@@ -39,6 +39,7 @@ export const questionSchema = z.object({
   mediaId: z.string().nullable(),
   answerExplanation: z.string().nullable(),
   timeLimitS: z.number().int(),
+  revealDelayS: z.number().int().nullable(),
   pointsMode: z.enum(['standard', 'double', 'none']),
   numericValue: z.string().nullable(),
   numericTolerance: z.string().nullable(),

@@ -57,6 +57,8 @@ export const questionContentSchema = z
     answerExplanation: z.string().trim().max(2000).nullable().optional(),
     mediaId: z.string().length(26).optional(),
     timeLimitS: z.number().int().min(5).max(120).default(20),
+    // Auto-mode delay on REVEAL (#6); null = engine default. Bounds match the SQL CHECK.
+    revealDelayS: z.number().int().min(1).max(300).nullable().optional(),
     pointsMode: z.enum(['standard', 'double', 'none']).default('standard'),
     numericValue: z.number().optional(),
     numericTolerance: z.number().min(0).optional(),

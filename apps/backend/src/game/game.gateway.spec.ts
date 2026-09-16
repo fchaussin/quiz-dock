@@ -430,6 +430,56 @@ describe('GameGateway (intégration socket)', () => {
     expect(podium.you?.rank).toBe(1);
   }, 15_000);
 
+  it('auto mode: a per-question revealDelayS overrides the default auto-next delay (#6)', async () => {
+    // Same quiz shape, but the question asks for a 1 s reveal (default in test is 300 ms).
+    const quiz = await prisma.quiz.create({
+      data: {
+        ownerId: hostUserId,
+        title: 'Quiz reveal delay',
+        status: 'ready',
+        questionCount: 1,
+        questions: {
+          create: {
+            orderIndex: 0,
+            type: 'single_choice',
+            prompt: 'Capitale ?',
+            timeLimitS: 5,
+            revealDelayS: 1,
+            options: {
+              create: [
+                { orderIndex: 0, text: 'Paris', color: 'red', shape: 'triangle', isCorrect: true },
+                { orderIndex: 1, text: 'Lyon', color: 'blue', shape: 'diamond', isCorrect: false },
+              ],
+            },
+          },
+        },
+      },
+    });
+    const host = connect({ localUser: 'Animateur' });
+    const { pin } = await host.emitWithAck('host:create', { quizId: quiz.id });
+    host.emit('host:mode', { pin, mode: 'auto' });
+    const player = connect();
+    await player.emitWithAck('player:join', { pin, nickname: 'Wes' });
+
+    const qStart = new Promise<{ startedAt: number; options: Array<{ id: string; text: string }> }>(
+      (resolve) => player.on('question:start', (q) => resolve(q as never)),
+    );
+    const modeP = new Promise<{ autoNextMs?: number }>((resolve) =>
+      host.on('game:mode', (m) => (m as { autoNextAt?: number }).autoNextAt && resolve(m as never)),
+    );
+    const podiumP = new Promise<void>((resolve) => player.on('game:podium', () => resolve()));
+
+    host.emit('host:start', { pin });
+    const q = await qStart;
+    await new Promise((r) => setTimeout(r, Math.max(0, q.startedAt - Date.now()) + 50));
+    const revealedAt = Date.now();
+    player.emit('player:submit', { pin, questionIndex: 0, answer: q.options[0].id });
+
+    expect((await modeP).autoNextMs).toBe(1000);
+    await podiumP;
+    expect(Date.now() - revealedAt).toBeGreaterThanOrEqual(1000);
+  }, 15_000);
+
   it('REVEAL anticipé quand TOUS répondent FAUX (convergence indépendante de la justesse)', async () => {
     const host = connect({ localUser: 'Animateur' });
     const { pin } = await host.emitWithAck('host:create', { quizId });
