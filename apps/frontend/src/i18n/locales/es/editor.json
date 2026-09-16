@@ -229,5 +229,11 @@
     "title": "¿Activar la captura completa de respuestas?",
     "description": "Se guardará cada respuesta de cada participante con su apodo: son datos personales (RGPD — informa a los participantes, purga después). Los archivos de sesión también pesan mucho más en la base de datos. Resérvalo para el seguimiento individual (evaluación, certificación).",
     "confirmLabel": "Activar"
+  },
+  "deleteItemConfirm": {
+    "questionTitle": "¿Eliminar esta pregunta?",
+    "slideTitle": "¿Eliminar esta diapositiva?",
+    "description": "«{{label}}» se eliminará definitivamente.",
+    "confirmLabel": "Eliminar"
   }
 }

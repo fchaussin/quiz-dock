@@ -136,6 +136,8 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
   const [presenting, setPresenting] = useState(false);
   const [presentError, setPresentError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  // Deleting an item of the sequence asks first (a question takes its stats history with it).
+  const [pendingDelete, setPendingDelete] = useState<QuizItem | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   // The description reads as text until clicked (the title is always an inline input).
   const [editingDescription, setEditingDescription] = useState(false);
@@ -558,11 +560,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
                           canMoveDown={i < items.length - 1 && !reorder.isPending}
                           onMove={(d) => move(i, d)}
                           onEdit={() => requestEditing(item.id)}
-                          onDelete={() =>
-                            void (item.kind === 'question'
-                              ? onDeleteQuestion(item.id)
-                              : onDeleteSlide(item.id))
-                          }
+                          onDelete={() => setPendingDelete(item)}
                         />
                       )}
                     </SortableRow>
@@ -621,6 +619,31 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
         )}
       </div>
 
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        destructive
+        title={
+          pendingDelete?.kind === 'slide'
+            ? t('deleteItemConfirm.slideTitle')
+            : t('deleteItemConfirm.questionTitle')
+        }
+        description={t('deleteItemConfirm.description', {
+          label: pendingDelete
+            ? pendingDelete.kind === 'slide'
+              ? slideLabel(pendingDelete.slide)
+              : pendingDelete.question.prompt
+            : '',
+        })}
+        confirmLabel={t('deleteItemConfirm.confirmLabel')}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={() => {
+          const it = pendingDelete;
+          setPendingDelete(null);
+          if (!it) return;
+          if (editing === it.id) closeForm();
+          void (it.kind === 'question' ? onDeleteQuestion(it.id) : onDeleteSlide(it.id));
+        }}
+      />
       <ConfirmDialog
         open={pendingEdit !== undefined}
         destructive

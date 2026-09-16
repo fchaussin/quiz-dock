@@ -229,5 +229,11 @@
     "title": "开启完整答题记录？",
     "description": "将保存每位参与者的每个答案及其昵称：这属于个人数据（GDPR — 请告知参与者并事后清除）。会话归档也会占用大得多的数据库空间。仅在需要个人跟踪（评估、认证）时使用。",
     "confirmLabel": "开启"
+  },
+  "deleteItemConfirm": {
+    "questionTitle": "删除这道题？",
+    "slideTitle": "删除这张幻灯片？",
+    "description": "“{{label}}”将被永久删除。",
+    "confirmLabel": "删除"
   }
 }

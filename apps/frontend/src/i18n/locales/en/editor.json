@@ -229,5 +229,11 @@
     "title": "Turn on full answer capture?",
     "description": "Every answer of every participant will be kept, with their nickname: that is personal data (GDPR — inform the participants, purge afterwards). Session archives also get much heavier in the database. Reserve it for individual tracking (assessment, certification).",
     "confirmLabel": "Turn on"
+  },
+  "deleteItemConfirm": {
+    "questionTitle": "Delete this question?",
+    "slideTitle": "Delete this slide?",
+    "description": "“{{label}}” will be permanently deleted.",
+    "confirmLabel": "Delete"
   }
 }
