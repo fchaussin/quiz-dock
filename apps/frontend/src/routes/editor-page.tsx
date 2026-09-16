@@ -645,7 +645,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
         {wide ? (
           <section className="min-h-[24rem] min-w-0">
             {openForm ? (
-              <div className="bg-muted/40 max-w-5xl rounded-2xl p-6">{openForm}</div>
+              <div className="bg-muted/40 rounded-2xl p-6">{openForm}</div>
             ) : (
               <EmptyPane
                 variant={items.length === 0 ? 'empty' : 'select'}
