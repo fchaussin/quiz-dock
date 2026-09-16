@@ -30,6 +30,8 @@ import {
   AlignRight,
   Columns2,
   Columns3,
+  Eye,
+  EyeOff,
   GripVertical,
   Heading1,
   Heading2,
@@ -128,6 +130,22 @@ export function SlideForm({
   const update = useSlidesControllerUpdate();
   const [error, setError] = useState<string | null>(null);
   const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const [showStage, setShowStage] = useState(() => {
+    try {
+      return localStorage.getItem('slide.preview') !== 'hidden';
+    } catch {
+      return true;
+    }
+  });
+  const toggleStage = () => {
+    const next = !showStage;
+    setShowStage(next);
+    try {
+      localStorage.setItem('slide.preview', next ? 'shown' : 'hidden');
+    } catch {
+      /* storage unavailable: the choice just does not persist */
+    }
+  };
   const [initial] = useState(() => initialValues(slide));
   const [values, setValues] = useState<FormValues>(initial);
   const patch = (p: Partial<FormValues>) => setValues((v) => ({ ...v, ...p }));
@@ -195,8 +213,26 @@ export function SlideForm({
         void submit();
       }}
     >
-      {/* What the projected screen will show, at slide proportions. */}
-      <SlideStage className="rounded-xl border" slide={stage} />
+      {/* What the projected screen will show, at slide proportions — foldable, remembered. */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+            {t('slideForm.previewLegend')}
+          </span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+            aria-pressed={showStage}
+            onClick={toggleStage}
+          >
+            {showStage ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+            {showStage ? t('slideForm.hidePreview') : t('slideForm.showPreview')}
+          </Button>
+        </div>
+        {showStage ? <SlideStage className="rounded-xl border" slide={stage} /> : null}
+      </div>
 
       <fieldset className="flex flex-col gap-3">
         <legend className="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase">

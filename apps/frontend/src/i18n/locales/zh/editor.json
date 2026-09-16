@@ -63,7 +63,9 @@
     "itemsCount_one": "{{count}} 个元素",
     "itemsCount_other": "{{count}} 个元素",
     "formTitle": "题目",
-    "empty": "还没有题目。添加一道吧！"
+    "empty": "还没有题目。添加一道吧！",
+    "collapseList": "收起列表",
+    "expandList": "展开列表"
   },
   "slides": {
     "formTitle": "幻灯片",
@@ -119,7 +121,10 @@
       "right": "右"
     },
     "ratio": "分栏比例",
-    "textAlign": "文字对齐"
+    "textAlign": "文字对齐",
+    "previewLegend": "预览",
+    "hidePreview": "隐藏",
+    "showPreview": "显示"
   },
   "discardConfirm": {
     "title": "放弃修改？",

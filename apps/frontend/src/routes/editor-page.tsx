@@ -29,6 +29,8 @@ import {
   LayoutTemplate,
   MousePointerClick,
   MonitorPlay,
+  PanelLeftClose,
+  PanelLeftOpen,
   Play,
   Plus,
   Radio,
@@ -106,6 +108,23 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
   }, []);
   // From `lg` the open item sits next to the list; below, in a bottom sheet.
   const wide = useMediaQuery('(min-width: 1024px)');
+  // The sequence can shrink to a rail of numbers/icons; remembered per browser.
+  const [rail, setRail] = useState(() => {
+    try {
+      return localStorage.getItem('editor.sidebar') === 'rail';
+    } catch {
+      return false;
+    }
+  });
+  const toggleRail = () => {
+    const next = !rail;
+    setRail(next);
+    try {
+      localStorage.setItem('editor.sidebar', next ? 'rail' : 'full');
+    } catch {
+      /* storage unavailable: the choice just does not persist */
+    }
+  };
   const requestEditing = (next: Editing) => {
     if (editing !== null && formDirty && next !== editing) setPendingEdit(next);
     else {
@@ -468,76 +487,160 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
 
       {/* Master / detail: the sequence on the left, the open item on the right (a bottom
           sheet below `lg`). */}
-      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[22rem_minmax(0,1fr)] xl:grid-cols-[24rem_minmax(0,1fr)]">
-        <aside className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-6">
-          <div className="flex items-baseline justify-between gap-3">
-            <h2 className="text-lg font-semibold">
-              {t('questions.title', { count: quiz.questionCount })}
-            </h2>
-            <span className="text-muted-foreground text-xs">
-              {t('questions.itemsCount', { count: items.length })}
-            </span>
-          </div>
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-            <SortableContext
-              items={items.map((it) => it.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <ul className="flex flex-col gap-0.5">
-                {items.map((item, i) => (
-                  <SortableRow key={item.id} id={item.id}>
-                    {(handle) => (
-                      <ItemRow
-                        item={item}
-                        active={editing === item.id}
-                        number={questionNumber(items, i)}
-                        handle={handle}
-                        canMoveUp={i > 0 && !reorder.isPending}
-                        canMoveDown={i < items.length - 1 && !reorder.isPending}
-                        onMove={(d) => move(i, d)}
-                        onEdit={() => requestEditing(item.id)}
-                        onDelete={() =>
-                          void (item.kind === 'question'
-                            ? onDeleteQuestion(item.id)
-                            : onDeleteSlide(item.id))
-                        }
-                      />
-                    )}
-                  </SortableRow>
-                ))}
-                {items.length === 0 && editing === null && (
-                  <li className="text-muted-foreground rounded-xl border border-dashed py-10 text-center text-sm">
-                    {t('questions.empty')}
-                  </li>
-                )}
-              </ul>
-            </SortableContext>
-          </DndContext>
-          <div className="mt-1 flex gap-1">
+      <div
+        className={cn(
+          'grid grid-cols-1 items-start gap-8',
+          rail && wide
+            ? 'lg:grid-cols-[3.5rem_minmax(0,1fr)]'
+            : 'lg:grid-cols-[22rem_minmax(0,1fr)] xl:grid-cols-[24rem_minmax(0,1fr)]',
+        )}
+      >
+        {rail && wide ? (
+          <aside className="flex flex-col items-center gap-1 lg:sticky lg:top-6">
             <Button
               type="button"
-              size="sm"
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              aria-label={t('questions.expandList')}
+              onClick={toggleRail}
+            >
+              <PanelLeftOpen className="size-4" />
+            </Button>
+            <ul className="flex flex-col items-center gap-1">
+              {items.map((item, i) => {
+                const n = questionNumber(items, i);
+                const label = item.kind === 'slide' ? slideLabel(item.slide) : item.question.prompt;
+                const active = editing === item.id;
+                return (
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      title={label}
+                      aria-label={label}
+                      aria-current={active ? 'true' : undefined}
+                      onClick={() => requestEditing(item.id)}
+                      className={cn(
+                        'flex size-8 items-center justify-center rounded-md text-xs font-semibold tabular-nums',
+                        active
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground hover:bg-accent',
+                      )}
+                    >
+                      {item.kind === 'slide' ? <LayoutTemplate className="size-4" /> : n}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            <Button
+              type="button"
               variant="outline"
-              className="flex-1"
+              size="icon"
+              className="mt-1 size-8"
+              aria-label={t('questions.add')}
+              title={t('questions.add')}
               onClick={() => requestEditing('new')}
               disabled={editing === 'new'}
             >
               <Plus className="size-4" />
-              {t('questions.add')}
             </Button>
             <Button
               type="button"
-              size="sm"
               variant="outline"
-              className="flex-1"
+              size="icon"
+              className="size-8"
+              aria-label={t('slides.add')}
+              title={t('slides.add')}
               onClick={() => requestEditing('new-slide')}
               disabled={editing === 'new-slide'}
             >
               <LayoutTemplate className="size-4" />
-              {t('slides.add')}
             </Button>
-          </div>
-        </aside>
+          </aside>
+        ) : (
+          <aside className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-6">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-baseline gap-3">
+                <h2 className="text-lg font-semibold">
+                  {t('questions.title', { count: quiz.questionCount })}
+                </h2>
+                <span className="text-muted-foreground text-xs">
+                  {t('questions.itemsCount', { count: items.length })}
+                </span>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="hidden size-7 lg:inline-flex"
+                aria-label={t('questions.collapseList')}
+                onClick={toggleRail}
+              >
+                <PanelLeftClose className="size-4" />
+              </Button>
+            </div>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+              <SortableContext
+                items={items.map((it) => it.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <ul className="flex flex-col gap-0.5">
+                  {items.map((item, i) => (
+                    <SortableRow key={item.id} id={item.id}>
+                      {(handle) => (
+                        <ItemRow
+                          item={item}
+                          active={editing === item.id}
+                          number={questionNumber(items, i)}
+                          handle={handle}
+                          canMoveUp={i > 0 && !reorder.isPending}
+                          canMoveDown={i < items.length - 1 && !reorder.isPending}
+                          onMove={(d) => move(i, d)}
+                          onEdit={() => requestEditing(item.id)}
+                          onDelete={() =>
+                            void (item.kind === 'question'
+                              ? onDeleteQuestion(item.id)
+                              : onDeleteSlide(item.id))
+                          }
+                        />
+                      )}
+                    </SortableRow>
+                  ))}
+                  {items.length === 0 && editing === null && (
+                    <li className="text-muted-foreground rounded-xl border border-dashed py-10 text-center text-sm">
+                      {t('questions.empty')}
+                    </li>
+                  )}
+                </ul>
+              </SortableContext>
+            </DndContext>
+            <div className="mt-1 flex gap-1">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="flex-1"
+                onClick={() => requestEditing('new')}
+                disabled={editing === 'new'}
+              >
+                <Plus className="size-4" />
+                {t('questions.add')}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="flex-1"
+                onClick={() => requestEditing('new-slide')}
+                disabled={editing === 'new-slide'}
+              >
+                <LayoutTemplate className="size-4" />
+                {t('slides.add')}
+              </Button>
+            </div>
+          </aside>
+        )}
 
         {wide ? (
           <section className="min-h-[24rem] min-w-0">

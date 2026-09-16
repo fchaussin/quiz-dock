@@ -63,7 +63,9 @@
     "itemsCount_one": "{{count}} item",
     "itemsCount_other": "{{count}} items",
     "formTitle": "Question",
-    "empty": "No questions. Add one!"
+    "empty": "No questions. Add one!",
+    "collapseList": "Collapse the list",
+    "expandList": "Expand the list"
   },
   "slides": {
     "formTitle": "Slide",
@@ -119,7 +121,10 @@
       "right": "Right"
     },
     "ratio": "Column split",
-    "textAlign": "Text alignment"
+    "textAlign": "Text alignment",
+    "previewLegend": "Preview",
+    "hidePreview": "Hide",
+    "showPreview": "Show"
   },
   "discardConfirm": {
     "title": "Discard changes?",

@@ -63,7 +63,9 @@
     "itemsCount_one": "{{count}} élément",
     "itemsCount_other": "{{count}} éléments",
     "formTitle": "Question",
-    "empty": "Aucune question. Ajoutez-en une !"
+    "empty": "Aucune question. Ajoutez-en une !",
+    "collapseList": "Réduire la liste",
+    "expandList": "Déplier la liste"
   },
   "slides": {
     "formTitle": "Slide",
@@ -119,7 +121,10 @@
       "right": "Droite"
     },
     "ratio": "Répartition des colonnes",
-    "textAlign": "Alignement du texte"
+    "textAlign": "Alignement du texte",
+    "previewLegend": "Aperçu",
+    "hidePreview": "Masquer",
+    "showPreview": "Afficher"
   },
   "discardConfirm": {
     "title": "Abandonner les modifications ?",

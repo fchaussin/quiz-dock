@@ -63,7 +63,9 @@
     "itemsCount_one": "{{count}} elemento",
     "itemsCount_other": "{{count}} elementos",
     "formTitle": "Pregunta",
-    "empty": "No hay preguntas. ¡Añade una!"
+    "empty": "No hay preguntas. ¡Añade una!",
+    "collapseList": "Reducir la lista",
+    "expandList": "Desplegar la lista"
   },
   "slides": {
     "formTitle": "Diapositiva",
@@ -119,7 +121,10 @@
       "right": "Derecha"
     },
     "ratio": "Reparto de columnas",
-    "textAlign": "Alineación del texto"
+    "textAlign": "Alineación del texto",
+    "previewLegend": "Vista previa",
+    "hidePreview": "Ocultar",
+    "showPreview": "Mostrar"
   },
   "discardConfirm": {
     "title": "¿Descartar los cambios?",
