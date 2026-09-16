@@ -21,7 +21,13 @@ body = """
     {% for commit in commits %}
         - {{ commit.message | upper_first }}{% if commit.scope %} *({{ commit.scope }})*{% endif %}
     {%- endfor %}
-{% endfor %}\n
+{% endfor %}
+{% if commits | length > 0 %}\
+    ### Contributors
+    {% for name in commits | map(attribute="author.name") | unique %}
+        - {{ name }}
+    {%- endfor %}
+{% endif %}\n
 """
 trim = true
 footer = ""
