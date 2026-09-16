@@ -567,7 +567,7 @@ function ItemRow({
   const isSlide = item.kind === 'slide';
   const label = isSlide ? item.slide.title || item.slide.body || '' : item.question.prompt;
   return (
-    <div className="group flex items-center gap-3 py-3 sm:gap-4">
+    <div className="group flex items-center gap-1 py-3 sm:gap-4">
       <span
         className={cn(
           'text-muted-foreground w-7 shrink-0 text-center text-sm tabular-nums',
@@ -581,7 +581,7 @@ function ItemRow({
         <Markdown profile="inline" className="block truncate font-medium">
           {label}
         </Markdown>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-muted-foreground truncate text-xs">
           {isSlide
             ? t('slides.kind')
             : t(`questionType.${item.question.type}`, { defaultValue: item.question.type })}
@@ -607,9 +607,15 @@ function ItemRow({
       >
         <ArrowDown className="size-4" />
       </Button>
-      <Button type="button" variant="ghost" size="sm" onClick={onEdit}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        aria-label={t('questions.edit')}
+        onClick={onEdit}
+      >
         <Pencil className="size-4" />
-        {t('questions.edit')}
+        <span className="hidden sm:inline">{t('questions.edit')}</span>
       </Button>
       <Button
         type="button"

@@ -20,10 +20,10 @@ export function RootLayout() {
         <nav className="flex items-center gap-3 text-sm">
           {user ? (
             <>
-              <Link to="/dashboard" className="hover:underline">
+              <Link to="/dashboard" className="whitespace-nowrap hover:underline">
                 {t('nav.myQuizzes')}
               </Link>
-              <span className="text-muted-foreground">{user}</span>
+              <span className="text-muted-foreground hidden sm:inline">{user}</span>
               <Button
                 variant="outline"
                 size="sm"
