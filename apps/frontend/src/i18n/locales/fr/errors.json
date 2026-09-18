@@ -49,5 +49,8 @@
   },
   "validation": "Certains champs sont invalides.",
   "internal": "Erreur interne.",
-  "error": "Une erreur est survenue."
+  "error": "Une erreur est survenue.",
+  "host_seat": {
+    "taken": "Le siège d’animateur est déjà pris."
+  }
 }

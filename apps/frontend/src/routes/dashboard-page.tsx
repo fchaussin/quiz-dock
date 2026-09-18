@@ -55,7 +55,7 @@ export function DashboardPage() {
   };
 
   // Le backend refuse (403) quand l'identité n'a pas le rôle hôte : en mode local,
-  // le siège d'hôte est tenu par quelqu'un d'autre.
+  // le siège d'hôte est tenu par quelqu'un d'autre (ou a expiré → repasser par /login).
   const seatTaken = error instanceof ApiError && error.status === 403;
   const invalidateList = () =>
     queryClient.invalidateQueries({ queryKey: getQuizzesControllerListQueryKey() });
@@ -140,7 +140,12 @@ export function DashboardPage() {
       {isLoading && <p className="text-muted-foreground">{t('common:loading')}</p>}
       {error ? (
         <p className="text-destructive" role="alert">
-          {seatTaken ? t('seatTaken') : t('loadError')}
+          {seatTaken ? t('seatTaken') : t('loadError')}{' '}
+          {seatTaken ? (
+            <Link to="/login" className="underline">
+              {t('seatBackToLogin')}
+            </Link>
+          ) : null}
         </p>
       ) : null}
       {launchError ? <p className="text-destructive">{launchError}</p> : null}

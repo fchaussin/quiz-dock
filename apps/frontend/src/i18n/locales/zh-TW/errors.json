@@ -49,5 +49,8 @@
   },
   "validation": "部分欄位無效。",
   "internal": "內部錯誤。",
-  "error": "發生了錯誤。"
+  "error": "發生了錯誤。",
+  "host_seat": {
+    "taken": "主持人席位已被佔用。"
+  }
 }

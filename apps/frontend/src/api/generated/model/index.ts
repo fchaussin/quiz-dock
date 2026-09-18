@@ -10,6 +10,7 @@ export * from './activeGameDto';
 export * from './authConfigDto';
 export * from './authConfigDtoMode';
 export * from './authConfigDtoOidc';
+export * from './claimHostSeatDto';
 export * from './createQuestionDto';
 export * from './createQuestionDtoAcceptedAnswersItem';
 export * from './createQuestionDtoBackgroundGradient';

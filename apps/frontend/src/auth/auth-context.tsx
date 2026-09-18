@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
-import { hostSeatControllerRelease } from '../api/generated/auth/auth';
+import { hostSeatControllerClaim, hostSeatControllerRelease } from '../api/generated/auth/auth';
 import { meControllerMe } from '../api/generated/me/me';
 import { setAuthHeaders, setUnauthorizedHandler } from '../api/http';
 import { getOidc } from './oidc';
@@ -87,10 +87,15 @@ interface AuthState {
   mode: AuthMode;
   user: string | null;
   /**
-   * Connexion mode local (nom). Résout le rôle attribué par le backend (siège
-   * d'hôte) : `player` = le siège est déjà pris, `null` = backend injoignable.
+   * Connexion mode local (nom). Résout le rôle courant : `host` = titulaire du
+   * siège d'hôte, `player` = pas (encore) titulaire, `null` = backend injoignable.
+   * L'identité reste posée ; la page décide (prise du siège ou `dropLocal`).
    */
   loginLocal: (name: string) => Promise<UserRole | null>;
+  /** Prise **intentionnelle** du siège d'hôte (mode local), après confirmation. */
+  claimHostSeat: (expiresInMinutes: number | null) => Promise<void>;
+  /** Abandonne l'identité locale sans passer par le backend (siège refusé / annulé). */
+  dropLocal: () => void;
   /** Connexion mode OIDC (redirection vers l'IdP). */
   loginOidc: () => Promise<void>;
   /** Finalise le retour de redirection OIDC (route /auth/callback). */
@@ -121,15 +126,19 @@ export function AuthProvider({
     localStorage.setItem(STORAGE_KEY, trimmed);
     applyLocalUser(trimmed);
     setUser(trimmed);
-    const role = await fetchRole();
-    if (role === 'player') {
-      // Siège d'hôte pris : on ne garde PAS l'identité (sinon la garde de route
-      // et la nav la traiteraient comme un hôte connecté).
-      localStorage.removeItem(STORAGE_KEY);
-      applyLocalUser(null);
-      setUser(null);
-    }
-    return role;
+    return fetchRole();
+  }, []);
+
+  const claimHostSeat = useCallback(async (expiresInMinutes: number | null) => {
+    await hostSeatControllerClaim({ expiresInMinutes });
+  }, []);
+
+  const dropLocal = useCallback(() => {
+    // Pas d'identité conservée : sinon la garde de route et la nav la
+    // traiteraient comme un hôte connecté.
+    localStorage.removeItem(STORAGE_KEY);
+    applyLocalUser(null);
+    setUser(null);
   }, []);
 
   const loginOidc = useCallback(async () => {
@@ -167,8 +176,17 @@ export function AuthProvider({
   }, [mode]);
 
   const value = useMemo(
-    () => ({ mode, user, loginLocal, loginOidc, completeOidcLogin, logout }),
-    [mode, user, loginLocal, loginOidc, completeOidcLogin, logout],
+    () => ({
+      mode,
+      user,
+      loginLocal,
+      claimHostSeat,
+      dropLocal,
+      loginOidc,
+      completeOidcLogin,
+      logout,
+    }),
+    [mode, user, loginLocal, claimHostSeat, dropLocal, loginOidc, completeOidcLogin, logout],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

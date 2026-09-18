@@ -26,6 +26,7 @@ import type {
 
 import type {
   AuthConfigDto,
+  ClaimHostSeatDto,
   HostSeatDto,
   HostSeatReleaseDto
 } from '../model';
@@ -249,7 +250,89 @@ export function useHostSeatControllerState<TData = Awaited<ReturnType<typeof hos
 
 
 
-export type hostSeatControllerReleaseResponse200 = {
+export type hostSeatControllerClaimResponse200 = {
+  data: HostSeatDto
+  status: 200
+}
+
+export type hostSeatControllerClaimResponse409 = {
+  data: void
+  status: 409
+}
+
+export type hostSeatControllerClaimResponseSuccess = (hostSeatControllerClaimResponse200) & {
+  headers: Headers;
+};
+export type hostSeatControllerClaimResponseError = (hostSeatControllerClaimResponse409) & {
+  headers: Headers;
+};
+
+export type hostSeatControllerClaimResponse = (hostSeatControllerClaimResponseSuccess | hostSeatControllerClaimResponseError)
+
+export const getHostSeatControllerClaimUrl = () => {
+
+
+
+
+  return `/api/v1/auth/host-seat/claim`
+}
+
+export const hostSeatControllerClaim = async (claimHostSeatDto: ClaimHostSeatDto, options?: RequestInit): Promise<hostSeatControllerClaimResponse> => {
+
+  return customFetch<hostSeatControllerClaimResponse>(getHostSeatControllerClaimUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(claimHostSeatDto)
+  }
+);}
+
+
+
+
+export const getHostSeatControllerClaimMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof hostSeatControllerClaim>>, TError,{data: ClaimHostSeatDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof hostSeatControllerClaim>>, TError,{data: ClaimHostSeatDto}, TContext> => {
+
+const mutationKey = ['hostSeatControllerClaim'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof hostSeatControllerClaim>>, {data: ClaimHostSeatDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  hostSeatControllerClaim(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type HostSeatControllerClaimMutationResult = NonNullable<Awaited<ReturnType<typeof hostSeatControllerClaim>>>
+    export type HostSeatControllerClaimMutationBody = ClaimHostSeatDto
+    export type HostSeatControllerClaimMutationError = void
+
+    export const useHostSeatControllerClaim = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof hostSeatControllerClaim>>, TError,{data: ClaimHostSeatDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof hostSeatControllerClaim>>,
+        TError,
+        {data: ClaimHostSeatDto},
+        TContext
+      > => {
+      return useMutation(getHostSeatControllerClaimMutationOptions(options), queryClient);
+    }
+    export type hostSeatControllerReleaseResponse200 = {
   data: HostSeatReleaseDto
   status: 200
 }

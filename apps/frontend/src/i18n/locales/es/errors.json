@@ -49,5 +49,8 @@
   },
   "validation": "Algunos campos no son válidos.",
   "internal": "Error interno.",
-  "error": "Se ha producido un error."
+  "error": "Se ha producido un error.",
+  "host_seat": {
+    "taken": "El puesto de anfitrión ya está ocupado."
+  }
 }

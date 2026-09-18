@@ -1,27 +1,54 @@
+import { ConflictException } from '@nestjs/common';
+import type { User } from '@prisma/client';
 import type { AuthPrincipal } from '../auth/auth-provider';
 import type { PrismaService } from '../prisma/prisma.service';
 import type { SampleQuizzesService } from '../quizzes/samples/sample-quizzes.service';
 import { HostSeatService } from './host-seat.service';
 
-const alice: AuthPrincipal = { sub: 'local:alice', displayName: 'Alice', email: null, roles: [] };
-const bob: AuthPrincipal = { sub: 'local:bob', displayName: 'Bob', email: null, roles: [] };
+const alice = { id: 'u-alice', oidcSubject: 'local:alice', displayName: 'Alice' } as User;
+const bob = { id: 'u-bob', oidcSubject: 'local:bob', displayName: 'Bob' } as User;
+const principal = (u: User): AuthPrincipal => ({
+  sub: u.oidcSubject,
+  displayName: u.displayName,
+  email: null,
+  roles: [],
+});
 
-function makeService(holderSub: string | null) {
+interface Seat {
+  id: number;
+  userId: string;
+  expiresAt: Date | null;
+  user?: { displayName: string };
+}
+
+function makeService(seat: Seat | null, knownUsers: User[] = [alice, bob]) {
+  const users = new Map(knownUsers.map((u) => [u.oidcSubject, u]));
   const tx = {
     $executeRaw: jest.fn().mockResolvedValue(0),
-    user: {
-      findFirst: jest.fn().mockResolvedValue(holderSub ? { oidcSubject: holderSub } : null),
-      upsert: jest.fn(async ({ create }: { create: Record<string, unknown> }) => ({
-        id: 'u-' + String(create.oidcSubject),
-        ...create,
-      })),
+    hostSeat: {
+      findUnique: jest.fn().mockResolvedValue(seat),
+      upsert: jest.fn().mockResolvedValue(undefined),
     },
+    user: { update: jest.fn().mockResolvedValue(undefined) },
   };
   const prisma = {
     $transaction: jest.fn((fn: (t: typeof tx) => unknown) => fn(tx)),
+    hostSeat: {
+      findUnique: jest.fn().mockResolvedValue(seat),
+      deleteMany: jest.fn(async ({ where }: { where: { userId: string } }) => ({
+        count: seat?.userId === where.userId ? 1 : 0,
+      })),
+    },
     user: {
-      findFirst: jest.fn().mockResolvedValue(holderSub ? { displayName: 'Alice' } : null),
-      updateMany: jest.fn().mockResolvedValue({ count: holderSub ? 1 : 0 }),
+      findUnique: jest.fn(async ({ where }: { where: { oidcSubject: string } }) => {
+        const u = users.get(where.oidcSubject);
+        return u ? { id: u.id } : null;
+      }),
+      upsert: jest.fn(async ({ create }: { create: Record<string, unknown> }) => ({
+        id: users.get(String(create.oidcSubject))?.id ?? 'u-new',
+        ...create,
+      })),
+      update: jest.fn().mockResolvedValue(undefined),
     },
   } as unknown as PrismaService;
   const samples = {
@@ -30,42 +57,101 @@ function makeService(holderSub: string | null) {
   return { service: new HostSeatService(prisma, samples), tx, prisma, samples };
 }
 
-describe('HostSeatService', () => {
-  it('gives the seat (host) to the first local user and loads the sample quizzes', async () => {
-    const { service, tx, samples } = makeService(null);
-    const user = await service.provision(alice);
-    expect(user.role).toBe('host');
-    expect(tx.$executeRaw).toHaveBeenCalled(); // advisory lock taken
-    expect(samples.createIfEmpty).toHaveBeenCalledWith('u-local:alice');
-  });
+const future = new Date(Date.now() + 3_600_000);
+const past = new Date(Date.now() - 1_000);
 
-  it('keeps the holder as host without reloading samples', async () => {
-    const { service, samples } = makeService('local:alice');
-    const user = await service.provision(alice);
-    expect(user.role).toBe('host');
+describe('HostSeatService.provision', () => {
+  it('never claims: a new local user is a player even when the seat is free', async () => {
+    const { service, tx, samples } = makeService(null);
+    const user = await service.provision(principal(alice));
+    expect(user.role).toBe('player');
+    expect(tx.$executeRaw).not.toHaveBeenCalled();
     expect(samples.createIfEmpty).not.toHaveBeenCalled();
   });
 
-  it('provisions anyone else as player while the seat is held', async () => {
-    const { service, tx } = makeService('local:alice');
-    const user = await service.provision(bob);
-    expect(user.role).toBe('player');
-    expect(tx.user.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ update: expect.objectContaining({ role: 'player' }) }),
-    );
+  it('derives host for the live holder and player for everyone else', async () => {
+    const { service } = makeService({ id: 1, userId: alice.id, expiresAt: future });
+    expect((await service.provision(principal(alice))).role).toBe('host');
+    expect((await service.provision(principal(bob))).role).toBe('player');
   });
 
-  it('release() frees the seat only for a local holder', async () => {
-    const { service, prisma } = makeService('local:alice');
-    await expect(service.release('local:alice')).resolves.toBe(true);
-    expect(prisma.user.updateMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { oidcSubject: 'local:alice', role: 'host' } }),
+  it('demotes the holder once the seat has expired', async () => {
+    const { service } = makeService({ id: 1, userId: alice.id, expiresAt: past });
+    expect((await service.provision(principal(alice))).role).toBe('player');
+  });
+});
+
+describe('HostSeatService.claim', () => {
+  it('takes a free seat under the advisory lock, with expiry, and loads the samples', async () => {
+    const { service, tx, samples } = makeService(null);
+    const state = await service.claim(alice, 60);
+    expect(tx.$executeRaw).toHaveBeenCalled();
+    expect(tx.hostSeat.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ create: expect.objectContaining({ userId: alice.id }) }),
     );
-    await expect(service.release('oidc-sub-123')).resolves.toBe(false);
+    expect(tx.user.update).toHaveBeenCalledWith({
+      where: { id: alice.id },
+      data: { role: 'host' },
+    });
+    expect(samples.createIfEmpty).toHaveBeenCalledWith(alice.id);
+    expect(state.holder).toBe('Alice');
+    expect(state.expiresAt!.getTime()).toBeGreaterThan(Date.now() + 59 * 60_000);
   });
 
-  it('isLocal() recognises local-mode subjects', () => {
-    expect(HostSeatService.isLocal('local:alice')).toBe(true);
-    expect(HostSeatService.isLocal('f2c1…')).toBe(false);
+  it('claims without expiry when expiresInMinutes is null', async () => {
+    const { service } = makeService(null);
+    expect((await service.claim(alice, null)).expiresAt).toBeNull();
+  });
+
+  it('refuses (409 host_seat.taken) while another user holds a live seat', async () => {
+    const { service, tx } = makeService({ id: 1, userId: alice.id, expiresAt: future });
+    await expect(service.claim(bob, null)).rejects.toThrow(ConflictException);
+    expect(tx.hostSeat.upsert).not.toHaveBeenCalled();
+  });
+
+  it('takes over an expired seat and demotes its previous holder', async () => {
+    const { service, tx } = makeService({ id: 1, userId: alice.id, expiresAt: past });
+    await service.claim(bob, 30);
+    expect(tx.user.update).toHaveBeenCalledWith({
+      where: { id: alice.id },
+      data: { role: 'player' },
+    });
+    expect(tx.user.update).toHaveBeenCalledWith({ where: { id: bob.id }, data: { role: 'host' } });
+  });
+
+  it('lets the holder renew their own seat', async () => {
+    const { service, tx } = makeService({ id: 1, userId: alice.id, expiresAt: future });
+    await expect(service.claim(alice, 120)).resolves.toMatchObject({ holder: 'Alice' });
+    expect(tx.hostSeat.upsert).toHaveBeenCalled();
+  });
+});
+
+describe('HostSeatService.state / release', () => {
+  it('reports the live holder, and a free seat once expired', async () => {
+    const live = makeService({
+      id: 1,
+      userId: alice.id,
+      expiresAt: future,
+      user: { displayName: 'Alice' },
+    });
+    await expect(live.service.state()).resolves.toEqual({ holder: 'Alice', expiresAt: future });
+    const expired = makeService({
+      id: 1,
+      userId: alice.id,
+      expiresAt: past,
+      user: { displayName: 'Alice' },
+    });
+    await expect(expired.service.state()).resolves.toEqual({ holder: null, expiresAt: null });
+  });
+
+  it('release() frees the seat only for its holder, and only for local identities', async () => {
+    const { service, prisma } = makeService({ id: 1, userId: alice.id, expiresAt: null });
+    await expect(service.release(alice)).resolves.toBe(true);
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: alice.id },
+      data: { role: 'player' },
+    });
+    await expect(service.release(bob)).resolves.toBe(false);
+    await expect(service.release({ ...bob, oidcSubject: 'oidc-123' } as User)).resolves.toBe(false);
   });
 });

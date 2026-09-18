@@ -122,8 +122,23 @@ model User {
   mediaAssets    MediaAsset[]
   hostedSessions GameSessionLog[]
   playerResults  PlayerResultLog[]
+  hostSeat       HostSeat?
 
   @@map("user")
+}
+
+/// Local mode (`AUTH_MODE=none`): the single **host seat**. One row at most (`id = 1`,
+/// CHECK in SQL). Claimed intentionally by a local user, released on log out or once
+/// `expires_at` is past (checked lazily on read — no scheduler).
+model HostSeat {
+  id        Int       @id @default(1) @db.SmallInt
+  userId    String    @unique @map("user_id") @db.Char(26)
+  claimedAt DateTime  @default(now()) @map("claimed_at") @db.Timestamptz(6)
+  expiresAt DateTime? @map("expires_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("host_seat")
 }
 
 /// §2.2 — quiz (banque privée du animateur).

@@ -19,5 +19,6 @@
   "running_other": "{{count}} 場進行中",
   "seatTaken": "主持人席位由其他人佔用：你只能以參與者身分加入。",
   "loadSamples": "載入範例測驗",
-  "loadSamplesHint": "兩套可直接開始的英文測驗（法國、臺灣），立即體驗應用程式。"
+  "loadSamplesHint": "兩套可直接開始的英文測驗（法國、臺灣），立即體驗應用程式。",
+  "seatBackToLogin": "返回登入"
 }

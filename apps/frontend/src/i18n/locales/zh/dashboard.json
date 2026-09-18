@@ -19,5 +19,6 @@
   "running_other": "{{count}} 场进行中",
   "seatTaken": "主持人席位由其他人占用：你只能以参与者身份加入。",
   "loadSamples": "加载示例测验",
-  "loadSamplesHint": "两套可直接开始的英文测验（法国、台湾），立即体验应用。"
+  "loadSamplesHint": "两套可直接开始的英文测验（法国、台湾），立即体验应用。",
+  "seatBackToLogin": "返回登录"
 }

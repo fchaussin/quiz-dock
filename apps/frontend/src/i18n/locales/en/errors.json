@@ -49,5 +49,8 @@
   },
   "validation": "Some fields are invalid.",
   "internal": "Internal error.",
-  "error": "An error occurred."
+  "error": "An error occurred.",
+  "host_seat": {
+    "taken": "The host seat is already taken."
+  }
 }

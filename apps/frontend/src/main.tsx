@@ -3,7 +3,7 @@ import { RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { authConfigControllerConfig } from './api/generated/auth/auth';
-import { setAuthHeaders } from './api/http';
+import { ApiError, setAuthHeaders } from './api/http';
 import { type AuthMode, AuthProvider, bindOidcSession, configureAuth } from './auth/auth-context';
 import { getOidc, initOidc } from './auth/oidc';
 import { APP_NAME } from './config';
@@ -13,7 +13,16 @@ import './index.css';
 
 document.title = APP_NAME; // marque runtime (white-label)
 
-const queryClient = new QueryClient();
+// Pas de nouvelle tentative sur une erreur 4xx (401/403/404…) : la réponse ne
+// changera pas et l'UI doit l'afficher tout de suite (ex. siège d'hôte pris).
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) =>
+        !(error instanceof ApiError && error.status < 500) && failureCount < 3,
+    },
+  },
+});
 
 /**
  * Découverte du mode d'auth auprès du backend AVANT le rendu — pour que la garde

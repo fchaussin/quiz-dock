@@ -19,5 +19,6 @@
   "running_other": "{{count}} sessions running",
   "seatTaken": "The host seat is held by someone else: you can only join sessions as a participant.",
   "loadSamples": "Load the sample quizzes",
-  "loadSamplesHint": "Two ready-to-play quizzes in English (France, Taiwan) to try the app right away."
+  "loadSamplesHint": "Two ready-to-play quizzes in English (France, Taiwan) to try the app right away.",
+  "seatBackToLogin": "Back to sign-in"
 }

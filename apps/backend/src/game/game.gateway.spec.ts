@@ -37,19 +37,19 @@ describe('GameGateway (intégration socket)', () => {
     prisma = app.get(PrismaService);
 
     // Seed : un hôte dont l'oidcSubject == slug local ('local:animateur'),
-    // propriétaire d'un quiz « ready » avec une question valide. Le siège d'hôte
-    // local (HostSeatService) revient au plus ancien hôte local : on libère
-    // d'abord tout siège laissé par un run précédent.
-    await prisma.user.updateMany({
-      where: { oidcSubject: { startsWith: 'local:' }, role: 'host' },
-      data: { role: 'player' },
-    });
+    // propriétaire d'un quiz « ready » avec une question valide. En mode local le
+    // rôle dérive du siège d'hôte (HostSeatService) : on le lui attribue.
     const host = await prisma.user.upsert({
       where: { oidcSubject: 'local:animateur' },
       create: { oidcSubject: 'local:animateur', displayName: 'Animateur', role: 'host' },
       update: { role: 'host' },
     });
     hostUserId = host.id;
+    await prisma.hostSeat.upsert({
+      where: { id: 1 },
+      create: { id: 1, userId: host.id, expiresAt: null },
+      update: { userId: host.id, expiresAt: null },
+    });
     const quiz = await prisma.quiz.create({
       data: {
         ownerId: host.id,

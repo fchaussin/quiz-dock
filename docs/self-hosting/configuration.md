@@ -113,11 +113,20 @@ Example `branding/override.css` (recolor the primary):
 ## 3. OIDC authentication
 
 By default (`AUTH_MODE=none`) QuizDock runs in **local mode**: no identity provider,
-hosts identify with a name. The first person to reach the host area takes the single
-**host seat** (they get the sample quizzes and can create / present); everyone else
-can only join sessions as a participant until the seat is released (log out). Ideal
-for a demo or a trusted network — it is *not* a security boundary (a name is not a
-secret).
+hosts identify with a name, and there is a single **host seat**:
+
+- The seat is taken **intentionally**: on the sign-in page the app explains the lock
+  and asks for confirmation, with an optional **auto-expiry** (1 h, 4 h, 24 h or none).
+- While held, the host area is locked: everyone else can only join sessions as a
+  participant (`403 auth.host_required` on the host API and `host:*` events).
+- It is released when the holder logs out, or automatically once the expiry is past
+  (checked lazily, no scheduler). The first claim also loads the two sample quizzes.
+- A name is the only key: entering the holder's name again (on any device) resumes
+  the seat — handy across devices, and the reason this is *not* a security boundary.
+  Use it for demos and trusted networks; use OIDC otherwise.
+
+`GET /auth/host-seat` (public) reports the holder and expiry; `POST /auth/host-seat/claim`
+and `POST /auth/host-seat/release` are what the SPA calls.
 
 Set **`AUTH_MODE=oidc`** to require sign-in for hosts against **any OpenID Connect
 provider**. QuizDock only relies on the OIDC standards — Discovery 1.0, the

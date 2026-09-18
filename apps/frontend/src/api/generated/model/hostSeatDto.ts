@@ -12,4 +12,9 @@ export interface HostSeatDto {
      * @nullable
      */
   holder: string | null;
+  /**
+     * When the seat frees itself automatically; null = no expiry (or free seat).
+     * @nullable
+     */
+  expiresAt: string | null;
 }

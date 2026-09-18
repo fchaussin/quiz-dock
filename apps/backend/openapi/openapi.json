@@ -83,6 +83,45 @@
         ]
       }
     },
+    "/api/v1/auth/host-seat/claim": {
+      "post": {
+        "operationId": "HostSeatController_claim",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimHostSeatDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostSeatDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "host_seat.taken — another local user holds the seat."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/api/v1/auth/host-seat/release": {
       "post": {
         "operationId": "HostSeatController_release",
@@ -1151,11 +1190,29 @@
             "type": "string",
             "description": "Display name of the current seat holder, or null when the seat is free (always null in OIDC mode).",
             "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the seat frees itself automatically; null = no expiry (or free seat).",
+            "nullable": true,
+            "format": "date-time"
           }
         },
         "required": [
-          "holder"
+          "holder",
+          "expiresAt"
         ]
+      },
+      "ClaimHostSeatDto": {
+        "type": "object",
+        "properties": {
+          "expiresInMinutes": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 10080,
+            "nullable": true
+          }
+        }
       },
       "HostSeatReleaseDto": {
         "type": "object",
