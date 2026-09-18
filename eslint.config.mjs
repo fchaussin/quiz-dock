@@ -27,6 +27,11 @@ export default tseslint.config(
       'no-undef': 'off',
     },
   },
+  // Scripts Node (outillage, ex. vérification des locales).
+  {
+    files: ['**/scripts/**/*.{js,mjs,cjs}'],
+    languageOptions: { globals: { ...globals.node } },
+  },
   // Frontend : règles React Hooks + globals navigateur
   {
     files: ['apps/frontend/**/*.{ts,tsx}'],
