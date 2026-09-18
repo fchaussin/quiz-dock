@@ -1,6 +1,7 @@
 {
   "auth": {
-    "required": "Autenticación requerida."
+    "required": "Autenticación requerida.",
+    "host_required": "Se requiere el rol de anfitrión."
   },
   "host": {
     "auth_required": "Se requiere autenticación del anfitrión.",

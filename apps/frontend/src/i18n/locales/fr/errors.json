@@ -1,6 +1,7 @@
 {
   "auth": {
-    "required": "Authentification requise."
+    "required": "Authentification requise.",
+    "host_required": "Rôle animateur requis."
   },
   "host": {
     "auth_required": "Authentification animateur requise.",

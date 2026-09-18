@@ -21,13 +21,13 @@ describe('localSlug', () => {
 describe('NoAuthProvider', () => {
   const provider = new NoAuthProvider();
 
-  it('dérive le principal de l’en-tête X-Local-User (rôle host)', async () => {
+  it('dérive le principal de l’en-tête X-Local-User (rôle attribué par le siège)', async () => {
     const principal = await provider.authenticate(reqWith({ 'x-local-user': 'Marc' }));
     expect(principal).toEqual({
       sub: 'local:marc',
       displayName: 'Marc',
       email: null,
-      roles: ['host'],
+      roles: [],
     });
   });
 

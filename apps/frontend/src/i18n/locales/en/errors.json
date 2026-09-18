@@ -1,6 +1,7 @@
 {
   "auth": {
-    "required": "Authentication required."
+    "required": "Authentication required.",
+    "host_required": "Host role required."
   },
   "host": {
     "auth_required": "Host authentication required.",

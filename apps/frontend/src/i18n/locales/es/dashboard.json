@@ -16,5 +16,8 @@
   "edit": "Editar",
   "present": "Presentar",
   "running_one": "{{count}} sesión en curso",
-  "running_other": "{{count}} sesiones en curso"
+  "running_other": "{{count}} sesiones en curso",
+  "seatTaken": "El puesto de anfitrión lo ocupa otra persona: solo puedes unirte a las sesiones como participante.",
+  "loadSamples": "Cargar los cuestionarios de ejemplo",
+  "loadSamplesHint": "Dos cuestionarios listos para jugar en inglés (Francia, Taiwán) para probar la aplicación de inmediato."
 }

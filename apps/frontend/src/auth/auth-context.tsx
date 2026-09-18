@@ -1,10 +1,13 @@
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
+import { hostSeatControllerRelease } from '../api/generated/auth/auth';
+import { meControllerMe } from '../api/generated/me/me';
 import { setAuthHeaders } from '../api/http';
 import { getOidc } from './oidc';
 
 const STORAGE_KEY = 'live.localUser';
 
 export type AuthMode = 'none' | 'oidc';
+export type UserRole = 'host' | 'player' | 'admin';
 
 // État hors-React, lu par la garde de route (synchrone) et configuré au démarrage.
 let currentMode: AuthMode = 'none';
@@ -44,11 +47,28 @@ function applyLocalUser(name: string | null): void {
   setAuthHeaders(name ? { 'X-Local-User': name } : {});
 }
 
+/**
+ * Rôle côté backend de l'identité courante (`GET /me`), ou `null` si injoignable.
+ * En mode local c'est ici que le **siège d'hôte** se décide : le premier arrivé
+ * devient `host`, les autres `player`.
+ */
+export async function fetchRole(): Promise<UserRole | null> {
+  try {
+    const { data } = await meControllerMe();
+    return data.role as UserRole;
+  } catch {
+    return null;
+  }
+}
+
 interface AuthState {
   mode: AuthMode;
   user: string | null;
-  /** Connexion mode local (nom). */
-  loginLocal: (name: string) => void;
+  /**
+   * Connexion mode local (nom). Résout le rôle attribué par le backend (siège
+   * d'hôte) : `player` = le siège est déjà pris, `null` = backend injoignable.
+   */
+  loginLocal: (name: string) => Promise<UserRole | null>;
   /** Connexion mode OIDC (redirection vers l'IdP). */
   loginOidc: () => Promise<void>;
   /** Finalise le retour de redirection OIDC (route /auth/callback). */
@@ -74,11 +94,12 @@ export function AuthProvider({
     return stored;
   });
 
-  const loginLocal = useCallback((name: string) => {
+  const loginLocal = useCallback(async (name: string) => {
     const trimmed = name.trim();
     localStorage.setItem(STORAGE_KEY, trimmed);
     applyLocalUser(trimmed);
     setUser(trimmed);
+    return fetchRole();
   }, []);
 
   const loginOidc = useCallback(async () => {
@@ -98,6 +119,8 @@ export function AuthProvider({
       oidcAuthed = false;
       await getOidc().removeUser();
     } else {
+      // Rend le siège d'hôte (no-op si on ne le tenait pas) avant d'oublier l'identité.
+      await hostSeatControllerRelease().catch(() => undefined);
       localStorage.removeItem(STORAGE_KEY);
     }
     applyLocalUser(null);

@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider, getLocalUser, useAuth } from './auth-context';
 import { getOidc } from './oidc';
@@ -23,7 +23,7 @@ function Probe() {
 describe('AuthProvider', () => {
   afterEach(() => localStorage.clear());
 
-  it('login/logout met à jour l’état et le stockage local', () => {
+  it('login/logout met à jour l’état et le stockage local', async () => {
     render(
       <AuthProvider>
         <Probe />
@@ -36,7 +36,8 @@ describe('AuthProvider', () => {
     expect(getLocalUser()).toBe('Marc');
 
     act(() => screen.getByText('out').click());
-    expect(screen.getByTestId('who').textContent).toBe('∅');
+    // La déconnexion locale rend d'abord le siège d'hôte (asynchrone).
+    await waitFor(() => expect(screen.getByTestId('who').textContent).toBe('∅'));
     expect(getLocalUser()).toBeNull();
   });
 });

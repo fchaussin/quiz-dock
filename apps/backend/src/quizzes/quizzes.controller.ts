@@ -27,12 +27,16 @@ import { QuizDto } from './dto/quiz.dto';
 import { TransitionQuizDto } from './dto/transition-quiz.dto';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { QuizzesService } from './quizzes.service';
+import { SampleQuizzesService } from './samples/sample-quizzes.service';
 
 @ApiTags('quizzes')
 @ApiBearerAuth()
 @Controller('quizzes')
 export class QuizzesController {
-  constructor(private readonly quizzes: QuizzesService) {}
+  constructor(
+    private readonly quizzes: QuizzesService,
+    private readonly samples: SampleQuizzesService,
+  ) {}
 
   @Get()
   @ApiOkResponse({ type: QuizDto, isArray: true })
@@ -44,6 +48,13 @@ export class QuizzesController {
   @ApiCreatedResponse({ type: QuizDto })
   create(@CurrentUser() user: User, @Body() dto: CreateQuizDto) {
     return this.quizzes.create(user.id, dto);
+  }
+
+  /** Adds the built-in sample quizzes (ready to play) to the caller's bank. */
+  @Post('samples')
+  @ApiCreatedResponse({ type: QuizDto, isArray: true })
+  createSamples(@CurrentUser() user: User) {
+    return this.samples.createFor(user.id);
   }
 
   @Post(':id/duplicate')

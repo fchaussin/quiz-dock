@@ -1,5 +1,8 @@
 import type { Request } from 'express';
 
+/** Prefix of the `sub` of local-mode identities (`AUTH_MODE=none`). */
+export const LOCAL_SUB_PREFIX = 'local:';
+
 /** Jeton d'injection NestJS pour l'implémentation d'`AuthProvider` choisie. */
 export const AUTH_PROVIDER = Symbol('AUTH_PROVIDER');
 

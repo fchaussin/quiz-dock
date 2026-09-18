@@ -24,6 +24,8 @@ export * from './createSlideDto';
 export * from './createSlideDtoBlocksItem';
 export * from './createSlideDtoGradient';
 export * from './createSlideDtoTextTone';
+export * from './hostSeatDto';
+export * from './hostSeatReleaseDto';
 export * from './mediaControllerUploadBody';
 export * from './mediaUploadResultDto';
 export * from './meResponseDto';

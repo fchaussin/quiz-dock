@@ -1,6 +1,7 @@
 {
   "auth": {
-    "required": "需要身份驗證。"
+    "required": "需要身份驗證。",
+    "host_required": "需要主持人角色。"
   },
   "host": {
     "auth_required": "需要主持人身份驗證。",
