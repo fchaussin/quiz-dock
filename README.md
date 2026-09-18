@@ -71,7 +71,7 @@ the results never leave your servers.
 - 🔎 **History & exploration** — browse archived sessions: per-question success rates, average times, and per-player answer sheets.
 - 📤 **CSV export** — export overall results and per-player answer sheets.
 - 🌍 **Multilingual** — interface in English, French, Spanish, Simplified Chinese and Traditional Chinese (one language per instance).
-- 🏠 **Self-hosted & private** — runs on your own infra with Docker; no SaaS, no tracking, no ads; players need no account, hosts can plug in OIDC.
+- 🏠 **Self-hosted & private** — runs on your own infra with Docker; no SaaS, no tracking, no ads; players need no account, hosts can plug in any OpenID Connect provider.
 - 🎨 **White-label** — rebrand name, logo and CSS via env + a mounted folder, no rebuild.
 
 ## 📸 Screenshots
@@ -162,7 +162,7 @@ Copy `.env.example` to `.env` and adjust. Common settings:
 |---|---|---|
 | `APP_NAME` | `QuizDock` | App name shown in the UI (white-label) |
 | `APP_LANG` | `en` | Instance language: `en` · `fr` · `es` · `zh` · `zh-TW` |
-| `AUTH_MODE` | `none` | `none` (local/demo) or `oidc` (bring your own IdP) |
+| `AUTH_MODE` | `none` | `none` (local mode: first host takes the seat, sample quizzes included) or `oidc` (any OpenID Connect provider) |
 | `HTTP_PORT` | `18080` | Host port for the app |
 
 Rebrand without rebuilding: set `APP_NAME` / `APP_LANG` and drop a `logo.svg` + `override.css`

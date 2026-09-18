@@ -42,7 +42,9 @@ async function makeToken(opts: TokenOpts = {}): Promise<string> {
   return new SignJWT({
     preferred_username: opts.username ?? 'marc',
     email: opts.email,
-    realm_access: { roles: opts.roles ?? ['host'] },
+    // Flat `roles` claim (default OIDC_ROLES_CLAIM); nested paths are tested separately.
+    roles: opts.roles ?? ['host'],
+    realm_access: { roles: ['nested-host'] },
   })
     .setProtectedHeader({ alg: 'RS256', kid: KID })
     .setIssuer(opts.issuer ?? ISSUER)
@@ -54,12 +56,16 @@ async function makeToken(opts: TokenOpts = {}): Promise<string> {
 }
 
 /** Construit le provider après avoir armé le JWKS local et l'env. */
-async function buildProvider(audience?: string) {
+async function buildProvider(audience?: string, rolesClaim?: string) {
   const localSet = createLocalJWKSet({ keys: [publicJwk] });
   (createRemoteJWKSet as jest.Mock).mockReturnValue(localSet);
   if (audience) process.env.OIDC_AUDIENCE = audience;
   else delete process.env.OIDC_AUDIENCE;
+  if (rolesClaim) process.env.OIDC_ROLES_CLAIM = rolesClaim;
+  else delete process.env.OIDC_ROLES_CLAIM;
   process.env.OIDC_ISSUER = ISSUER;
+  // Explicit JWKS URI: no discovery round-trip in unit tests.
+  process.env.OIDC_JWKS_URI = `${ISSUER}/jwks`;
   const { OidcProvider } = await import('./oidc.provider');
   return new OidcProvider();
 }
@@ -119,5 +125,57 @@ describe('OidcProvider', () => {
     expect(ok?.sub).toBe('kc-sub-123');
     const ko = await provider.authenticate(bearer(await makeToken({ audience: 'account' })));
     expect(ko).toBeNull();
+  });
+
+  it('lit les rôles à un chemin pointé quand OIDC_ROLES_CLAIM est configuré', async () => {
+    const provider = await buildProvider(undefined, 'realm_access.roles');
+    const principal = await provider.authenticate(bearer(await makeToken()));
+    expect(principal?.roles).toEqual(['nested-host']);
+  });
+
+  it('résout le JWKS via OIDC Discovery quand OIDC_JWKS_URI est absent', async () => {
+    await buildProvider();
+    delete process.env.OIDC_JWKS_URI;
+    const { OidcProvider } = await import('./oidc.provider');
+    const discovered = new OidcProvider();
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ issuer: ISSUER, jwks_uri: `${ISSUER}/protocol/openid-connect/certs` }),
+    });
+    const realFetch = global.fetch;
+    global.fetch = fetchMock as unknown as typeof fetch;
+    try {
+      const principal = await discovered.authenticate(bearer(await makeToken()));
+      expect(principal?.sub).toBe('kc-sub-123');
+      // Second call: discovery document is cached.
+      await discovered.authenticate(bearer(await makeToken()));
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(fetchMock).toHaveBeenCalledWith(`${ISSUER}/.well-known/openid-configuration`);
+      expect(createRemoteJWKSet).toHaveBeenLastCalledWith(
+        new URL(`${ISSUER}/protocol/openid-connect/certs`),
+      );
+    } finally {
+      global.fetch = realFetch;
+    }
+  });
+
+  it('retente la discovery au prochain appel si elle a échoué', async () => {
+    await buildProvider();
+    delete process.env.OIDC_JWKS_URI;
+    const { OidcProvider } = await import('./oidc.provider');
+    const discovered = new OidcProvider();
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 503 })
+      .mockResolvedValue({ ok: true, json: async () => ({ jwks_uri: `${ISSUER}/jwks` }) });
+    const realFetch = global.fetch;
+    global.fetch = fetchMock as unknown as typeof fetch;
+    try {
+      expect(await discovered.authenticate(bearer(await makeToken()))).toBeNull();
+      expect((await discovered.authenticate(bearer(await makeToken())))?.sub).toBe('kc-sub-123');
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      global.fetch = realFetch;
+    }
   });
 });
