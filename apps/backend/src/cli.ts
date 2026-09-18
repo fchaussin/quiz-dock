@@ -14,7 +14,7 @@ import { HostSeatService } from './users/host-seat.service';
 
 const USAGE = `QuizDock admin CLI — runs inside the app container.
 
-Usage: node dist/cli.js <command> [options]
+Usage: qd <command> [options]      (in the container; = node dist/cli.js)
 
   doctor            Check env, database, migrations, Redis, media dir, OIDC discovery
   migrate:status    List applied / pending migrations

@@ -5,7 +5,7 @@ Two tools, one name, for operators who self-host QuizDock:
 | | Where it runs | What it does |
 |---|---|---|
 | **`quizdock`** script | on the host (needs only Docker + curl) | install, start/stop, logs, backup/restore, upgrade — and relays admin commands |
-| **`node dist/cli.js`** | inside the app container (shipped in the image) | doctor, host seat, users, sample quizzes, retention purge |
+| **`qd`** command in the image | inside the app container | doctor, host seat, users, sample quizzes, retention purge |
 
 You normally only touch the first one.
 
@@ -50,10 +50,13 @@ Available through `./quizdock <command>`, or directly:
 
 ```bash
 # compose
-docker compose -f docker-compose.prod.yml exec quizdock /nodejs/bin/node dist/cli.js doctor
+docker compose -f docker-compose.prod.yml exec quizdock qd doctor
 # standalone
-docker exec quizdock node dist/cli.js doctor
+docker exec quizdock qd doctor
 ```
+
+(`qd` is `/usr/local/bin/qd` in both images — a launcher for `node dist/cli.js`,
+which still works too.)
 
 | Command | Description |
 |---|---|

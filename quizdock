@@ -10,7 +10,7 @@
 #   standalone  one container (fchaussin/quizdock:standalone) — demo / first try
 #
 # Admin commands (doctor, seat:*, user:*, samples:load, sessions:purge) are
-# relayed to the CLI shipped inside the image: `node dist/cli.js`.
+# relayed to the `qd` CLI shipped inside the image (/usr/local/bin/qd).
 set -eu
 
 IMAGE="${QUIZDOCK_IMAGE:-fchaussin/quizdock}"
@@ -58,9 +58,8 @@ compose() { docker compose -f "$COMPOSE_FILE" "$@"; }
 # Runs the in-image admin CLI with the instance's environment.
 admin() {
   case "$(mode)" in
-    # distroless image: no shell, node lives at /nodejs/bin/node
-    compose) compose exec -T quizdock /nodejs/bin/node dist/cli.js "$@" ;;
-    standalone) docker exec -i "$CONTAINER" node dist/cli.js "$@" ;;
+    compose) compose exec -T quizdock qd "$@" ;;
+    standalone) docker exec -i "$CONTAINER" qd "$@" ;;
   esac
 }
 
