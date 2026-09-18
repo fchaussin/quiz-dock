@@ -141,6 +141,9 @@ void i18next.use(initReactI18next).init({
   lng: resolveLang(),
   fallbackLng: DEFAULT_LANG,
   supportedLngs: [...supportedLngs],
+  // `zh-TW` ne doit PAS retomber sur `zh` (simplifié) avant `en` : sans ceci
+  // i18next résout zh-TW → zh → en, et une clé manquante s'affiche en simplifié.
+  load: 'currentOnly',
   defaultNS,
   ns: Object.keys(resources.en),
   interpolation: { escapeValue: false }, // React échappe déjà
