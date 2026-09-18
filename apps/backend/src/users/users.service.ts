@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { type User, UserRole } from '@prisma/client';
 import type { AuthPrincipal } from '../auth/auth-provider';
 import { PrismaService } from '../prisma/prisma.service';
+import { HostSeatService } from './host-seat.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly seat: HostSeatService,
+  ) {}
 
   /** Mappe les rôles OIDC sur le rôle interne (le plus élevé l'emporte). */
   private resolveRole(roles: string[]): UserRole {
@@ -16,10 +20,20 @@ export class UsersService {
 
   /**
    * Provisionne (ou met à jour) l'utilisateur à partir du principal authentifié.
-   * Idempotent : clé sur `oidcSubject` (inclut le sentinel `local:<slug>`).
+   * Idempotent : clé sur `oidcSubject`. Les identités locales (`local:<slug>`,
+   * mode none) passent par le siège d'hôte, qui décide du rôle.
    */
   async upsertFromPrincipal(principal: AuthPrincipal): Promise<User> {
-    const role = this.resolveRole(principal.roles);
+    if (HostSeatService.isLocal(principal.sub)) {
+      return this.seat.provision(principal);
+    }
+    const claimed = this.resolveRole(principal.roles);
+    // An operator-granted `admin` (CLI) is sticky: never downgraded by the claims.
+    const existing = await this.prisma.user.findUnique({
+      where: { oidcSubject: principal.sub },
+      select: { role: true },
+    });
+    const role = existing?.role === UserRole.admin ? UserRole.admin : claimed;
     return this.prisma.user.upsert({
       where: { oidcSubject: principal.sub },
       create: {

@@ -1,0 +1,109 @@
+# CLI — install, maintain, administer
+
+Two tools, one name, for operators who self-host QuizDock:
+
+| | Where it runs | What it does |
+|---|---|---|
+| **`quizdock`** script | on the host (needs only Docker + curl) | install, start/stop, logs, backup/restore, upgrade — and relays admin commands |
+| **`qd`** command in the image | inside the app container | doctor, host seat, users, sample quizzes, retention purge |
+
+You normally only touch the first one.
+
+- [1. The `quizdock` script](#1-the-quizdock-script)
+- [2. Admin commands (in-image CLI)](#2-admin-commands-in-image-cli)
+- [3. Recipes](#3-recipes)
+
+---
+
+## 1. The `quizdock` script
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/quizdock/quiz-dock/main/quizdock
+chmod +x quizdock
+./quizdock init            # guided: name, language, port, auth mode → writes .env, fetches docker-compose.prod.yml
+./quizdock up              # starts the stack and waits for /health
+```
+
+`init --standalone` targets the all-in-one image instead (one container, bundled
+PostgreSQL + Redis, data in the `quizdock` volume) — fine for a demo, not for
+production. The mode is remembered in `.env` (`QUIZDOCK_MODE`), everything else
+reads the same file.
+
+| Command | Description |
+|---|---|
+| `init [--standalone]` | Create `.env` (guided; generates a PostgreSQL password) and fetch `docker-compose.prod.yml`. |
+| `up` / `down` | Start (and wait for health) / stop. |
+| `status` | Containers and health check. |
+| `logs [service]` | Follow logs (`quizdock`, `postgres`, `redis`, `migrate` in compose mode). |
+| `backup [dir]` | `pg_dump --clean` + media + `.env` → `./backups/quizdock-<date>/`. |
+| `restore <dir>` | Replace the database and media from a backup (stops the app first; asks for confirmation). |
+| `upgrade [tag]` | **backup → pull → restart** (migrations run on start) **→ doctor**. Persists the tag in `.env`. |
+| `doctor`, `seat:*`, `user:*`, `samples:load`, `sessions:purge` | Relayed to the in-image CLI (below). |
+| `admin <cmd…>` | Relay anything else (`admin help`). |
+
+Overrides: `QUIZDOCK_IMAGE`, `QUIZDOCK_COMPOSE_FILE`, `QUIZDOCK_ENV_FILE`,
+`QUIZDOCK_BACKUP_DIR`, `QUIZDOCK_CONTAINER` (standalone container name).
+
+## 2. Admin commands (in-image CLI)
+
+Available through `./quizdock <command>`, or directly:
+
+```bash
+# compose
+docker compose -f docker-compose.prod.yml exec quizdock qd doctor
+# standalone
+docker exec quizdock qd doctor
+```
+
+(`qd` is `/usr/local/bin/qd` in both images — a launcher for `node dist/cli.js`,
+which still works too.)
+
+| Command | Description |
+|---|---|
+| `doctor` | Checks `AUTH_MODE`, PostgreSQL, applied / pending / failed migrations, Redis, that `MEDIA_DIR` is writable, and in OIDC mode fetches the discovery document and the JWKS. Exit code 1 when something fails — the message says what to fix. |
+| `migrate:status` | Applied / pending / failed migrations (folders shipped in the image vs `_prisma_migrations`). |
+| `seat:status` | Local mode: who holds the host seat, since when, until when. |
+| `seat:release` | Operator override: free the seat whoever holds it (e.g. claimed with no expiry and abandoned). |
+| `user:list` | Accounts with subject, e-mail, role (as last provisioned), quiz count. |
+| `user:set-role <sub\|email> admin\|player` | Grant the `admin` role (sticky: never overridden by IdP claims or the host seat) or revoke it. `host` is derived, never assigned. |
+| `samples:load <sub\|email>` | Add the two sample quizzes to that user's bank. |
+| `sessions:purge [--dry-run]` | Delete archived sessions past their retention date (`retain_until`, 365 days at archive time) with their results. Nothing else purges them — schedule it (cron) if you need the retention enforced. |
+
+Subjects: OIDC `sub`, or `local:<slug>` in local mode (`user:list` shows them).
+
+## 3. Recipes
+
+**Upgrade to a release**
+
+```bash
+./quizdock upgrade 0.5.0     # backup, pull, restart, migrations, doctor
+```
+
+**Someone left with the host seat (local mode)**
+
+```bash
+./quizdock seat:status
+./quizdock seat:release
+```
+
+**Bootstrap an administrator in OIDC mode**
+
+```bash
+./quizdock user:list
+./quizdock user:set-role alice@example.com admin
+```
+
+**Enforce session retention weekly** (host crontab)
+
+```cron
+0 4 * * 1  cd /srv/quizdock && ./quizdock sessions:purge >> purge.log 2>&1
+```
+
+**Move to another server**
+
+```bash
+./quizdock backup ./move            # on the old host
+# copy ./move, quizdock, docker-compose.prod.yml to the new host, then:
+./quizdock init                     # same settings; or reuse ./move/env as .env
+./quizdock up && ./quizdock restore ./move
+```

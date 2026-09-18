@@ -28,7 +28,8 @@ services:
       retries: 5
     networks: [internal]
 
-  # Auth optionnelle : démarrée uniquement avec --profile keycloak (AUTH_MODE=keycloak)
+  # IdP OIDC d'exemple (dev) : démarré uniquement avec --profile keycloak (AUTH_MODE=oidc).
+  # N'importe quel fournisseur OpenID Connect peut le remplacer via les variables OIDC_*.
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
     profiles: ['keycloak']
@@ -59,11 +60,12 @@ services:
       MEDIA_MAX_BYTES: ${MEDIA_MAX_BYTES:-10485760}
       # Auth OIDC (utilisé seulement si AUTH_MODE=oidc). En Docker, l'issuer (host
       # vu par le navigateur) diffère de l'URI JWKS (host interne) — d'où deux
-      # variables. Keycloak est l'IdP de référence en dev.
-      OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:48080/realms/quiz-dock}
+      # variables. Les défauts ciblent l'IdP d'exemple du profil `keycloak`.
+      OIDC_ISSUER: ${OIDC_ISSUER:-http://localhost:${KEYCLOAK_PORT:-18080}/realms/quiz-dock}
       OIDC_JWKS_URI: ${OIDC_JWKS_URI:-http://keycloak:8080/realms/quiz-dock/protocol/openid-connect/certs}
       OIDC_AUDIENCE: ${OIDC_AUDIENCE:-}
       OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-quiz-dock-frontend}
+      OIDC_ROLES_CLAIM: ${OIDC_ROLES_CLAIM:-realm_access.roles}
     depends_on:
       postgres:
         condition: service_healthy

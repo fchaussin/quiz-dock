@@ -1,24 +1,83 @@
-import { useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
+import { hostSeatControllerState, useHostSeatControllerState } from '../api/generated/auth/auth';
+import { ApiError } from '../api/http';
 import { useAuth } from '../auth/auth-context';
+
+/** Auto-expiry choices offered when taking the host seat (minutes; 0 = never). */
+const EXPIRY_OPTIONS = [60, 240, 1440, 0] as const;
+const DEFAULT_EXPIRY = 240;
 
 /** Connexion animateur : mode local (nom) ou redirection OIDC selon `AUTH_MODE`. */
 export function LoginPage() {
-  const { t } = useTranslation(['auth', 'common']);
-  const { mode, loginLocal, loginOidc } = useAuth();
+  const { t, i18n } = useTranslation(['auth', 'common']);
+  const { mode, loginLocal, claimHostSeat, dropLocal, loginOidc } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState('');
+  const [seatTaken, setSeatTaken] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [claiming, setClaiming] = useState(false);
+  const [expiry, setExpiry] = useState<number>(DEFAULT_EXPIRY);
+  // Mode local : qui tient le siège d'hôte (et jusqu'à quand). Affiché avant même
+  // de saisir un nom, pour expliquer le verrou.
+  const seatQuery = useHostSeatControllerState({ query: { enabled: mode === 'none' } });
+  const holder = seatQuery.data?.data.holder ?? null;
+  const expiresAt = seatQuery.data?.data.expiresAt ?? null;
 
-  const submit = (e: FormEvent) => {
+  const formatUntil = (iso: string) =>
+    new Date(iso).toLocaleString(i18n.language, { dateStyle: 'short', timeStyle: 'short' });
+
+  const refuse = () => {
+    dropLocal();
+    setSeatTaken(true);
+    void seatQuery.refetch();
+  };
+
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    loginLocal(name);
-    void navigate({ to: '/dashboard' });
+    setSeatTaken(false);
+    const role = await loginLocal(name);
+    if (role === 'host' || role === 'admin' || role === null) {
+      // Titulaire du siège (ou backend injoignable : on laisse l'API trancher).
+      void navigate({ to: '/dashboard' });
+      return;
+    }
+    // Pas titulaire : le siège est libre (→ prise intentionnelle, après
+    // explication et confirmation) ou occupé (→ participant seulement).
+    const state = await hostSeatControllerState().catch(() => null);
+    if (state?.data.holder) {
+      refuse();
+      return;
+    }
+    setConfirming(true);
+  };
+
+  const confirmClaim = async () => {
+    setClaiming(true);
+    try {
+      await claimHostSeat(expiry === 0 ? null : expiry);
+      setConfirming(false);
+      void navigate({ to: '/dashboard' });
+    } catch (err) {
+      setConfirming(false);
+      if (err instanceof ApiError && err.status === 409) refuse();
+      else throw err;
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  const cancelClaim = () => {
+    setConfirming(false);
+    dropLocal();
   };
 
   return (
@@ -35,7 +94,14 @@ export function LoginPage() {
             </Button>
           </div>
         ) : (
-          <form onSubmit={submit} className="flex flex-col gap-4">
+          <form onSubmit={(e) => void submit(e)} className="flex flex-col gap-4">
+            <p className="rounded-md bg-muted p-3 text-sm" role="status">
+              {holder
+                ? expiresAt
+                  ? t('login.seatHeldByUntil', { name: holder, until: formatUntil(expiresAt) })
+                  : t('login.seatHeldBy', { name: holder })
+                : t('login.seatFree')}
+            </p>
             <Label htmlFor="name">
               {t('login.nameLabel')}
               <Input
@@ -49,10 +115,51 @@ export function LoginPage() {
             <Button type="submit" disabled={!name.trim()}>
               {t('login.submit')}
             </Button>
+            {seatTaken ? (
+              <p className="text-sm text-destructive" role="alert">
+                {t('login.seatTaken')}{' '}
+                <Link to="/" className="underline">
+                  {t('login.joinInstead')}
+                </Link>
+              </p>
+            ) : null}
             <small className="text-muted-foreground">{t('login.localHint')}</small>
           </form>
         )}
       </CardContent>
+
+      <ConfirmDialog
+        open={confirming}
+        title={t('claim.title')}
+        description={t('claim.explain')}
+        confirmLabel={claiming ? t('common:loading') : t('claim.confirm')}
+        onConfirm={() => {
+          if (!claiming) void confirmClaim();
+        }}
+        onCancel={cancelClaim}
+      >
+        <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+          <li>{t('claim.ruleOthers')}</li>
+          <li>{t('claim.ruleRelease')}</li>
+          <li>{t('claim.ruleName')}</li>
+        </ul>
+        <Label htmlFor="seat-expiry">
+          {t('claim.expiryLabel')}
+          <Select
+            id="seat-expiry"
+            value={expiry}
+            onChange={(e) => setExpiry(Number(e.target.value))}
+          >
+            {EXPIRY_OPTIONS.map((minutes) => (
+              <option key={minutes} value={minutes}>
+                {minutes === 0
+                  ? t('claim.expiryNever')
+                  : t('claim.expiryHours', { count: minutes / 60 })}
+              </option>
+            ))}
+          </Select>
+        </Label>
+      </ConfirmDialog>
     </Card>
   );
 }

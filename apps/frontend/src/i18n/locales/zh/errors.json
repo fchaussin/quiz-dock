@@ -1,6 +1,7 @@
 {
   "auth": {
-    "required": "需要身份验证。"
+    "required": "需要身份验证。",
+    "host_required": "需要主持人角色。"
   },
   "host": {
     "auth_required": "需要主持人身份验证。",
@@ -48,5 +49,8 @@
   },
   "validation": "部分字段无效。",
   "internal": "内部错误。",
-  "error": "发生了错误。"
+  "error": "发生了错误。",
+  "host_seat": {
+    "taken": "主持人席位已被占用。"
+  }
 }

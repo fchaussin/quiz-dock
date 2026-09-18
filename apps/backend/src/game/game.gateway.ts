@@ -19,6 +19,7 @@ import type { User } from '@prisma/client';
 import type { Request } from 'express';
 import type { Server, Socket } from 'socket.io';
 import { AUTH_PROVIDER, type AuthProvider } from '../auth/auth-provider';
+import { isHostRole } from '../auth/roles';
 import { UsersService } from '../users/users.service';
 import { GameEngine } from './game.engine';
 import { GameService } from './game.service';
@@ -96,11 +97,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect {
     @ConnectedSocket() socket: GameSocket,
     @MessageBody() payload: { quizId: string; fullCapture?: boolean },
   ): Promise<{ pin: string }> {
-    const host = socket.data.user;
-    if (!host) {
-      throw new WsException('host.auth_required');
-    }
-    const { pin } = await this.game.createSession(host.id, payload);
+    const hostId = this.requireHostId(socket);
+    const { pin } = await this.game.createSession(hostId, payload);
     socket.data.pin = pin;
     socket.data.isHostControl = true;
     await socket.join(pin);
@@ -146,10 +144,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect {
     @ConnectedSocket() socket: GameSocket,
     @MessageBody() payload: { pin: string },
   ): Promise<{ ok: boolean }> {
-    const host = socket.data.user;
-    if (!host) {
-      throw new WsException('host.auth_required');
-    }
+    const host = this.requireHost(socket);
     const meta = await this.game.getMeta(payload.pin);
     if (!meta) {
       throw new WsException('session.not_found');
@@ -406,13 +401,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect {
     }
   }
 
-  /** Exige un socket d'hôte authentifié ; renvoie son id utilisateur. */
-  private requireHostId(socket: GameSocket): string {
+  /** Exige un socket authentifié avec le rôle hôte (`host`/`admin`). */
+  private requireHost(socket: GameSocket): User {
     const host = socket.data.user;
     if (!host) {
       throw new WsException('host.auth_required');
     }
-    return host.id;
+    if (!isHostRole(host.role)) {
+      throw new WsException('auth.host_required');
+    }
+    return host;
+  }
+
+  private requireHostId(socket: GameSocket): string {
+    return this.requireHost(socket).id;
   }
 }
 

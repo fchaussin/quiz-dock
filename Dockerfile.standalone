@@ -27,7 +27,10 @@ RUN useradd -u 65532 -m -d /home/quizdock quizdock \
 # App artifact (dist, node_modules, prisma schema/config, built SPA, prisma client).
 COPY --from=app --chown=quizdock:quizdock /app /app
 COPY --chown=quizdock:quizdock docker/standalone-entrypoint.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh \
+ # Admin CLI as a plain command: `docker exec quizdock qd <cmd>`.
+ && printf '#!/bin/sh\nexec node /app/dist/cli.js "$@"\n' >/usr/local/bin/qd \
+ && chmod +x /usr/local/bin/qd
 
 ENV NODE_ENV=production \
     PORT=3000 \

@@ -49,6 +49,8 @@ COPY --from=build --chown=65532:65532 /out/client ./client
 COPY --from=build --chown=65532:65532 /out/prisma ./prisma
 COPY --from=build --chown=65532:65532 /out/prisma.config.ts ./prisma.config.ts
 COPY --from=build --chown=65532:65532 /data/media /data/media
+# Admin CLI as a plain command: `docker compose exec quizdock qd <cmd>`.
+COPY --chmod=755 docker/qd /usr/local/bin/qd
 EXPOSE 3000
 # ENTRYPOINT de l'image distroless nodejs = `node` → CMD = arguments.
 CMD ["dist/main.js"]

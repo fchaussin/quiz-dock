@@ -4,6 +4,7 @@ import { UsersModule } from '../users/users.module';
 import { AuthConfigController } from './auth-config.controller';
 import { AUTH_PROVIDER, type AuthProvider } from './auth-provider';
 import { AuthGuard } from './auth.guard';
+import { HostSeatController } from './host-seat.controller';
 import { NoAuthProvider } from './no-auth.provider';
 import { OidcProvider } from './oidc.provider';
 
@@ -13,7 +14,7 @@ import { OidcProvider } from './oidc.provider';
  */
 @Module({
   imports: [UsersModule],
-  controllers: [AuthConfigController],
+  controllers: [AuthConfigController, HostSeatController],
   providers: [
     {
       provide: AUTH_PROVIDER,

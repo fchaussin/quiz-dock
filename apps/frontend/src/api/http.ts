@@ -7,10 +7,19 @@
 import { errorText, validationFieldErrors } from './error-text';
 
 let authHeaders: Record<string, string> = {};
+let onUnauthorized: (() => void) | null = null;
 
 /** Mis à jour par le contexte d'auth (login/logout). */
 export function setAuthHeaders(headers: Record<string, string>): void {
   authHeaders = headers;
+}
+
+/**
+ * Réaction à un 401 sur une requête **authentifiée** (session expirée / jeton
+ * rejeté) : posé par le contexte d'auth (mode OIDC → retour à la connexion).
+ */
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  onUnauthorized = handler;
 }
 
 /** Erreur HTTP (statut ≥ 400) portant le corps parsé (messages de validation). */
@@ -58,6 +67,9 @@ export const customFetch = async <T>(url: string, options: RequestInit): Promise
   const data = body ? JSON.parse(body) : {};
   // Non-2xx → on lève, pour que react-query expose l'erreur (et son corps).
   if (!res.ok) {
+    if (res.status === 401 && Object.keys(authHeaders).length > 0) {
+      onUnauthorized?.();
+    }
     throw new ApiError(res.status, data);
   }
   return { data, status: res.status, headers: res.headers } as T;

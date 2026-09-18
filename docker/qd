@@ -1,0 +1,5 @@
+#!/nodejs/bin/node
+// `qd` launcher for the distroless app image: no shell there, but the kernel
+// resolves the shebang itself, so `docker compose exec quizdock qd doctor` works.
+// Same admin CLI as `node dist/cli.js`.
+require('/app/dist/cli.js');

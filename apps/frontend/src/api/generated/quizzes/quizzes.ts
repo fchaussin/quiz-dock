@@ -225,6 +225,81 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getQuizzesControllerCreateMutationOptions(options), queryClient);
     }
+    export type quizzesControllerCreateSamplesResponse201 = {
+  data: QuizDto[]
+  status: 201
+}
+
+export type quizzesControllerCreateSamplesResponseSuccess = (quizzesControllerCreateSamplesResponse201) & {
+  headers: Headers;
+};
+;
+
+export type quizzesControllerCreateSamplesResponse = (quizzesControllerCreateSamplesResponseSuccess)
+
+export const getQuizzesControllerCreateSamplesUrl = () => {
+
+
+
+
+  return `/api/v1/quizzes/samples`
+}
+
+export const quizzesControllerCreateSamples = async ( options?: RequestInit): Promise<quizzesControllerCreateSamplesResponse> => {
+
+  return customFetch<quizzesControllerCreateSamplesResponse>(getQuizzesControllerCreateSamplesUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getQuizzesControllerCreateSamplesMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof quizzesControllerCreateSamples>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof quizzesControllerCreateSamples>>, TError,void, TContext> => {
+
+const mutationKey = ['quizzesControllerCreateSamples'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof quizzesControllerCreateSamples>>, void> = () => {
+
+
+          return  quizzesControllerCreateSamples(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type QuizzesControllerCreateSamplesMutationResult = NonNullable<Awaited<ReturnType<typeof quizzesControllerCreateSamples>>>
+
+    export type QuizzesControllerCreateSamplesMutationError = unknown
+
+    export const useQuizzesControllerCreateSamples = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof quizzesControllerCreateSamples>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof quizzesControllerCreateSamples>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getQuizzesControllerCreateSamplesMutationOptions(options), queryClient);
+    }
     export type quizzesControllerDuplicateResponse201 = {
   data: QuizDto
   status: 201

@@ -1,4 +1,4 @@
-import { type ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { type ExecutionContext, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import type { Reflector } from '@nestjs/core';
 import type { User } from '@prisma/client';
 import type { Request } from 'express';
@@ -6,7 +6,8 @@ import type { UsersService } from '../users/users.service';
 import type { AuthPrincipal, AuthProvider } from './auth-provider';
 import { AuthGuard } from './auth.guard';
 
-const fakeUser = { id: 'u1', displayName: 'Marc' } as User;
+const fakeUser = { id: 'u1', displayName: 'Marc', role: 'host' } as User;
+const playerUser = { id: 'u2', displayName: 'Léa', role: 'player' } as User;
 const principal: AuthPrincipal = {
   sub: 'local:marc',
   displayName: 'Marc',
@@ -22,15 +23,22 @@ function makeContext(req: Partial<Request>): ExecutionContext {
   } as unknown as ExecutionContext;
 }
 
-function makeGuard(opts: { isPublic?: boolean; authResult?: AuthPrincipal | null }) {
+function makeGuard(opts: {
+  isPublic?: boolean;
+  allowAnyRole?: boolean;
+  authResult?: AuthPrincipal | null;
+  user?: User;
+}) {
   const provider: AuthProvider = {
     authenticate: jest.fn().mockResolvedValue(opts.authResult ?? null),
   };
   const users = {
-    upsertFromPrincipal: jest.fn().mockResolvedValue(fakeUser),
+    upsertFromPrincipal: jest.fn().mockResolvedValue(opts.user ?? fakeUser),
   } as unknown as UsersService;
   const reflector = {
-    getAllAndOverride: jest.fn().mockReturnValue(opts.isPublic ?? false),
+    getAllAndOverride: jest.fn((key: string) =>
+      key === 'isPublic' ? (opts.isPublic ?? false) : (opts.allowAnyRole ?? false),
+    ),
   } as unknown as Reflector;
   return {
     guard: new AuthGuard(provider, users, reflector),
@@ -59,5 +67,19 @@ describe('AuthGuard', () => {
     await expect(guard.canActivate(makeContext(req))).resolves.toBe(true);
     expect(users.upsertFromPrincipal).toHaveBeenCalledWith(principal);
     expect(req.user).toBe(fakeUser);
+  });
+
+  it('refuse (403) un utilisateur sans rôle hôte sur une route standard', async () => {
+    const { guard } = makeGuard({ authResult: principal, user: playerUser });
+    await expect(guard.canActivate(makeContext({ headers: {} }))).rejects.toThrow(
+      ForbiddenException,
+    );
+  });
+
+  it('laisse passer un joueur sur une route @AllowAnyRole', async () => {
+    const { guard } = makeGuard({ authResult: principal, user: playerUser, allowAnyRole: true });
+    const req: Partial<Request> & { user?: User } = { headers: {} };
+    await expect(guard.canActivate(makeContext(req))).resolves.toBe(true);
+    expect(req.user).toBe(playerUser);
   });
 });

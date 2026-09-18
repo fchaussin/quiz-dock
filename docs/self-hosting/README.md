@@ -9,6 +9,9 @@ infrastructure — for operators and integrators (not contributors).
 
 ## Guides
 
+- **[CLI — install, maintain, administer](cli.md)** — the `quizdock` script
+  (init, up, backup/restore, upgrade) and the admin commands shipped in the
+  image (doctor, host seat, users, retention purge).
 - **[Configuration, branding & OIDC](configuration.md)** — every environment
   variable, white-labeling (name, language, logo, CSS), and wiring your own
   OIDC identity provider.
@@ -21,6 +24,9 @@ infrastructure — for operators and integrators (not contributors).
   (`:latest` app image · `:standalone` all-in-one).
 
 ## Upgrading
+
+With the [CLI](cli.md): `./quizdock upgrade <tag>` does all of the below (backup,
+pull, restart, migration check, doctor). By hand:
 
 Migrations are part of the image and run **automatically** before the app starts:
 the `migrate` one-shot service in `docker-compose.prod.yml`, or the entrypoint of the

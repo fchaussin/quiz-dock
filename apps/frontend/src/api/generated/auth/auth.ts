@@ -6,22 +6,29 @@
  * OpenAPI spec version: 0.1.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
-  AuthConfigDto
+  AuthConfigDto,
+  ClaimHostSeatDto,
+  HostSeatDto,
+  HostSeatReleaseDto
 } from '../model';
 
 import { customFetch } from '../../http';
@@ -137,3 +144,266 @@ export function useAuthConfigControllerConfig<TData = Awaited<ReturnType<typeof 
 
 
 
+export type hostSeatControllerStateResponse200 = {
+  data: HostSeatDto
+  status: 200
+}
+
+export type hostSeatControllerStateResponseSuccess = (hostSeatControllerStateResponse200) & {
+  headers: Headers;
+};
+;
+
+export type hostSeatControllerStateResponse = (hostSeatControllerStateResponseSuccess)
+
+export const getHostSeatControllerStateUrl = () => {
+
+
+
+
+  return `/api/v1/auth/host-seat`
+}
+
+export const hostSeatControllerState = async ( options?: RequestInit): Promise<hostSeatControllerStateResponse> => {
+
+  return customFetch<hostSeatControllerStateResponse>(getHostSeatControllerStateUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getHostSeatControllerStateQueryKey = () => {
+    return [
+    `/api/v1/auth/host-seat`
+    ] as const;
+    }
+
+
+export const getHostSeatControllerStateQueryOptions = <TData = Awaited<ReturnType<typeof hostSeatControllerState>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof hostSeatControllerState>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getHostSeatControllerStateQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof hostSeatControllerState>>> = ({ signal }) => hostSeatControllerState({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof hostSeatControllerState>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type HostSeatControllerStateQueryResult = NonNullable<Awaited<ReturnType<typeof hostSeatControllerState>>>
+export type HostSeatControllerStateQueryError = unknown
+
+
+export function useHostSeatControllerState<TData = Awaited<ReturnType<typeof hostSeatControllerState>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof hostSeatControllerState>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof hostSeatControllerState>>,
+          TError,
+          Awaited<ReturnType<typeof hostSeatControllerState>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHostSeatControllerState<TData = Awaited<ReturnType<typeof hostSeatControllerState>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof hostSeatControllerState>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof hostSeatControllerState>>,
+          TError,
+          Awaited<ReturnType<typeof hostSeatControllerState>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHostSeatControllerState<TData = Awaited<ReturnType<typeof hostSeatControllerState>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof hostSeatControllerState>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useHostSeatControllerState<TData = Awaited<ReturnType<typeof hostSeatControllerState>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof hostSeatControllerState>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getHostSeatControllerStateQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type hostSeatControllerClaimResponse200 = {
+  data: HostSeatDto
+  status: 200
+}
+
+export type hostSeatControllerClaimResponse409 = {
+  data: void
+  status: 409
+}
+
+export type hostSeatControllerClaimResponseSuccess = (hostSeatControllerClaimResponse200) & {
+  headers: Headers;
+};
+export type hostSeatControllerClaimResponseError = (hostSeatControllerClaimResponse409) & {
+  headers: Headers;
+};
+
+export type hostSeatControllerClaimResponse = (hostSeatControllerClaimResponseSuccess | hostSeatControllerClaimResponseError)
+
+export const getHostSeatControllerClaimUrl = () => {
+
+
+
+
+  return `/api/v1/auth/host-seat/claim`
+}
+
+export const hostSeatControllerClaim = async (claimHostSeatDto: ClaimHostSeatDto, options?: RequestInit): Promise<hostSeatControllerClaimResponse> => {
+
+  return customFetch<hostSeatControllerClaimResponse>(getHostSeatControllerClaimUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(claimHostSeatDto)
+  }
+);}
+
+
+
+
+export const getHostSeatControllerClaimMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof hostSeatControllerClaim>>, TError,{data: ClaimHostSeatDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof hostSeatControllerClaim>>, TError,{data: ClaimHostSeatDto}, TContext> => {
+
+const mutationKey = ['hostSeatControllerClaim'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof hostSeatControllerClaim>>, {data: ClaimHostSeatDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  hostSeatControllerClaim(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type HostSeatControllerClaimMutationResult = NonNullable<Awaited<ReturnType<typeof hostSeatControllerClaim>>>
+    export type HostSeatControllerClaimMutationBody = ClaimHostSeatDto
+    export type HostSeatControllerClaimMutationError = void
+
+    export const useHostSeatControllerClaim = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof hostSeatControllerClaim>>, TError,{data: ClaimHostSeatDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof hostSeatControllerClaim>>,
+        TError,
+        {data: ClaimHostSeatDto},
+        TContext
+      > => {
+      return useMutation(getHostSeatControllerClaimMutationOptions(options), queryClient);
+    }
+    export type hostSeatControllerReleaseResponse200 = {
+  data: HostSeatReleaseDto
+  status: 200
+}
+
+export type hostSeatControllerReleaseResponseSuccess = (hostSeatControllerReleaseResponse200) & {
+  headers: Headers;
+};
+;
+
+export type hostSeatControllerReleaseResponse = (hostSeatControllerReleaseResponseSuccess)
+
+export const getHostSeatControllerReleaseUrl = () => {
+
+
+
+
+  return `/api/v1/auth/host-seat/release`
+}
+
+export const hostSeatControllerRelease = async ( options?: RequestInit): Promise<hostSeatControllerReleaseResponse> => {
+
+  return customFetch<hostSeatControllerReleaseResponse>(getHostSeatControllerReleaseUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getHostSeatControllerReleaseMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof hostSeatControllerRelease>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof hostSeatControllerRelease>>, TError,void, TContext> => {
+
+const mutationKey = ['hostSeatControllerRelease'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof hostSeatControllerRelease>>, void> = () => {
+
+
+          return  hostSeatControllerRelease(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type HostSeatControllerReleaseMutationResult = NonNullable<Awaited<ReturnType<typeof hostSeatControllerRelease>>>
+
+    export type HostSeatControllerReleaseMutationError = unknown
+
+    export const useHostSeatControllerRelease = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof hostSeatControllerRelease>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof hostSeatControllerRelease>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getHostSeatControllerReleaseMutationOptions(options), queryClient);
+    }

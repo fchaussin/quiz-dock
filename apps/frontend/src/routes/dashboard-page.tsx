@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { Pencil, Play, Plus, Radio, Square } from 'lucide-react';
+import { Pencil, Play, Plus, Radio, Sparkles, Square } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
@@ -15,8 +15,10 @@ import {
 import {
   getQuizzesControllerListQueryKey,
   useQuizzesControllerCreate,
+  useQuizzesControllerCreateSamples,
   useQuizzesControllerList,
 } from '../api/generated/quizzes/quizzes';
+import { ApiError } from '../api/http';
 
 const STATUS_VARIANT: Record<string, 'default' | 'success' | 'muted'> = {
   draft: 'default',
@@ -29,6 +31,7 @@ export function DashboardPage() {
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useQuizzesControllerList();
   const create = useQuizzesControllerCreate();
+  const createSamples = useQuizzesControllerCreateSamples();
   const { launch, isLaunching, error: launchError } = useLaunchSession();
   const { data: gamesData } = useGameControllerMine();
   const endGame = useGameControllerEnd();
@@ -49,6 +52,16 @@ export function DashboardPage() {
           queryClient.invalidateQueries({ queryKey: getGameControllerMineQueryKey() }),
       },
     );
+  };
+
+  // Le backend refuse (403) quand l'identité n'a pas le rôle hôte : en mode local,
+  // le siège d'hôte est tenu par quelqu'un d'autre (ou a expiré → repasser par /login).
+  const seatTaken = error instanceof ApiError && error.status === 403;
+  const invalidateList = () =>
+    queryClient.invalidateQueries({ queryKey: getQuizzesControllerListQueryKey() });
+
+  const onLoadSamples = () => {
+    createSamples.mutate(undefined, { onSuccess: invalidateList });
   };
 
   const onCreate = () => {
@@ -125,11 +138,32 @@ export function DashboardPage() {
       />
 
       {isLoading && <p className="text-muted-foreground">{t('common:loading')}</p>}
-      {error ? <p className="text-destructive">{t('loadError')}</p> : null}
+      {error ? (
+        <p className="text-destructive" role="alert">
+          {seatTaken ? t('seatTaken') : t('loadError')}{' '}
+          {seatTaken ? (
+            <Link to="/login" className="underline">
+              {t('seatBackToLogin')}
+            </Link>
+          ) : null}
+        </p>
+      ) : null}
       {launchError ? <p className="text-destructive">{launchError}</p> : null}
 
       {!isLoading && !error && quizzes.length === 0 && (
-        <p className="text-muted-foreground">{t('empty')}</p>
+        <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed p-6">
+          <p className="text-muted-foreground">{t('empty')}</p>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={createSamples.isPending}
+            onClick={onLoadSamples}
+          >
+            <Sparkles className="size-4" />
+            {t('loadSamples')}
+          </Button>
+          <small className="text-muted-foreground">{t('loadSamplesHint')}</small>
+        </div>
       )}
 
       <ul className="flex flex-col gap-2">

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import type { Request } from 'express';
-import type { AuthPrincipal, AuthProvider } from './auth-provider';
+import { type AuthPrincipal, type AuthProvider, LOCAL_SUB_PREFIX } from './auth-provider';
 
 /** Slug déterministe (minuscule, sans accent, alphanumérique + tirets). */
 export function localSlug(name: string): string {
   const slug = name
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
@@ -15,20 +15,26 @@ export function localSlug(name: string): string {
 
 /**
  * Mode `AUTH_MODE=none` : pas de JWT. L'hôte s'identifie par un simple nom local
- * via l'en-tête `X-Local-User` (SPECIFICATIONS §1). Toujours authentifié (rôle
- * `host`) ; deux requêtes avec le même nom → même `sub` (isolation testable).
+ * via l'en-tête `X-Local-User` (SPECIFICATIONS §1) ; deux requêtes avec le même
+ * nom → même `sub` ; sans en-tête → non authentifié (401). Le rôle n'est PAS porté par le principal : il est attribué au
+ * provisionnement par le **siège d'hôte** (`HostSeatService`) — premier arrivé
+ * dans l'espace hôte = `host`, les autres = `player`.
  */
 @Injectable()
 export class NoAuthProvider implements AuthProvider {
-  async authenticate(req: Request): Promise<AuthPrincipal> {
+  async authenticate(req: Request): Promise<AuthPrincipal | null> {
     const header = req.headers['x-local-user'];
-    const raw = (Array.isArray(header) ? header[0] : header)?.trim();
-    const displayName = raw && raw.length > 0 ? raw : 'Animateur local';
+    const displayName = (Array.isArray(header) ? header[0] : header)?.trim();
+    // Sans nom, pas d'identité : une requête anonyme ne doit jamais provisionner
+    // (ni, a fortiori, prendre le siège d'hôte) par effet de bord.
+    if (!displayName) {
+      return null;
+    }
     return {
-      sub: `local:${localSlug(displayName)}`,
+      sub: `${LOCAL_SUB_PREFIX}${localSlug(displayName)}`,
       displayName,
       email: null,
-      roles: ['host'],
+      roles: [],
     };
   }
 }

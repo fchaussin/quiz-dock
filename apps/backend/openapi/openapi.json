@@ -62,6 +62,92 @@
         ]
       }
     },
+    "/api/v1/auth/host-seat": {
+      "get": {
+        "operationId": "HostSeatController_state",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostSeatDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/host-seat/claim": {
+      "post": {
+        "operationId": "HostSeatController_claim",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimHostSeatDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostSeatDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "host_seat.taken — another local user holds the seat."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/host-seat/release": {
+      "post": {
+        "operationId": "HostSeatController_release",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostSeatReleaseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/api/v1/quizzes": {
       "get": {
         "operationId": "QuizzesController_list",
@@ -110,6 +196,35 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/QuizDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "quizzes"
+        ]
+      }
+    },
+    "/api/v1/quizzes/samples": {
+      "post": {
+        "operationId": "QuizzesController_createSamples",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QuizDto"
+                  }
                 }
               }
             }
@@ -1066,6 +1181,49 @@
         "required": [
           "mode",
           "oidc"
+        ]
+      },
+      "HostSeatDto": {
+        "type": "object",
+        "properties": {
+          "holder": {
+            "type": "string",
+            "description": "Display name of the current seat holder, or null when the seat is free (always null in OIDC mode).",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "When the seat frees itself automatically; null = no expiry (or free seat).",
+            "nullable": true,
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "holder",
+          "expiresAt"
+        ]
+      },
+      "ClaimHostSeatDto": {
+        "type": "object",
+        "properties": {
+          "expiresInMinutes": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 10080,
+            "nullable": true
+          }
+        }
+      },
+      "HostSeatReleaseDto": {
+        "type": "object",
+        "properties": {
+          "released": {
+            "type": "boolean",
+            "description": "True when the caller held the seat and it is now free."
+          }
+        },
+        "required": [
+          "released"
         ]
       },
       "QuizDto": {

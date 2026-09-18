@@ -21,25 +21,24 @@ describe('localSlug', () => {
 describe('NoAuthProvider', () => {
   const provider = new NoAuthProvider();
 
-  it('dérive le principal de l’en-tête X-Local-User (rôle host)', async () => {
+  it('dérive le principal de l’en-tête X-Local-User (rôle attribué par le siège)', async () => {
     const principal = await provider.authenticate(reqWith({ 'x-local-user': 'Marc' }));
     expect(principal).toEqual({
       sub: 'local:marc',
       displayName: 'Marc',
       email: null,
-      roles: ['host'],
+      roles: [],
     });
   });
 
-  it('utilise un utilisateur par défaut sans en-tête', async () => {
-    const principal = await provider.authenticate(reqWith({}));
-    expect(principal.sub).toBe('local:animateur-local');
-    expect(principal.displayName).toBe('Animateur local');
+  it('renvoie null sans en-tête (anonyme : aucun provisionnement par effet de bord)', async () => {
+    expect(await provider.authenticate(reqWith({}))).toBeNull();
+    expect(await provider.authenticate(reqWith({ 'x-local-user': '   ' }))).toBeNull();
   });
 
   it('isole deux noms distincts par des sub différents', async () => {
     const a = await provider.authenticate(reqWith({ 'x-local-user': 'Alice' }));
     const b = await provider.authenticate(reqWith({ 'x-local-user': 'Bob' }));
-    expect(a.sub).not.toBe(b.sub);
+    expect(a?.sub).not.toBe(b?.sub);
   });
 });

@@ -1,10 +1,13 @@
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
-import { setAuthHeaders } from '../api/http';
+import { hostSeatControllerClaim, hostSeatControllerRelease } from '../api/generated/auth/auth';
+import { meControllerMe } from '../api/generated/me/me';
+import { setAuthHeaders, setUnauthorizedHandler } from '../api/http';
 import { getOidc } from './oidc';
 
 const STORAGE_KEY = 'live.localUser';
 
 export type AuthMode = 'none' | 'oidc';
+export type UserRole = 'host' | 'player' | 'admin';
 
 // État hors-React, lu par la garde de route (synchrone) et configuré au démarrage.
 let currentMode: AuthMode = 'none';
@@ -14,6 +17,28 @@ let oidcAuthed = false;
 export function configureAuth(mode: AuthMode, oidcUserAuthed = false): void {
   currentMode = mode;
   oidcAuthed = oidcUserAuthed;
+}
+
+/**
+ * Suit le cycle de vie du jeton OIDC (mode oidc, après `initOidc`) : chaque
+ * renouvellement silencieux remplace l'en-tête Bearer ; une expiration sans
+ * renouvellement, ou un 401 du backend, ramène à la page de connexion.
+ */
+export function bindOidcSession(): void {
+  const events = getOidc().events;
+  events.addUserLoaded((u) => {
+    setAuthHeaders({ Authorization: `Bearer ${u.access_token}` });
+    oidcAuthed = true;
+  });
+  const dropSession = () => {
+    oidcAuthed = false;
+    setAuthHeaders({});
+    void getOidc().removeUser();
+    if (window.location.pathname !== '/login') window.location.assign('/login');
+  };
+  events.addAccessTokenExpired(dropSession);
+  events.addUserSignedOut(dropSession);
+  setUnauthorizedHandler(dropSession);
 }
 
 /** Identité locale (mode none) — utilisée aussi par la garde. */
@@ -44,11 +69,33 @@ function applyLocalUser(name: string | null): void {
   setAuthHeaders(name ? { 'X-Local-User': name } : {});
 }
 
+/**
+ * Rôle côté backend de l'identité courante (`GET /me`), ou `null` si injoignable.
+ * En mode local c'est ici que le **siège d'hôte** se décide : le premier arrivé
+ * devient `host`, les autres `player`.
+ */
+export async function fetchRole(): Promise<UserRole | null> {
+  try {
+    const { data } = await meControllerMe();
+    return data.role as UserRole;
+  } catch {
+    return null;
+  }
+}
+
 interface AuthState {
   mode: AuthMode;
   user: string | null;
-  /** Connexion mode local (nom). */
-  loginLocal: (name: string) => void;
+  /**
+   * Connexion mode local (nom). Résout le rôle courant : `host` = titulaire du
+   * siège d'hôte, `player` = pas (encore) titulaire, `null` = backend injoignable.
+   * L'identité reste posée ; la page décide (prise du siège ou `dropLocal`).
+   */
+  loginLocal: (name: string) => Promise<UserRole | null>;
+  /** Prise **intentionnelle** du siège d'hôte (mode local), après confirmation. */
+  claimHostSeat: (expiresInMinutes: number | null) => Promise<void>;
+  /** Abandonne l'identité locale sans passer par le backend (siège refusé / annulé). */
+  dropLocal: () => void;
   /** Connexion mode OIDC (redirection vers l'IdP). */
   loginOidc: () => Promise<void>;
   /** Finalise le retour de redirection OIDC (route /auth/callback). */
@@ -74,11 +121,24 @@ export function AuthProvider({
     return stored;
   });
 
-  const loginLocal = useCallback((name: string) => {
+  const loginLocal = useCallback(async (name: string) => {
     const trimmed = name.trim();
     localStorage.setItem(STORAGE_KEY, trimmed);
     applyLocalUser(trimmed);
     setUser(trimmed);
+    return fetchRole();
+  }, []);
+
+  const claimHostSeat = useCallback(async (expiresInMinutes: number | null) => {
+    await hostSeatControllerClaim({ expiresInMinutes });
+  }, []);
+
+  const dropLocal = useCallback(() => {
+    // Pas d'identité conservée : sinon la garde de route et la nav la
+    // traiteraient comme un hôte connecté.
+    localStorage.removeItem(STORAGE_KEY);
+    applyLocalUser(null);
+    setUser(null);
   }, []);
 
   const loginOidc = useCallback(async () => {
@@ -96,8 +156,19 @@ export function AuthProvider({
   const logout = useCallback(async () => {
     if (mode === 'oidc') {
       oidcAuthed = false;
-      await getOidc().removeUser();
+      setAuthHeaders({});
+      setUser(null);
+      // RP-initiated logout (end_session_endpoint) ; repli local si le
+      // fournisseur n'en expose pas.
+      try {
+        await getOidc().signoutRedirect();
+        return; // navigation en cours vers l'IdP
+      } catch {
+        await getOidc().removeUser();
+      }
     } else {
+      // Rend le siège d'hôte (no-op si on ne le tenait pas) avant d'oublier l'identité.
+      await hostSeatControllerRelease().catch(() => undefined);
       localStorage.removeItem(STORAGE_KEY);
     }
     applyLocalUser(null);
@@ -105,8 +176,17 @@ export function AuthProvider({
   }, [mode]);
 
   const value = useMemo(
-    () => ({ mode, user, loginLocal, loginOidc, completeOidcLogin, logout }),
-    [mode, user, loginLocal, loginOidc, completeOidcLogin, logout],
+    () => ({
+      mode,
+      user,
+      loginLocal,
+      claimHostSeat,
+      dropLocal,
+      loginOidc,
+      completeOidcLogin,
+      logout,
+    }),
+    [mode, user, loginLocal, claimHostSeat, dropLocal, loginOidc, completeOidcLogin, logout],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

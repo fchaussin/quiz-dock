@@ -1,6 +1,7 @@
 import {
   type CanActivate,
   type ExecutionContext,
+  ForbiddenException,
   Inject,
   Injectable,
   UnauthorizedException,
@@ -9,12 +10,15 @@ import { Reflector } from '@nestjs/core';
 import type { User } from '@prisma/client';
 import type { Request } from 'express';
 import { UsersService } from '../users/users.service';
+import { ALLOW_ANY_ROLE_KEY } from './allow-any-role.decorator';
 import { AUTH_PROVIDER, type AuthProvider } from './auth-provider';
 import { IS_PUBLIC_KEY } from './public.decorator';
+import { isHostRole } from './roles';
 
 /**
  * Garde global : authentifie via l'`AuthProvider` actif, provisionne
  * l'utilisateur et l'attache à `req.user`. Les routes `@Public()` passent.
+ * Toute autre route exige le rôle `host` (ou `admin`), sauf `@AllowAnyRole()`.
  */
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -25,11 +29,8 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      ctx.getHandler(),
-      ctx.getClass(),
-    ]);
-    if (isPublic) {
+    const targets = [ctx.getHandler(), ctx.getClass()];
+    if (this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, targets)) {
       return true;
     }
 
@@ -38,7 +39,12 @@ export class AuthGuard implements CanActivate {
     if (!principal) {
       throw new UnauthorizedException('auth.required');
     }
-    req.user = await this.users.upsertFromPrincipal(principal);
+    const user = await this.users.upsertFromPrincipal(principal);
+    const anyRole = this.reflector.getAllAndOverride<boolean>(ALLOW_ANY_ROLE_KEY, targets);
+    if (!anyRole && !isHostRole(user.role)) {
+      throw new ForbiddenException('auth.host_required');
+    }
+    req.user = user;
     return true;
   }
 }

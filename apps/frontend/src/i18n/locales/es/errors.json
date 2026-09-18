@@ -1,6 +1,7 @@
 {
   "auth": {
-    "required": "Autenticación requerida."
+    "required": "Autenticación requerida.",
+    "host_required": "Se requiere el rol de anfitrión."
   },
   "host": {
     "auth_required": "Se requiere autenticación del anfitrión.",
@@ -48,5 +49,8 @@
   },
   "validation": "Algunos campos no son válidos.",
   "internal": "Error interno.",
-  "error": "Se ha producido un error."
+  "error": "Se ha producido un error.",
+  "host_seat": {
+    "taken": "El puesto de anfitrión ya está ocupado."
+  }
 }

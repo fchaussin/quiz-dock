@@ -1,5 +1,6 @@
 import { Controller, Get, Header } from '@nestjs/common';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
+import { Public } from '../auth/public.decorator';
 
 /**
  * Sert `/config.js` (white-label runtime) quand le backend héberge aussi le SPA
@@ -11,6 +12,7 @@ import { ApiExcludeEndpoint } from '@nestjs/swagger';
  */
 @Controller()
 export class AppConfigController {
+  @Public() // chargé avant toute authentification (branding du SPA)
   @Get('config.js')
   @ApiExcludeEndpoint() // asset JS (chargé via <script>), pas un endpoint d'API → hors OpenAPI
   @Header('Content-Type', 'application/javascript; charset=utf-8')
