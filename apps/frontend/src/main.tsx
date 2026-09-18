@@ -4,7 +4,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { authConfigControllerConfig } from './api/generated/auth/auth';
 import { setAuthHeaders } from './api/http';
-import { type AuthMode, AuthProvider, configureAuth } from './auth/auth-context';
+import { type AuthMode, AuthProvider, bindOidcSession, configureAuth } from './auth/auth-context';
 import { getOidc, initOidc } from './auth/oidc';
 import { APP_NAME } from './config';
 import { router } from './router';
@@ -27,6 +27,7 @@ async function bootstrap(): Promise<void> {
     mode = data.mode;
     if (data.mode === 'oidc' && data.oidc) {
       initOidc(data.oidc.authority, data.oidc.clientId);
+      bindOidcSession();
       const oidcUser = await getOidc().getUser();
       if (oidcUser && !oidcUser.expired) {
         setAuthHeaders({ Authorization: `Bearer ${oidcUser.access_token}` });

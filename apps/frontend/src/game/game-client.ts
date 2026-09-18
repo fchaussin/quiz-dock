@@ -80,12 +80,21 @@ export function clearPlayerSession(): void {
 
 /**
  * Connexion **hôte** : auth dérivée du contexte (mode oidc → `token` = access
- * token ; mode none → `localUser`). Asynchrone car le token OIDC l'est.
+ * token ; mode none → `localUser`).
  */
 export async function connectHost(): Promise<GameSocket> {
-  const token = await getAccessToken();
-  const auth = token ? { token } : { localUser: getLocalUser() ?? i18next.t('live:fallbackHost') };
-  socket = io('/game', { auth, forceNew: true });
+  // `auth` en fonction : réévaluée à CHAQUE (re)connexion, donc un jeton OIDC
+  // renouvelé entre-temps est bien présenté au handshake.
+  const auth = async () => {
+    const token = await getAccessToken();
+    return token ? { token } : { localUser: getLocalUser() ?? i18next.t('live:fallbackHost') };
+  };
+  socket = io('/game', {
+    auth: (cb) => {
+      void auth().then(cb);
+    },
+    forceNew: true,
+  });
   return socket;
 }
 

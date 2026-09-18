@@ -1,8 +1,10 @@
 import { UserManager } from 'oidc-client-ts';
 
 /**
- * Gestionnaire OIDC (Authorization Code + PKCE pour SPA publique). Initialisé
- * au démarrage depuis la config renvoyée par le backend (`GET /auth/config`).
+ * OIDC user manager (Authorization Code + PKCE, public SPA client). Initialised
+ * at boot from the backend config (`GET /auth/config`), which only carries the
+ * standard pieces: the issuer (`authority`, discovered through
+ * `.well-known/openid-configuration`) and the public `client_id`.
  */
 let manager: UserManager | null = null;
 
@@ -13,6 +15,10 @@ export function initOidc(authority: string, clientId: string): UserManager {
     redirect_uri: `${window.location.origin}/auth/callback`,
     post_logout_redirect_uri: window.location.origin,
     scope: 'openid profile email',
+    // Renew the access token before it expires (refresh token when the provider
+    // issues one, silent iframe otherwise); consumers listen to `userLoaded`.
+    automaticSilentRenew: true,
+    silent_redirect_uri: `${window.location.origin}/auth/callback`,
   });
   return manager;
 }

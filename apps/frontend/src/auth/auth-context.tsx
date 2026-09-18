@@ -1,7 +1,7 @@
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import { hostSeatControllerRelease } from '../api/generated/auth/auth';
 import { meControllerMe } from '../api/generated/me/me';
-import { setAuthHeaders } from '../api/http';
+import { setAuthHeaders, setUnauthorizedHandler } from '../api/http';
 import { getOidc } from './oidc';
 
 const STORAGE_KEY = 'live.localUser';
@@ -17,6 +17,28 @@ let oidcAuthed = false;
 export function configureAuth(mode: AuthMode, oidcUserAuthed = false): void {
   currentMode = mode;
   oidcAuthed = oidcUserAuthed;
+}
+
+/**
+ * Suit le cycle de vie du jeton OIDC (mode oidc, après `initOidc`) : chaque
+ * renouvellement silencieux remplace l'en-tête Bearer ; une expiration sans
+ * renouvellement, ou un 401 du backend, ramène à la page de connexion.
+ */
+export function bindOidcSession(): void {
+  const events = getOidc().events;
+  events.addUserLoaded((u) => {
+    setAuthHeaders({ Authorization: `Bearer ${u.access_token}` });
+    oidcAuthed = true;
+  });
+  const dropSession = () => {
+    oidcAuthed = false;
+    setAuthHeaders({});
+    void getOidc().removeUser();
+    if (window.location.pathname !== '/login') window.location.assign('/login');
+  };
+  events.addAccessTokenExpired(dropSession);
+  events.addUserSignedOut(dropSession);
+  setUnauthorizedHandler(dropSession);
 }
 
 /** Identité locale (mode none) — utilisée aussi par la garde. */
@@ -117,7 +139,16 @@ export function AuthProvider({
   const logout = useCallback(async () => {
     if (mode === 'oidc') {
       oidcAuthed = false;
-      await getOidc().removeUser();
+      setAuthHeaders({});
+      setUser(null);
+      // RP-initiated logout (end_session_endpoint) ; repli local si le
+      // fournisseur n'en expose pas.
+      try {
+        await getOidc().signoutRedirect();
+        return; // navigation en cours vers l'IdP
+      } catch {
+        await getOidc().removeUser();
+      }
     } else {
       // Rend le siège d'hôte (no-op si on ne le tenait pas) avant d'oublier l'identité.
       await hostSeatControllerRelease().catch(() => undefined);
