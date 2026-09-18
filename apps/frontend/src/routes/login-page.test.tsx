@@ -46,5 +46,8 @@ describe('LoginPage', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('déjà pris');
     expect(screen.queryByRole('heading', { name: 'Mes quiz' })).not.toBeInTheDocument();
+    // Identité non conservée : pas de nav hôte, pas d'accès au tableau de bord.
+    expect(localStorage.getItem('live.localUser')).toBeNull();
+    expect(screen.queryByText('Se déconnecter')).not.toBeInTheDocument();
   });
 });

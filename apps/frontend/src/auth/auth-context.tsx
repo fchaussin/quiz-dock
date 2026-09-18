@@ -121,7 +121,15 @@ export function AuthProvider({
     localStorage.setItem(STORAGE_KEY, trimmed);
     applyLocalUser(trimmed);
     setUser(trimmed);
-    return fetchRole();
+    const role = await fetchRole();
+    if (role === 'player') {
+      // Siège d'hôte pris : on ne garde PAS l'identité (sinon la garde de route
+      // et la nav la traiteraient comme un hôte connecté).
+      localStorage.removeItem(STORAGE_KEY);
+      applyLocalUser(null);
+      setUser(null);
+    }
+    return role;
   }, []);
 
   const loginOidc = useCallback(async () => {
