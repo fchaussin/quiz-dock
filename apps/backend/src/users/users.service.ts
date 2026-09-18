@@ -27,7 +27,13 @@ export class UsersService {
     if (HostSeatService.isLocal(principal.sub)) {
       return this.seat.provision(principal);
     }
-    const role = this.resolveRole(principal.roles);
+    const claimed = this.resolveRole(principal.roles);
+    // An operator-granted `admin` (CLI) is sticky: never downgraded by the claims.
+    const existing = await this.prisma.user.findUnique({
+      where: { oidcSubject: principal.sub },
+      select: { role: true },
+    });
+    const role = existing?.role === UserRole.admin ? UserRole.admin : claimed;
     return this.prisma.user.upsert({
       where: { oidcSubject: principal.sub },
       create: {
