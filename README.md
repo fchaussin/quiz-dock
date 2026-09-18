@@ -122,7 +122,20 @@ Bundles PostgreSQL + Redis; data persists in the `quizdock` volume across restar
 Perfect for a demo or beginners — for production, prefer the multi-service setup below
 (external, dedicated database).
 
-### Option A — Docker Hub image (recommended for production)
+### Option A — the `quizdock` script (recommended)
+
+One script, Docker only — guided setup, then start, backup, upgrade and admin commands:
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/quizdock/quiz-dock/main/quizdock && chmod +x quizdock
+./quizdock init      # name, language, port, auth mode → .env + docker-compose.prod.yml
+./quizdock up        # open http://localhost:18080
+./quizdock doctor    # config & connectivity check; later: backup, upgrade <tag>, seat:release…
+```
+
+Every command: [`docs/self-hosting/cli.md`](docs/self-hosting/cli.md).
+
+### Option B — Docker Hub image by hand
 
 Pull the published image and run the stack — no build, no source checkout:
 
@@ -143,9 +156,10 @@ service, or the `:standalone` entrypoint): pull the new tag and `up` again. Two 
 **back up PostgreSQL first** (`pg_dump`), and **don't roll back** an image once its
 migrations ran — restore the backup instead. Each release lists its schema changes
 under *Upgrading* in the [release notes](https://github.com/quizdock/quiz-dock/releases).
+With the script: `./quizdock upgrade 0.5.0` (backup → pull → restart → doctor).
 Full procedure: https://github.com/quizdock/quiz-dock/blob/main/docs/self-hosting/README.md#upgrading
 
-### Option B — build from source
+### Option C — build from source
 
 ```bash
 git clone https://github.com/quizdock/quiz-dock.git
