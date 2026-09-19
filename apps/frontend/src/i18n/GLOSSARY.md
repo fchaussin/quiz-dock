@@ -104,6 +104,8 @@ reference, the others follow its sense, not its words.
   *release* are its verbs (never *login* for the seat itself).
 - **Taiwan usage in zh-TW**: 資料 (data), 檔案 (file), 清單 (list), 拖曳
   (drag), 送出 (submit), 自訂 (custom), 置中 (centre), 投影片 (slide), 「」
-  quotes. zh-TW is resolved straight to `en`, never through `zh`.
+  quotes. zh-TW is resolved straight to `en`, never through `zh`. The locale
+  was contributed by [@noeFly](https://github.com/noeFly) (#1); later keys are
+  machine-assisted and follow their choices — native review welcome.
 - **No jargon leaks**: tokenised error codes (`quiz.not_found`…) are
   translated in `errors.json`; the interface never shows a code.
