@@ -249,11 +249,11 @@ export function ControlPage() {
           </span>
         </label>
 
-        <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap items-center justify-between gap-3">
-          <ModeToggle mode={view.mode} onChange={setMode} />
-          <div className="flex items-center gap-2">
-            <EndGameButton label={t('control.stopSession')} onConfirm={endGame} />
-            {screenButton}
+        <ActionBar
+          status={<ModeToggle mode={view.mode} onChange={setMode} />}
+          end={<EndGameButton label={t('control.stopSession')} onConfirm={endGame} />}
+          nav={screenButton}
+          primary={
             <Tooltip label={t('control.startTooltip')}>
               <Button
                 type="button"
@@ -265,8 +265,8 @@ export function ControlPage() {
                 {t('control.start')}
               </Button>
             </Tooltip>
-          </div>
-        </div>
+          }
+        />
         <QRCodeCanvas value={joinUrl} size={512} ref={qrCanvasRef} className="hidden" />
       </section>
     );
@@ -305,22 +305,25 @@ export function ControlPage() {
         <div className="bg-card flex rounded-xl border p-5 text-[0.8rem] sm:p-6">
           <SlideView slide={view.slide} />
         </div>
-        <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            {view.paused && view.slide.displayDelayS ? (
+        <ActionBar
+          status={
+            view.paused && view.slide.displayDelayS ? (
               <span className="text-muted-foreground text-sm">{t('control.autoPaused')}</span>
             ) : view.autoNextAt ? (
               <AutoAdvanceCountdown deadline={view.autoNextAt} totalMs={view.autoNextMs ?? 0} />
-            ) : null}
-          </div>
-          {navBar}
-          {view.nav?.review ? null : (
-            <Button type="button" onClick={() => emit('host:next')}>
-              <SkipForward className="size-4" />
-              {t('control.continue')}
-            </Button>
-          )}
-        </div>
+            ) : null
+          }
+          end={<EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />}
+          nav={navBar}
+          primary={
+            view.nav?.review ? null : (
+              <Button type="button" onClick={() => emit('host:next')}>
+                <SkipForward className="size-4" />
+                {t('control.continue')}
+              </Button>
+            )
+          }
+        />
       </section>
     );
   }
@@ -345,22 +348,25 @@ export function ControlPage() {
             <LeaderboardList rows={view.leaderboard.top} />
           </div>
         ) : null}
-        <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            {view.mode === 'auto' && view.paused ? (
+        <ActionBar
+          status={
+            view.mode === 'auto' && view.paused ? (
               <span className="text-muted-foreground text-sm">{t('control.autoPaused')}</span>
             ) : view.mode === 'auto' && view.autoNextAt ? (
               <AutoAdvanceCountdown deadline={view.autoNextAt} totalMs={view.autoNextMs ?? 0} />
-            ) : null}
-          </div>
-          {navBar}
-          {view.nav?.review ? null : (
-            <Button type="button" onClick={() => emit('host:next')}>
-              <SkipForward className="size-4" />
-              {t('control.nextQuestion')}
-            </Button>
-          )}
-        </div>
+            ) : null
+          }
+          end={<EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />}
+          nav={navBar}
+          primary={
+            view.nav?.review ? null : (
+              <Button type="button" onClick={() => emit('host:next')}>
+                <SkipForward className="size-4" />
+                {t('control.nextQuestion')}
+              </Button>
+            )
+          }
+        />
       </section>
     );
   }
@@ -371,10 +377,12 @@ export function ControlPage() {
       <section className={cn(CONSOLE_SECTION, 'items-center gap-6')}>
         <h2 className="text-2xl font-bold">{t('control.podium')}</h2>
         {view.podium ? <Podium rows={view.podium.podium} /> : null}
-        <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex w-full flex-wrap items-center justify-between gap-3">
-          <div className="flex-1">{navBar}</div>
-          <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
-        </div>
+        <ActionBar
+          nav={navBar}
+          primary={
+            <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
+          }
+        />
       </section>
     );
   }
@@ -445,14 +453,45 @@ export function ControlPage() {
       {/* Déroulé du quiz (vue d'ensemble). */}
       <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
 
-      <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap gap-2">
-        <Button type="button" onClick={() => emit('host:reveal')}>
-          <Eye className="size-4" />
-          {t('control.revealNow')}
-        </Button>
-        <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
-      </div>
+      <ActionBar
+        end={<EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />}
+        primary={
+          <Button type="button" onClick={() => emit('host:reveal')}>
+            <Eye className="size-4" />
+            {t('control.revealNow')}
+          </Button>
+        }
+      />
     </section>
+  );
+}
+
+/**
+ * The console's action bar, the same on every screen so the hands never search:
+ * status on the left (mode, auto countdown), then — right-aligned, in this
+ * order — the way out (end the session), the secondary navigation (look back,
+ * projection), and the primary action at the far right.
+ */
+function ActionBar({
+  status,
+  end,
+  nav,
+  primary,
+}: {
+  status?: React.ReactNode;
+  end?: React.ReactNode;
+  nav?: React.ReactNode;
+  primary?: React.ReactNode;
+}) {
+  return (
+    <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-3">{status}</div>
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {end}
+        {nav}
+        {primary}
+      </div>
+    </div>
   );
 }
 
