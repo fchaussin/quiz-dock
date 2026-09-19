@@ -1,14 +1,18 @@
 # Quiz bundle (import / export)
 
 A quiz leaves and enters QuizDock as a **bundle**: a `quiz.json` manifest next
-to a `media/` folder, zipped (`<title>.quizdock.zip`). The same layout, unzipped,
+to a `media/` folder, zipped (`<slug>.quizdock.zip`). The same layout, unzipped,
 is what a Quiz Store repository holds.
 
-- **Export** — editor header → *Export*, or `GET /api/v1/quizzes/:id/export`.
+- **Export** — editor header → *Export*, `GET /api/v1/quizzes/:id/export`, or
+  `qd quiz:export <id> <file.zip>` from the operator CLI
+  ([self-hosting/cli.md](self-hosting/cli.md)). Every export bumps the quiz's
+  `revision` and fixes its `slug` (derived from the title the first time).
 - **Import** — dashboard → *Import* (zip, or a bare `quiz.json` when there is
-  no media), or `POST /api/v1/quizzes/import` (multipart field `file`). The
-  result is a **new draft** owned by the importer, with its own copies of the
-  media. Nothing is merged or overwritten.
+  no media), `POST /api/v1/quizzes/import` (multipart field `file`), or
+  `qd quiz:import <file> <sub|email>`. The result is a **new draft** owned by
+  the importer, with its own copies of the media. Nothing is merged or
+  overwritten.
 
 ## `quiz.json`
 
@@ -17,9 +21,16 @@ is what a Quiz Store repository holds.
   "format": "quizdock/quiz",
   "version": 1,
   "quiz": {
+    "slug": "capitals",
+    "namespace": null,
+    "revision": 3,
+    "updatedAt": "2026-09-20T12:00:00.000Z",
     "title": "Capitals",
     "description": "Markdown, inline images allowed: ![map](media/map.png)",
     "language": "en",
+    "domain": "geography",
+    "tags": ["capitals", "europe"],
+    "license": "CC-BY-4.0",
     "feedbackEnabled": true,
     "cover": "media/cover.jpg"
   },
@@ -70,3 +81,26 @@ is what a Quiz Store repository holds.
   (typos tolerated). `pointsMode` accepts `standard`, `double`, `none`, `fixed`
   (full points, no speed weighting).
 - An invalid bundle is refused as a whole, with the offending item and field.
+
+## Store fields
+
+The `quiz` object carries what a Quiz Store catalogue will need, so bundles
+exported today stay valid there. None of it is editable in the app yet: a quiz
+built in the editor exports with `namespace`, `domain` and `license` at `null`
+and `tags` empty; an imported bundle keeps whatever it carried.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `version` (top level) | integer | Manifest schema version, currently `1`. Absent in the earliest bundles: read as `0`, same layout. A bundle from a newer schema is refused. |
+| `slug` | `^[a-z0-9]+(-[a-z0-9]+)*$`, ≤ 60 | The identity that travels — never an internal id. Derived from the title at first export or import when absent; the zip is named after it. |
+| `namespace` | string or `null` | Reserved for a Store submission (`<username>/<slug>`); `null` on a local export. |
+| `revision` | integer ≥ 0 | Content revision: **+1 at every export**, carried over by import. An integer, not semver. |
+| `updatedAt` | ISO 8601 UTC | When the quiz was last saved (the export moment, since the export itself stamps it). Informative: ignored on import. |
+| `language` | BCP 47 | A dedicated field, never a tag. |
+| `domain` | string or `null` | Free text until the Store closes the vocabulary. |
+| `tags` | kebab-case strings, 5 at most | Lowercase, `^[a-z0-9]+(-[a-z0-9]+)*$`, ≤ 30 chars each. |
+| `license` | SPDX identifier or `null` | e.g. `CC-BY-4.0`, `MIT`. |
+
+Every field is optional in the manifest: a bundle exported before they existed
+imports with the defaults above. Nothing about the emitting instance travels —
+no ids, no owner, no absolute URL; media paths are relative to the bundle root.

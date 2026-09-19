@@ -5,7 +5,7 @@ Two tools, one name, for operators who self-host QuizDock:
 | | Where it runs | What it does |
 |---|---|---|
 | **`quizdock`** script | on the host (needs only Docker + curl) | install, start/stop, logs, backup/restore, upgrade — and relays admin commands |
-| **`qd`** command in the image | inside the app container | doctor, host seat, users, sample quizzes, retention purge |
+| **`qd`** command in the image | inside the app container | doctor, host seat, users, sample quizzes, quiz export / import, retention purge |
 
 You normally only touch the first one.
 
@@ -38,7 +38,9 @@ reads the same file.
 | `backup [dir]` | `pg_dump --clean` + media + `.env` → `./backups/quizdock-<date>/`. |
 | `restore <dir>` | Replace the database and media from a backup (stops the app first; asks for confirmation). |
 | `upgrade [tag]` | **backup → pull → restart** (migrations run on start) **→ doctor**. Persists the tag in `.env`. |
-| `doctor`, `seat:*`, `user:*`, `samples:load`, `sessions:purge` | Relayed to the in-image CLI (below). |
+| `doctor`, `seat:*`, `user:*`, `samples:load`, `quiz:list`, `sessions:purge` | Relayed to the in-image CLI (below). |
+| `quiz:export <id> <file.zip>` | Write a quiz bundle to a file **on the host** (streamed out of the container). |
+| `quiz:import <file> <sub\|email>` | Create a draft in that user's bank from a bundle file on the host. |
 | `admin <cmd…>` | Relay anything else (`admin help`). |
 
 Overrides: `QUIZDOCK_IMAGE`, `QUIZDOCK_COMPOSE_FILE`, `QUIZDOCK_ENV_FILE`,
@@ -67,6 +69,9 @@ which still works too.)
 | `user:list` | Accounts with subject, e-mail, role (as last provisioned), quiz count. |
 | `user:set-role <sub\|email> admin\|player` | Grant the `admin` role (sticky: never overridden by IdP claims or the host seat) or revoke it. `host` is derived, never assigned. |
 | `samples:load <sub\|email>` | Add the two sample quizzes to that user's bank. |
+| `quiz:list [<sub\|email>]` | Quizzes with id, title, owner, status, question count, slug, revision — every one, or one user's. |
+| `quiz:export <id> <file.zip\|->` | The quiz as a bundle ([quiz-bundle.md](../quiz-bundle.md)), whoever owns it; `-` streams the zip to stdout. Bumps the quiz `revision`, like the in-app export. |
+| `quiz:import <file\|-> <sub\|email>` | A new draft in that user's bank from a bundle (zip or bare `quiz.json`); `-` reads stdin. Refused as a whole when invalid, naming the culprit. |
 | `sessions:purge [--dry-run]` | Delete archived sessions past their retention date (`retain_until`, 365 days at archive time) with their results. Nothing else purges them — schedule it (cron) if you need the retention enforced. |
 
 Subjects: OIDC `sub`, or `local:<slug>` in local mode (`user:list` shows them).
@@ -91,6 +96,15 @@ Subjects: OIDC `sub`, or `local:<slug>` in local mode (`user:list` shows them).
 ```bash
 ./quizdock user:list
 ./quizdock user:set-role alice@example.com admin
+```
+
+**Move a quiz to another instance, or publish it**
+
+```bash
+./quizdock quiz:list alice@example.com          # find the id
+./quizdock quiz:export 01J… ./capitals.quizdock.zip
+# on the other instance:
+./quizdock quiz:import ./capitals.quizdock.zip bob@example.com
 ```
 
 **Enforce session retention weekly** (host crontab)

@@ -28,6 +28,23 @@ export type ExportableQuiz = Prisma.QuizGetPayload<{ include: typeof EXPORT_INCL
 const MEDIA_URL_RE = /\/api\/v1\/media\/([0-9A-Za-z]{26})/g;
 const BUNDLE_URL_RE = /\]\((media\/[A-Za-z0-9][A-Za-z0-9._-]{0,120})\)/g;
 
+/** ASCII, lowercase, dash-separated: a bundle `slug` (and file stem) derived from a title. */
+export function slugify(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+    .replace(/-+$/, '');
+}
+
+/** The slug a quiz travels under: its own, or one derived from the title. */
+export function slugOf(quiz: Pick<ExportableQuiz, 'slug' | 'title'>): string {
+  return quiz.slug ?? (slugify(quiz.title) || 'quiz');
+}
+
 /** Raised when the bundle is structurally fine but an item fails the API content rules. */
 export class BundleContentError extends Error {
   constructor(
@@ -173,9 +190,16 @@ export function toBundle(quiz: ExportableQuiz, pathFor: PathFor): QuizBundle {
     format: BUNDLE_FORMAT,
     version: BUNDLE_VERSION,
     quiz: {
+      slug: slugOf(quiz),
+      namespace: quiz.namespace,
+      revision: quiz.revision,
+      updatedAt: quiz.updatedAt.toISOString(),
       title: quiz.title,
       description: quiz.description ? mdOut(quiz.description, pathFor) : null,
       language: quiz.language,
+      domain: quiz.domain,
+      tags: quiz.tags,
+      license: quiz.license,
       feedbackEnabled: quiz.feedbackEnabled,
       cover: quiz.coverMediaId ? pathFor(quiz.coverMediaId) : null,
     },
@@ -195,6 +219,13 @@ export interface ImportedQuiz {
   language: string;
   feedbackEnabled: boolean;
   coverMediaId: string | null;
+  /** Store fields, defaulted when the bundle predates them (`docs/quiz-bundle.md`). */
+  slug: string;
+  namespace: string | null;
+  revision: number;
+  domain: string | null;
+  tags: string[];
+  license: string | null;
   questions: QuestionContent[];
   /** `beforeQuestion` indexes `questions`; `null` anchors the slide at the end. */
   slides: { content: SlideContent; beforeQuestion: number | null; orderIndex: number }[];
@@ -327,12 +358,19 @@ export function fromBundle(bundle: QuizBundle, idFor: IdFor): ImportedQuiz {
   pending.forEach((content, orderIndex) =>
     slides.push({ content, beforeQuestion: null, orderIndex }),
   );
+  const { quiz } = bundle;
   return {
-    title: bundle.quiz.title,
-    description: bundle.quiz.description ? mdIn(bundle.quiz.description, idFor) : null,
-    language: bundle.quiz.language ?? 'en',
-    feedbackEnabled: bundle.quiz.feedbackEnabled ?? true,
-    coverMediaId: bundle.quiz.cover ? idFor(bundle.quiz.cover) : null,
+    title: quiz.title,
+    description: quiz.description ? mdIn(quiz.description, idFor) : null,
+    language: quiz.language ?? 'en',
+    feedbackEnabled: quiz.feedbackEnabled ?? true,
+    coverMediaId: quiz.cover ? idFor(quiz.cover) : null,
+    slug: quiz.slug ?? slugOf({ slug: null, title: quiz.title }),
+    namespace: quiz.namespace ?? null,
+    revision: quiz.revision ?? 0,
+    domain: quiz.domain ?? null,
+    tags: quiz.tags ?? [],
+    license: quiz.license ?? null,
     questions,
     slides,
   };

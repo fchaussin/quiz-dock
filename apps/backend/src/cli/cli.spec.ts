@@ -1,9 +1,11 @@
+import { BadRequestException } from '@nestjs/common';
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from './args';
 import { doctor, type DoctorDeps } from './commands/doctor';
 import { migrationStatus } from './commands/migrate-status';
+import { type BundleIo, quizExport, quizImport, quizList } from './commands/quiz';
 import { seatRelease, seatStatus } from './commands/seat';
 import { sessionsPurge } from './commands/sessions';
 import { samplesLoad, userList, userSetRole } from './commands/users';
@@ -245,6 +247,94 @@ describe('user commands', () => {
     await samplesLoad(out, db(), samples, 'oidc-1');
     expect(samples.createFor).toHaveBeenCalledWith('u1');
     expect(text()).toContain('Discover France');
+  });
+});
+
+describe('quiz commands', () => {
+  const alice = { id: 'u1', displayName: 'Alice', oidcSubject: 'oidc-1', email: 'alice@ex.io' };
+  const row = {
+    id: 'q1',
+    title: 'Ports',
+    status: 'ready',
+    questionCount: 3,
+    slug: 'ports',
+    revision: 2,
+    updatedAt: new Date(0),
+    owner: { oidcSubject: 'oidc-1' },
+  };
+  function db(found: unknown = alice) {
+    return {
+      user: { findFirst: jest.fn().mockResolvedValue(found) },
+      quiz: { findMany: jest.fn().mockResolvedValue([row]) },
+    } as unknown as Parameters<typeof quizList>[1];
+  }
+  function memIo(input = Buffer.from('{}')) {
+    const written: Record<string, Buffer> = {};
+    const io: BundleIo = {
+      read: jest.fn(async () => input),
+      write: jest.fn(async (path, data) => void (written[path] = data)),
+    };
+    return { io, written };
+  }
+
+  it('quiz:list tabulates every quiz, or one user’s', async () => {
+    const { out, text } = memOutput();
+    const prisma = db();
+    await quizList(out, prisma);
+    expect(prisma.quiz.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: undefined }),
+    );
+    expect(text()).toContain('"id":"q1"');
+    expect(text()).toContain('"owner":"oidc-1"');
+    await quizList(out, prisma, 'alice@ex.io');
+    expect(prisma.quiz.findMany).toHaveBeenLastCalledWith(
+      expect.objectContaining({ where: { ownerId: 'u1' } }),
+    );
+    await expect(quizList(out, db(null), 'nobody')).rejects.toThrow('No user');
+  });
+
+  it('quiz:export writes the bundle where asked, silently on stdout', async () => {
+    const zip = Buffer.from('PK..');
+    const portable = {
+      exportZip: jest.fn().mockResolvedValue({ filename: 'ports.quizdock.zip', zip }),
+      importBundle: jest.fn(),
+    };
+    const { out, text } = memOutput();
+    const { io, written } = memIo();
+    await quizExport(out, portable, 'q1', '/tmp/out.zip', io);
+    expect(portable.exportZip).toHaveBeenCalledWith('q1'); // no owner: any quiz
+    expect(written['/tmp/out.zip']).toBe(zip);
+    expect(text()).toContain('Exported ports.quizdock.zip (4 bytes) to /tmp/out.zip.');
+
+    const quiet = memOutput();
+    await quizExport(quiet.out, portable, 'q1', '-', io);
+    expect(written['-']).toBe(zip);
+    expect(quiet.lines).toEqual([]);
+  });
+
+  it('quiz:import creates a draft for the resolved user, and explains a refusal', async () => {
+    const input = Buffer.from('{"format":"quizdock/quiz"}');
+    const portable = {
+      exportZip: jest.fn(),
+      importBundle: jest.fn().mockResolvedValue({ id: 'new', title: 'Ports' }),
+    };
+    const { out, text } = memOutput();
+    const { io } = memIo(input);
+    await quizImport(out, db(), portable, 'ports.zip', 'oidc-1', io);
+    expect(io.read).toHaveBeenCalledWith('ports.zip');
+    expect(portable.importBundle).toHaveBeenCalledWith(
+      'u1',
+      expect.objectContaining({ buffer: input }),
+    );
+    expect(text()).toContain('Imported "Ports" (new) as a draft of Alice.');
+
+    portable.importBundle.mockRejectedValue(
+      new BadRequestException({ code: 'import.media_missing', params: { path: 'media/a.png' } }),
+    );
+    await expect(quizImport(out, db(), portable, '-', 'oidc-1', io)).rejects.toThrow(
+      'Import refused: import.media_missing (path=media/a.png)',
+    );
+    await expect(quizImport(out, db(null), portable, '-', 'nobody', io)).rejects.toThrow('No user');
   });
 });
 

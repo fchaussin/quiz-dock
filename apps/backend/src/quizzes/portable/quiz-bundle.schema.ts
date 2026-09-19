@@ -13,10 +13,46 @@ import { QUESTION_TYPES } from '../../questions/dto/question-content.schema';
  * which carry the per-type rules.
  */
 export const BUNDLE_FORMAT = 'quizdock/quiz';
+/**
+ * Schema version of the manifest. A bundle written before this field existed
+ * reads as version 0 (same layout, every Store field absent); the importer
+ * accepts anything up to the current version and fills the defaults.
+ */
 export const BUNDLE_VERSION = 1;
 
 /** A media path inside the bundle: flat, under `media/`, no traversal. */
 export const mediaPathSchema = z.string().regex(/^media\/[A-Za-z0-9][A-Za-z0-9._-]{0,120}$/);
+
+/** Kebab-case identifier: the quiz `slug`, and each tag. */
+export const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+export const slugSchema = z.string().regex(SLUG_RE).max(60);
+export const tagSchema = z.string().regex(SLUG_RE).max(30);
+export const MAX_TAGS = 5;
+
+/**
+ * Quiz Store metadata (#20): the fields a future catalogue needs and that would
+ * be costly to retrofit. `slug` is the only identity that travels — never an
+ * internal id. `namespace` is reserved for a Store submission (`<username>/<slug>`)
+ * and stays null on a local export.
+ */
+const storeBundleFields = {
+  slug: slugSchema.optional(),
+  namespace: z.string().min(1).max(120).nullable().optional(),
+  /** Content revision, bumped by every export (an integer, not semver). */
+  revision: z.number().int().min(0).optional(),
+  /** ISO 8601, UTC. */
+  updatedAt: z.iso.datetime().optional(),
+  /** Vocabulary to be closed by the Store; free text until then. */
+  domain: z.string().trim().min(1).max(50).nullable().optional(),
+  tags: z.array(tagSchema).max(MAX_TAGS).optional(),
+  /** SPDX identifier. */
+  license: z
+    .string()
+    .regex(/^[A-Za-z0-9.+-]+$/)
+    .max(64)
+    .nullable()
+    .optional(),
+};
 
 const backgroundBundleFields = {
   backgroundImage: mediaPathSchema.nullable().optional(),
@@ -61,13 +97,15 @@ export const slideBundleSchema = z.object({
 
 export const quizBundleSchema = z.object({
   format: z.literal(BUNDLE_FORMAT),
-  version: z.literal(BUNDLE_VERSION),
+  version: z.number().int().min(0).max(BUNDLE_VERSION).optional(),
   quiz: z.object({
     title: z.string().trim().min(1).max(200),
     description: z.string().nullable().optional(),
+    /** BCP 47 tag — a dedicated field, never a tag. */
     language: z.string().min(2).max(10).optional(),
     feedbackEnabled: z.boolean().optional(),
     cover: mediaPathSchema.nullable().optional(),
+    ...storeBundleFields,
   }),
   items: z.array(z.discriminatedUnion('kind', [questionBundleSchema, slideBundleSchema])).max(500),
 });

@@ -35,7 +35,7 @@ function makePrisma() {
   };
   return {
     tx,
-    quiz: { findFirst: jest.fn() },
+    quiz: { findFirst: jest.fn(), update: jest.fn() },
     $transaction: jest.fn((fn: (t: typeof tx) => unknown) => fn(tx)),
   };
 }
@@ -89,6 +89,13 @@ describe('QuizPortableService', () => {
         title: 'Ports',
         status: 'draft',
         questionCount: 1,
+        // Store fields absent from the bundle: defaults, slug derived from the title.
+        slug: 'ports',
+        namespace: null,
+        revision: 0,
+        domain: null,
+        tags: [],
+        license: null,
       });
       expect(data.questions.create[0]).toMatchObject({ orderIndex: 0, type: 'true_false' });
       expect(data.questions.create[0].options.create).toHaveLength(2);
@@ -104,6 +111,57 @@ describe('QuizPortableService', () => {
       await service.importBundle(OWNER, { buffer, mimetype: 'application/json' });
       expect(media.upload).not.toHaveBeenCalled();
       expect(prisma.tx.slide.createMany).not.toHaveBeenCalled();
+    });
+
+    it('keeps the Store fields of a bundle that carries them', async () => {
+      const json = manifest({
+        items: [manifest().items[1]],
+        quiz: {
+          title: 'Ports',
+          slug: 'harbours-101',
+          namespace: 'alice/harbours-101',
+          revision: 3,
+          updatedAt: '2026-09-01T10:00:00.000Z',
+          domain: 'geography',
+          tags: ['sea', 'europe'],
+          license: 'CC-BY-4.0',
+        },
+      });
+      await service.importBundle(OWNER, {
+        buffer: Buffer.from(JSON.stringify(json)),
+        mimetype: '',
+      });
+      expect(prisma.tx.quiz.create.mock.calls[0][0].data).toMatchObject({
+        slug: 'harbours-101',
+        namespace: 'alice/harbours-101',
+        revision: 3,
+        domain: 'geography',
+        tags: ['sea', 'europe'],
+        license: 'CC-BY-4.0',
+      });
+    });
+
+    it('reads a bundle written before the schema was versioned', async () => {
+      const json = manifest({ items: [manifest().items[1]], version: undefined });
+      await service.importBundle(OWNER, {
+        buffer: Buffer.from(JSON.stringify(json)),
+        mimetype: '',
+      });
+      expect(prisma.tx.quiz.create).toHaveBeenCalled();
+    });
+
+    it('refuses a bundle from a newer schema, a bad slug, too many tags', async () => {
+      const only = [manifest().items[1]];
+      for (const json of [
+        manifest({ items: only, version: 2 }),
+        manifest({ items: only, quiz: { title: 'X', slug: 'Not A Slug' } }),
+        manifest({ items: only, quiz: { title: 'X', tags: ['a', 'b', 'c', 'd', 'e', 'f'] } }),
+      ]) {
+        await expect(
+          service.importBundle(OWNER, { buffer: Buffer.from(JSON.stringify(json)), mimetype: '' }),
+        ).rejects.toMatchObject({ response: { code: 'import.invalid_bundle' } });
+      }
+      expect(prisma.tx.quiz.create).not.toHaveBeenCalled();
     });
 
     it('rejects a referenced media absent from the zip, before touching the database', async () => {
@@ -158,7 +216,7 @@ describe('QuizPortableService', () => {
   });
 
   describe('export', () => {
-    it('zips quiz.json with the media it can read, named from the title', async () => {
+    it('zips quiz.json with the media it can read, stamps slug and revision', async () => {
       prisma.quiz.findFirst.mockResolvedValue({
         id: 'q',
         title: 'Été à Paris !',
@@ -166,6 +224,13 @@ describe('QuizPortableService', () => {
         coverMediaId: null,
         language: 'fr',
         feedbackEnabled: true,
+        slug: null,
+        namespace: null,
+        revision: 2,
+        domain: 'travel',
+        tags: ['paris'],
+        license: null,
+        updatedAt: new Date('2026-09-01T10:00:00Z'),
         questions: [
           {
             id: 'q1',
@@ -200,8 +265,24 @@ describe('QuizPortableService', () => {
         slides: [],
       });
       media.readAsset.mockResolvedValue({ buffer: Buffer.from([9]), mime: 'image/jpeg' });
+      const exportedAt = new Date('2026-09-20T12:00:00Z');
+      prisma.quiz.update.mockResolvedValue({
+        slug: 'ete-a-paris',
+        revision: 3,
+        updatedAt: exportedAt,
+      });
 
-      const { filename, zip } = await service.exportZip(OWNER, 'q');
+      const { filename, zip } = await service.exportZip('q', OWNER);
+      expect(prisma.quiz.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 'q', ownerId: OWNER } }),
+      );
+      // First export: the slug is derived from the title and written back; the revision is bumped.
+      expect(prisma.quiz.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'q' },
+          data: { slug: 'ete-a-paris', revision: { increment: 1 } },
+        }),
+      );
       expect(filename).toBe('ete-a-paris.quizdock.zip');
       const files = unzipSync(new Uint8Array(zip));
       expect(Object.keys(files).sort()).toEqual([
@@ -209,12 +290,32 @@ describe('QuizPortableService', () => {
         'quiz.json',
       ]);
       const json = JSON.parse(Buffer.from(files['quiz.json']).toString());
+      expect(json.version).toBe(1);
+      expect(json.quiz).toMatchObject({
+        slug: 'ete-a-paris',
+        namespace: null,
+        revision: 3,
+        updatedAt: exportedAt.toISOString(),
+        domain: 'travel',
+        tags: ['paris'],
+        license: null,
+      });
+      expect(json.quiz).not.toHaveProperty('id');
       expect(json.items[0].media).toBe('media/01ARZ3NDEKTSV4RRFFQ69G5FAV.jpg');
     });
 
     it('404s on a quiz the caller does not own', async () => {
       prisma.quiz.findFirst.mockResolvedValue(null);
-      await expect(service.exportZip(OWNER, 'x')).rejects.toBeInstanceOf(NotFoundException);
+      await expect(service.exportZip('x', OWNER)).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.quiz.update).not.toHaveBeenCalled();
+    });
+
+    it('exports any quiz when no owner is given (operator CLI)', async () => {
+      prisma.quiz.findFirst.mockResolvedValue(null);
+      await expect(service.exportZip('x')).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.quiz.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: 'x', ownerId: undefined } }),
+      );
     });
   });
 
