@@ -39,11 +39,11 @@ export function JoinAddressPicker({
   }, [data, lan, origin]);
   const onLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|$)/.test(origin);
   const lanSource = data?.data.lanSource;
-  const showHelp = help ?? (onLocalhost && lanSource === 'hidden' && !data?.data.publicUrl);
   const [custom, setCustom] = useState('');
   // Help opens by itself in the one situation that goes wrong (console on localhost,
   // no usable address); the button then toggles from that state.
   const [help, setHelp] = useState<boolean | null>(null);
+  const showHelp = help ?? (onLocalhost && lanSource === 'hidden' && !data?.data.publicUrl);
   const isCustom = !candidates.includes(current);
 
   // First time on this session: apply the remembered choice, else the best candidate
