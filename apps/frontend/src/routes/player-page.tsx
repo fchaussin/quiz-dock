@@ -246,10 +246,6 @@ export function PlayerPage() {
     topbarSlot && view.status === 'ready' && view.state !== 'ENDED' && !view.kicked
       ? createPortal(
           <>
-            <span className="hidden max-w-[10rem] truncate text-sm font-medium sm:inline">
-              {nickname}
-            </span>
-            <Avatar name={avatarName} size={32} />
             <Button
               type="button"
               variant="ghost"
@@ -260,6 +256,10 @@ export function PlayerPage() {
               <LogOut className="size-4" />
               {t('player.leave')}
             </Button>
+            <span className="hidden max-w-[10rem] truncate text-sm font-medium sm:inline">
+              {nickname}
+            </span>
+            <Avatar name={avatarName} size={32} />
             <ConfirmDialog
               open={confirmLeave}
               destructive
