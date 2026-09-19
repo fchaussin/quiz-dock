@@ -95,7 +95,7 @@ export function DashboardPage() {
   };
 
   return (
-    <section className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+    <section className="content-lg flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
         <div className="flex flex-wrap items-center gap-2">
@@ -148,7 +148,7 @@ export function DashboardPage() {
                 <span className="text-sm text-muted-foreground">
                   {t('playerCount', { count: game.playerCount })}
                 </span>
-                <Link to="/present/$pin/control" params={{ pin: game.pin }}>
+                <Link to="/session/$pin/console" params={{ pin: game.pin }}>
                   <Button type="button" size="sm" variant="outline">
                     {t('resume')}
                   </Button>

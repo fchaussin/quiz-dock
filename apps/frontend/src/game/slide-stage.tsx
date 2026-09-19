@@ -1,7 +1,7 @@
 import type { SlideShowPayload } from '@quiz-dock/contracts';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { SlideView } from './live-components';
+import { SlideView, TYPE_BASE } from './live-components';
 
 const STAGE_W = 1280;
 const STAGE_H = 720;
@@ -31,10 +31,10 @@ export function SlideStage({ slide, className }: { slide: SlideShowPayload; clas
       className={cn('bg-background relative aspect-video w-full overflow-hidden', className)}
     >
       <div
-        className="absolute top-0 left-0 flex origin-top-left"
+        className={cn('absolute top-0 left-0 flex origin-top-left', TYPE_BASE.stage)}
         style={{ width: STAGE_W, height: STAGE_H, transform: `scale(${scale})` }}
       >
-        <SlideView slide={slide} large />
+        <SlideView slide={slide} />
       </div>
     </div>
   );

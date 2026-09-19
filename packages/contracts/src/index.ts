@@ -41,7 +41,17 @@ export enum PointsMode {
   Standard = 'standard',
   Double = 'double',
   None = 'none',
+  /** Full base points for a right answer, no speed weighting. */
+  Fixed = 'fixed',
 }
+
+/**
+ * Per-type scoring rule. `standard` = historical behaviour. numeric: `closest`
+ * ranks the answers by distance (scored at reveal); multiple_choice and
+ * ordering: `partial` gives credit per right element; text_input: `lenient`
+ * tolerates small typos.
+ */
+export type QuestionScoring = 'standard' | 'closest' | 'partial' | 'lenient';
 
 /** Rythme de progression de la partie (§8). `manual` : l'hôte enchaîne ; `auto` :
  * la partie avance seule après le reveal (le `pause` suspend l'auto-progression). */
@@ -76,6 +86,7 @@ export const ClientEvents = {
   HostAttach: 'host:attach',
   HostStart: 'host:start',
   HostNext: 'host:next',
+  HostReview: 'host:review',
   HostReveal: 'host:reveal',
   HostKick: 'host:kick',
   HostEnd: 'host:end',
@@ -147,6 +158,8 @@ export interface QuestionStartPayload {
   options?: PublicOption[];
   timeLimitS: number;
   basePoints: number;
+  /** Scoring rule of the question (so the rules line and the reveal can explain it). */
+  scoring?: QuestionScoring;
   startedAt: number; // ms epoch serveur (§6)
   endsAt: number;
   /** Optional full-cover background (image or gradient), like a slide's. */
@@ -220,10 +233,19 @@ export interface SlideShowPayload {
   displayDelayS: number | null;
 }
 
+/** A step of the sequence the host can jump back to: a played question (its reveal) or a shown slide. */
+export type GameStep = { questionIndex: number } | { slideIndex: number };
+
 export interface GameStatePayload {
   state: GameState;
   questionIndex: number;
   totalQuestions: number;
+  /**
+   * Host navigation over what was already played: `prev`/`next` steps when the
+   * host may look back (null = none), `review` when the screens show a past step
+   * rather than the live position (`host:next` then resumes the live position).
+   */
+  nav?: { prev: GameStep | null; next: GameStep | null; review: boolean };
 }
 
 /**
@@ -275,6 +297,23 @@ export interface PersonalResult {
   points: number;
   totalScore: number;
   rank: number;
+  /** Share of the credit earned (0..1) when the scoring gives partial credit. */
+  credit?: number;
+  /** Numeric `closest`: own proximity rank and distance to the target. */
+  closestRank?: number;
+  distance?: number;
+}
+
+/** One row of the proximity ranking of a `closest` numeric question. */
+export interface ClosestRow {
+  nickname: string;
+  avatar?: string;
+  value: number;
+  /** |value − target| */
+  distance: number;
+  /** 1 = closest; ties share a rank. */
+  rank: number;
+  points: number;
 }
 
 export interface QuestionRevealPayload {
@@ -283,6 +322,8 @@ export interface QuestionRevealPayload {
   /** Markdown explanation of the answer (#5); only ever sent at reveal. */
   answerExplanation?: string;
   distribution: Record<string, number>;
+  /** Numeric `closest`: answers from the closest to the farthest (top 10). */
+  closest?: ClosestRow[];
   yourResult?: PersonalResult;
 }
 
@@ -316,6 +357,8 @@ export interface ClientToServerEvents {
   'host:attach': (p: { pin: string }, ack: (res: { ok: boolean }) => void) => void;
   'host:start': (p: { pin: string }) => void;
   'host:next': (p: { pin: string }) => void;
+  /** Show a played step again (no replay, no rescoring); `host:next` resumes. */
+  'host:review': (p: { pin: string } & GameStep) => void;
   'host:reveal': (p: { pin: string }) => void;
   'host:kick': (p: { pin: string; playerId: string }) => void;
   /**

@@ -48,7 +48,8 @@ is what a Quiz Store repository holds.
       ]
     },
     { "kind": "question", "type": "text_input", "prompt": "Capital of Italy?", "acceptedAnswers": ["Rome", "Roma"] },
-    { "kind": "question", "type": "numeric", "prompt": "Departments in France?", "numericValue": 101, "numericTolerance": 0 }
+    { "kind": "question", "type": "numeric", "prompt": "Departments in France?", "numericValue": 101, "numericTolerance": 0 },
+    { "kind": "question", "type": "numeric", "prompt": "Height of the Eiffel Tower (m)?", "numericValue": 330, "numericTolerance": 5, "scoring": "closest", "pointsMode": "fixed" }
   ]
 }
 ```
@@ -63,4 +64,9 @@ is what a Quiz Store repository holds.
   fields, block types, colour/shape names, limits). Defaults apply when a
   field is omitted: `timeLimitS` 20, `pointsMode` standard, `textTone` light,
   `displayDelayS` null (engine default; `0` = the host clicks).
+- `scoring` picks a per-type rule (`standard` when omitted): numeric `closest`
+  (answers ranked by distance, scored at the reveal), multiple_choice /
+  ordering `partial` (credit per right element), text_input `lenient`
+  (typos tolerated). `pointsMode` accepts `standard`, `double`, `none`, `fixed`
+  (full points, no speed weighting).
 - An invalid bundle is refused as a whole, with the offending item and field.

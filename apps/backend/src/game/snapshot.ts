@@ -4,6 +4,7 @@ import type {
   OptionShape,
   PointsMode,
   PublicOption,
+  QuestionScoring,
   QuestionStartPayload,
   QuestionType,
 } from '@quiz-dock/contracts';
@@ -69,6 +70,8 @@ export function buildSnapshot(quiz: QuizWithContent): QuizSnapshot {
         timeLimitS: q.timeLimitS,
         revealDelayS: q.revealDelayS ?? null,
         basePoints: basePointsFor(q.pointsMode as PointsMode),
+        pointsMode: q.pointsMode as PointsMode,
+        scoring: q.scoring as QuestionScoring,
         numericValue: q.numericValue === null ? null : Number(q.numericValue),
         numericTolerance: q.numericTolerance === null ? null : Number(q.numericTolerance),
         acceptedAnswersNormalized: q.acceptedAnswers.map((a) => a.normalized),
@@ -100,19 +103,23 @@ function buildSnapshotSlides(quiz: QuizWithContent): SnapshotSlide[] {
       anchor: s.beforeQuestionId === null ? end : (indexById.get(s.beforeQuestionId) ?? end),
     }))
     .sort((a, b) => a.anchor - b.anchor || a.slide.orderIndex - b.slide.orderIndex)
-    .map(({ slide, anchor }) => ({
-      id: slide.id,
-      beforeQuestionIndex: anchor,
-      blocks: resolveBlocks(slide.blocks as SlideBlock[]),
-      background: slide.media
-        ? { url: slide.media.url }
-        : slide.gradient
-          ? { gradient: slide.gradient as unknown as SlideGradient }
-          : null,
-      textTone: slide.textTone as SlideTextTone,
-      textOutline: slide.textOutline,
-      displayDelayS: slide.displayDelayS,
-    }));
+    .map(({ slide, anchor }) => snapshotSlide(slide, anchor));
+}
+
+function snapshotSlide(slide: QuizWithContent['slides'][number], anchor: number): SnapshotSlide {
+  return {
+    id: slide.id,
+    beforeQuestionIndex: anchor,
+    blocks: resolveBlocks(slide.blocks as SlideBlock[]),
+    background: slide.media
+      ? { url: slide.media.url }
+      : slide.gradient
+        ? { gradient: slide.gradient as unknown as SlideGradient }
+        : null,
+    textTone: slide.textTone as SlideTextTone,
+    textOutline: slide.textOutline,
+    displayDelayS: slide.displayDelayS,
+  };
 }
 
 /** Image blocks get their served URL so the clients never build one from an id. */
@@ -167,10 +174,56 @@ export function buildQuestionStart(
     options,
     timeLimitS: question.timeLimitS,
     basePoints: question.basePoints,
+    scoring: question.scoring ?? 'standard',
     startedAt,
     endsAt,
     background: question.background,
     textTone: question.textTone,
     textOutline: question.textOutline,
+  };
+}
+
+/**
+ * Live refresh of the **form** of a running session: the substance of the
+ * questions (list and order, type, prompt, media, options, right answers,
+ * scoring, timing) stays frozen from the launch so statistics remain
+ * consistent; what only affects the display follows the editor — backgrounds,
+ * text contrast, answer explanation, reveal delay — and the slides in full
+ * (they carry no history). Questions are matched by id; a question deleted
+ * meanwhile keeps its frozen version.
+ */
+export function refreshSnapshotForm(frozen: QuizSnapshot, current: QuizWithContent): QuizSnapshot {
+  const fresh = buildSnapshot(current);
+  const freshById = new Map(fresh.questions.map((q) => [q.id, q]));
+  const questions = frozen.questions.map((q): SnapshotQuestion => {
+    const now = freshById.get(q.id);
+    if (!now) return q;
+    return {
+      ...q,
+      background: now.background,
+      textTone: now.textTone,
+      textOutline: now.textOutline,
+      answerExplanation: now.answerExplanation,
+      revealDelayS: now.revealDelayS,
+    };
+  });
+  // Slides anchor on question ids in the editor; resolve them onto the frozen order.
+  const indexById = new Map(frozen.questions.map((q, i) => [q.id, i]));
+  const end = frozen.questions.length;
+  const slides = current.slides
+    .map((slide) => ({
+      slide,
+      anchor:
+        slide.beforeQuestionId === null ? end : (indexById.get(slide.beforeQuestionId) ?? end),
+    }))
+    .sort((a, b) => a.anchor - b.anchor || a.slide.orderIndex - b.slide.orderIndex)
+    .map(({ slide, anchor }) => snapshotSlide(slide, anchor));
+  return {
+    ...frozen,
+    title: fresh.title,
+    description: fresh.description,
+    feedbackEnabled: fresh.feedbackEnabled,
+    questions,
+    slides,
   };
 }

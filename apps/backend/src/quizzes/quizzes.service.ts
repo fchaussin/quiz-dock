@@ -274,6 +274,7 @@ export class QuizzesService {
             textOutline: q.textOutline,
             timeLimitS: q.timeLimitS,
             pointsMode: q.pointsMode,
+            scoring: q.scoring,
             revealDelayS: q.revealDelayS,
             numericValue: q.numericValue,
             numericTolerance: q.numericTolerance,

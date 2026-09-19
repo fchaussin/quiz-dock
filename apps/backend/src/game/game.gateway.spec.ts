@@ -17,6 +17,7 @@ describe('GameGateway (intégration socket)', () => {
   let url: string;
   let quizId: string;
   let hostUserId: string;
+  let previousSeat: { userId: string; expiresAt: Date | null } | null = null;
   const sockets: Socket[] = [];
 
   const connect = (auth?: Record<string, string>): Socket => {
@@ -45,6 +46,8 @@ describe('GameGateway (intégration socket)', () => {
       update: { role: 'host' },
     });
     hostUserId = host.id;
+    // The seat is shared state of the target database: remember whose it was, give it back at the end.
+    previousSeat = await prisma.hostSeat.findUnique({ where: { id: 1 } });
     await prisma.hostSeat.upsert({
       where: { id: 1 },
       create: { id: 1, userId: host.id, expiresAt: null },
@@ -84,6 +87,14 @@ describe('GameGateway (intégration socket)', () => {
   afterAll(async () => {
     for (const s of sockets) s.disconnect();
     if (quizId) await prisma.quiz.delete({ where: { id: quizId } }).catch(() => undefined);
+    if (previousSeat) {
+      await prisma.hostSeat
+        .update({
+          where: { id: 1 },
+          data: { userId: previousSeat.userId, expiresAt: previousSeat.expiresAt },
+        })
+        .catch(() => undefined);
+    }
     await app.close();
   });
 
@@ -267,6 +278,116 @@ describe('GameGateway (intégration socket)', () => {
     const podium = await podiumP;
     expect(podium.you?.rank).toBe(1);
     expect(podium.you?.score).toBeGreaterThan(0);
+  }, 15_000);
+
+  it('host:review shows a played question again (no replay), host:next resumes the live position', async () => {
+    const host = connect({ localUser: 'Animateur' });
+    const { pin } = await host.emitWithAck('host:create', { quizId });
+    const player = connect();
+    await player.emitWithAck('player:join', { pin, nickname: 'Zoé' });
+
+    const states: Array<{
+      state: string;
+      questionIndex: number;
+      nav?: { review: boolean; prev: unknown; next: unknown };
+    }> = [];
+    player.on('game:state', (p) => states.push(p as never));
+    const firstReveal = new Promise<void>((resolve) =>
+      player.once('question:reveal', () => resolve()),
+    );
+    const podiumP = new Promise<void>((resolve) => player.once('game:podium', () => resolve()));
+    const qStart = new Promise<{ startedAt: number; options: Array<{ id: string; text: string }> }>(
+      (resolve) => player.once('question:start', (q) => resolve(q as never)),
+    );
+    host.emit('host:start', { pin });
+    const q = await qStart;
+    const parisId = q.options.find((o) => o.text === 'Paris')!.id;
+    await new Promise((r) => setTimeout(r, Math.max(0, q.startedAt - Date.now()) + 50));
+    player.emit('player:submit', { pin, questionIndex: 0, answer: parisId });
+    await firstReveal;
+    host.emit('host:next', { pin });
+    await podiumP;
+    // At the podium the host may look back at question 1.
+    expect(states.at(-1)).toMatchObject({
+      state: 'PODIUM',
+      nav: { review: false, prev: { questionIndex: 0 }, next: null },
+    });
+
+    // Review: the question comes back with its reveal and the player's archived result.
+    const reviewStart = new Promise<{ questionIndex: number; endsAt: number }>((resolve) =>
+      player.once('question:start', (p) => resolve(p as never)),
+    );
+    const reviewReveal = new Promise<{
+      correctOptionIds?: string[];
+      yourResult?: { correct: boolean };
+    }>((resolve) => player.once('question:reveal', (r) => resolve(r as never)));
+    host.emit('host:review', { pin, questionIndex: 0 });
+    const rs = await reviewStart;
+    expect(rs).toMatchObject({ questionIndex: 0, endsAt: 0 }); // chrono already over: nothing to answer
+    const rr = await reviewReveal;
+    expect(rr.correctOptionIds).toEqual([parisId]);
+    expect(rr.yourResult?.correct).toBe(true);
+    expect(states.at(-1)).toMatchObject({
+      state: 'REVEAL',
+      questionIndex: 0,
+      nav: { review: true, prev: null, next: null },
+    });
+
+    // Answering again is refused: the question is not live.
+    const ackP = new Promise<{ accepted: boolean }>((resolve) =>
+      player.once('answer:ack', (a) => resolve(a as never)),
+    );
+    player.emit('player:submit', { pin, questionIndex: 0, answer: parisId });
+    expect((await ackP).accepted).toBe(false);
+
+    // Next resumes the live position (podium), the same for every screen.
+    const back = new Promise<void>((resolve) => player.once('game:podium', () => resolve()));
+    host.emit('host:next', { pin });
+    await back;
+    expect(states.at(-1)).toMatchObject({ state: 'PODIUM', nav: { review: false } });
+  }, 15_000);
+
+  it('live form refresh: an explanation edited during the session shows on the next step, the substance stays frozen', async () => {
+    const host = connect({ localUser: 'Animateur' });
+    const { pin } = await host.emitWithAck('host:create', { quizId });
+    const player = connect();
+    await player.emitWithAck('player:join', { pin, nickname: 'Max' });
+    const firstReveal = new Promise<void>((resolve) =>
+      player.once('question:reveal', () => resolve()),
+    );
+    const podiumP = new Promise<void>((resolve) => player.once('game:podium', () => resolve()));
+    host.emit('host:start', { pin });
+    await firstReveal;
+    host.emit('host:next', { pin });
+    await podiumP;
+
+    // The host edits the question while the session runs: form and substance alike.
+    const question = await prisma.question.findFirstOrThrow({ where: { quizId } });
+    await prisma.question.update({
+      where: { id: question.id },
+      data: { answerExplanation: 'Edited live.', prompt: 'Edited prompt?', timeLimitS: 60 },
+    });
+    try {
+      const reviewStart = new Promise<{ prompt: string; timeLimitS: number }>((resolve) =>
+        player.once('question:start', (p) => resolve(p as never)),
+      );
+      const reviewReveal = new Promise<{ answerExplanation?: string }>((resolve) =>
+        player.once('question:reveal', (r) => resolve(r as never)),
+      );
+      host.emit('host:review', { pin, questionIndex: 0 });
+      const start = await reviewStart;
+      expect(start).toMatchObject({ prompt: 'Capitale de la France ?', timeLimitS: 5 }); // frozen
+      expect((await reviewReveal).answerExplanation).toBe('Edited live.'); // followed
+    } finally {
+      await prisma.question.update({
+        where: { id: question.id },
+        data: {
+          answerExplanation: 'Paris est la **capitale**.',
+          prompt: 'Capitale de la France ?',
+          timeLimitS: 5,
+        },
+      });
+    }
   }, 15_000);
 
   it('archivage (§2.7) : capture intégrale → host:end{archive} persiste les tables, idempotent', async () => {

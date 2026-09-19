@@ -3,6 +3,8 @@ import type {
   GameMode,
   OptionColor,
   OptionShape,
+  PointsMode,
+  QuestionScoring,
   QuestionType,
   SlideBackground,
   SlideBlock,
@@ -46,6 +48,10 @@ export interface SnapshotQuestion {
   textOutline: boolean;
   /** Points de base déjà résolus depuis `pointsMode` (1000 / 2000 / 0 — §5). */
   basePoints: number;
+  /** `fixed`: full base points, no speed weighting. Absent = standard weighting. */
+  pointsMode?: PointsMode;
+  /** Per-type scoring rule (`standard` when absent — snapshots from before the field). */
+  scoring?: QuestionScoring;
   /** Cible numérique (type `numeric`) — secret serveur. */
   numericValue: number | null;
   numericTolerance: number | null;
@@ -132,6 +138,8 @@ export interface GameMeta {
   prevState?: string;
   /** ms de question restantes, figées quand `clockFrozen` (pause ou §7.1). */
   pausedRemainingMs?: number;
+  /** Step shown again by the host (`q<i>` / `s<i>`), '' when the screens follow the live position. */
+  reviewStep?: string;
 }
 
 /** Réponse gradée stockée au submit (Redis hash `:answers:{idx}`) — REVEAL la relit. */
@@ -139,6 +147,11 @@ export interface AnswerRecord {
   answer: AnswerValue;
   isCorrect: boolean;
   pointsAwarded: number;
+  /** Share of the credit earned (0..1), when the scoring is not all-or-nothing. */
+  credit?: number;
+  /** Numeric `closest`: proximity rank and distance, settled at reveal. */
+  closestRank?: number;
+  distance?: number;
   /** Temps de réponse serveur compensé, en ms (§6). */
   tMs: number;
   receivedAt: number;
@@ -149,6 +162,10 @@ export interface ScoreResult {
   correct: boolean;
   points: number;
   newStreak: number;
+  /** Share of the credit earned, 0..1. */
+  credit: number;
+  /** Points settled later (numeric `closest`, at reveal). */
+  deferred?: boolean;
 }
 
 export type { AnswerValue };

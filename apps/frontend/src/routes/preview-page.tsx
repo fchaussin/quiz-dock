@@ -36,7 +36,7 @@ function QuizPreview({ quiz }: { quiz: QuizDetailDto }) {
     <div
       ref={ref}
       className={cn(
-        'mx-auto flex w-full max-w-4xl flex-col gap-4',
+        'content-lg flex flex-col gap-4',
         // En plein écran : occupe tout l'écran (projeté / grand écran), contenu centré.
         isFullscreen && 'max-w-none justify-center overflow-auto bg-background p-6 sm:p-12',
       )}
@@ -121,7 +121,7 @@ function QuestionPreview({
     <article
       className={cn(
         'flex flex-col gap-4 rounded-xl border p-4 sm:p-6',
-        large && 'mx-auto w-full max-w-5xl gap-6',
+        large && 'content-lg gap-6',
       )}
     >
       <div className="text-xs uppercase tracking-wide text-muted-foreground">

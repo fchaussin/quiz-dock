@@ -1,6 +1,7 @@
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
-import { ArrowDown, ArrowUp, Check, LogIn, LogOut, Shuffle } from 'lucide-react';
+import { Check, LogIn, LogOut, Shuffle } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,16 @@ import {
   loadPlayerSession,
   saveAvatarSeed,
 } from '../game/game-client';
-import { AnswerExplanation, OptionGrid, SlideView } from '../game/live-components';
+import { ResultMark } from '../game/result-mark';
+import { SortableAnswer } from '../game/sortable-answer';
+import {
+  AnswerExplanation,
+  AnswerRules,
+  OptionGrid,
+  RevealAnswer,
+  SlideView,
+  TYPE_BASE,
+} from '../game/live-components';
 import { cn } from '@/lib/utils';
 import { Surface } from '../game/surface';
 import { RatingPanel } from '../game/rating-panel';
@@ -55,8 +65,15 @@ export function PlayerPage() {
   // bloque donc la saisie pendant la lecture pour ne jamais perdre de réponse.
   const readingLeft = useCountdown(question ? question.startedAt : null);
   const reading = readingLeft !== null && readingLeft > 0;
-  // Avatar affiché : graine choisie, sinon dérivée du pseudo.
-  const avatarName = avatarSeed || nickname || '?';
+  // Avatar affiché : dans le lobby, la graine choisie localement (aperçu avant
+  // enregistrement) ; une fois la partie lancée, **celle que le serveur connaît**
+  // (la même que sur le podium, la projection et la console) — un rechargement
+  // sans graine locale ou un choix non enregistré ne doivent pas diverger.
+  const myId = loadPlayerSession()?.playerId;
+  const serverAvatar = view.players.find((p) => p.playerId === myId)?.avatar;
+  const inLobby = view.state === null || view.state === 'LOBBY';
+  const avatarName =
+    (inLobby ? avatarSeed || serverAvatar : serverAvatar || avatarSeed) || nickname || '?';
 
   // Graine déjà synchronisée vers le serveur (pour n'émettre que sur changement réel).
   const [syncedSeed, setSyncedSeed] = useState(avatarSeed);
@@ -121,15 +138,6 @@ export function PlayerPage() {
     }
   };
 
-  const moveOrder = (i: number, dir: -1 | 1) =>
-    setOrder((prev) => {
-      const next = [...prev];
-      const target = i + dir;
-      if (target < 0 || target >= next.length) return prev;
-      [next[i], next[target]] = [next[target], next[i]];
-      return next;
-    });
-
   /** Widget de réponse selon le type de question (§4/§5.3). */
   const renderAnswerInput = () => {
     if (!question) return <p className="text-muted-foreground">{t('player.waitingQuestion')}</p>;
@@ -171,39 +179,8 @@ export function PlayerPage() {
     if (question.type === 'ordering' && opts.length) {
       const ordered = order.length ? order : opts.map((o) => o.id);
       return (
-        <div className="flex w-full flex-col gap-3">
-          <ul className="flex flex-col gap-2">
-            {ordered.map((id, i) => {
-              const o = opts.find((x) => x.id === id);
-              if (!o) return null;
-              return (
-                <li key={id} className="flex items-center gap-2 rounded-lg border px-3 py-2">
-                  <span className="text-muted-foreground tabular-nums">{i + 1}.</span>
-                  <span className="flex-1 text-left">{o.text ?? o.color}</span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    aria-label={t('player.moveUp')}
-                    disabled={i === 0}
-                    onClick={() => moveOrder(i, -1)}
-                  >
-                    <ArrowUp className="size-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    aria-label={t('player.moveDown')}
-                    disabled={i === ordered.length - 1}
-                    onClick={() => moveOrder(i, 1)}
-                  >
-                    <ArrowDown className="size-4" />
-                  </Button>
-                </li>
-              );
-            })}
-          </ul>
+        <div className="flex w-full flex-col gap-[0.75em]">
+          <SortableAnswer options={opts} order={ordered} onChange={setOrder} />
           <Button type="button" onClick={() => submit(ordered)}>
             {t('player.submitAnswer')}
           </Button>
@@ -215,7 +192,7 @@ export function PlayerPage() {
     if (opts.length) {
       return (
         <>
-          <OptionGrid options={opts} onPick={onPick} selectedIds={selected} />
+          <OptionGrid options={opts} onPick={onPick} selectedIds={selected} layout="split" />
           {isMulti ? (
             <Button type="button" disabled={selected.length === 0} onClick={() => submit(selected)}>
               {t('player.submitAnswer')}
@@ -228,48 +205,73 @@ export function PlayerPage() {
     return <p className="text-muted-foreground">{t('player.unsupportedType')}</p>;
   };
 
-  const wrap = (children: React.ReactNode) => (
+  // `wide` lets a screen use a laptop's width (the reveal lays out side by side);
+  // `center` places the content in the middle of the remaining height.
+  // Identity and the way out live in the topbar (same place on every screen), not in the page.
+  // The slot exists once the layout is in the DOM (after the first commit), hence the effect.
+  const [topbarSlot, setTopbarSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => setTopbarSlot(document.getElementById('participant-topbar')), []);
+  const participantBar =
+    topbarSlot && view.status === 'ready' && view.state !== 'ENDED' && !view.kicked
+      ? createPortal(
+          <>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2"
+              onClick={() => setConfirmLeave(true)}
+            >
+              <LogOut className="size-4" />
+              {t('player.leave')}
+            </Button>
+            <span className="hidden max-w-[10rem] truncate text-sm font-medium sm:inline">
+              {nickname}
+            </span>
+            <Avatar name={avatarName} size={32} />
+            <ConfirmDialog
+              open={confirmLeave}
+              destructive
+              title={t('player.leaveConfirmTitle')}
+              description={t('player.leaveConfirmDescription')}
+              confirmLabel={t('player.leave')}
+              onCancel={() => setConfirmLeave(false)}
+              onConfirm={() => {
+                setConfirmLeave(false);
+                clearPlayerSession();
+                socket?.disconnect();
+                void navigate({ to: '/join' });
+              }}
+            />
+          </>,
+          topbarSlot,
+        )
+      : null;
+
+  const wrap = (children: React.ReactNode, opts: { wide?: boolean; center?: boolean } = {}) => (
     <Surface
       background={view.question?.background}
       textTone={view.question?.textTone}
       textOutline={view.question?.textOutline}
       className={cn(
         '-mx-4 -my-4 min-h-[calc(100dvh-4rem)] px-4 py-4',
+        TYPE_BASE.phone,
         !view.question?.background && 'bg-transparent',
       )}
     >
-      <section className="mx-auto flex w-full max-w-sm flex-col items-center gap-6 py-6 text-center">
-        {view.status === 'ready' && view.state !== 'ENDED' && !view.kicked ? (
-          <div className="flex w-full items-center gap-2 text-sm">
-            <Avatar name={avatarName} size={28} />
-            <span className="min-w-0 flex-1 truncate text-left font-medium">{nickname}</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs"
-              onClick={() => setConfirmLeave(true)}
-            >
-              <LogOut className="size-3.5" />
-              {t('player.leave')}
-            </Button>
-          </div>
-        ) : null}
-        {children}
-        <ConfirmDialog
-          open={confirmLeave}
-          destructive
-          title={t('player.leaveConfirmTitle')}
-          description={t('player.leaveConfirmDescription')}
-          confirmLabel={t('player.leave')}
-          onCancel={() => setConfirmLeave(false)}
-          onConfirm={() => {
-            setConfirmLeave(false);
-            clearPlayerSession();
-            socket?.disconnect();
-            void navigate({ to: '/join' });
-          }}
-        />
+      {participantBar}
+      <section
+        className={cn(
+          'mx-auto flex w-full flex-1 flex-col items-center gap-[1.5em] py-[1.5em] text-center',
+          opts.wide ? 'max-w-[24em] md:max-w-[36em]' : 'max-w-[24em]',
+          opts.center && 'min-h-[calc(100dvh-6rem)]',
+        )}
+      >
+        {opts.center ? (
+          <div className="my-auto flex w-full flex-col items-center gap-[1.5em]">{children}</div>
+        ) : (
+          children
+        )}
       </section>
     </Surface>
   );
@@ -293,6 +295,7 @@ export function PlayerPage() {
             <Label>
               {t('player.nickname')}
               <Input
+                autoFocus
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 placeholder={t('player.nicknamePlaceholder')}
@@ -318,7 +321,7 @@ export function PlayerPage() {
   if (view.kicked) {
     return wrap(
       <>
-        <span className="text-7xl leading-none" aria-hidden>
+        <span className="text-[4.5em] leading-none" aria-hidden>
           🚫
         </span>
         <p className="text-xl font-semibold">{t('player.kickedTitle')}</p>
@@ -334,7 +337,10 @@ export function PlayerPage() {
   // viewport (width and height under the header), content centred.
   if (view.state === 'SLIDE_SHOW' && view.slide) {
     return (
-      <div className="-my-4 mx-[calc(50%-50vw)] flex min-h-[calc(100dvh-4rem)]">
+      <div
+        className={cn('-my-4 mx-[calc(50%-50vw)] flex min-h-[calc(100dvh-4rem)]', TYPE_BASE.phone)}
+      >
+        {participantBar}
         <SlideView slide={view.slide} />
       </div>
     );
@@ -350,11 +356,11 @@ export function PlayerPage() {
       <>
         {view.state === 'PODIUM' ? (
           <>
-            <span className="text-7xl leading-none" aria-hidden>
+            <span className="text-[4.5em] leading-none" aria-hidden>
               🏆
             </span>
             <Avatar name={avatarName} size={72} />
-            <h2 className="text-2xl font-bold">{t('player.podium')}</h2>
+            <h2 className="text-[1.5em] font-bold">{t('player.podium')}</h2>
             {view.podium?.you ? (
               <p className="text-lg">
                 {t('player.yourRank')}{' '}
@@ -367,7 +373,7 @@ export function PlayerPage() {
           </>
         ) : (
           <>
-            <span className="text-7xl leading-none" aria-hidden>
+            <span className="text-[4.5em] leading-none" aria-hidden>
               🎉
             </span>
             <p className="text-xl font-semibold">{t('player.thanks')}</p>
@@ -386,26 +392,67 @@ export function PlayerPage() {
     // Classement perso : `you` (du leaderboard) est toujours présent au reveal, même
     // si le joueur n'a pas répondu (pas de `result`). On l'affiche systématiquement.
     const you = view.leaderboard?.you;
+    // One column, in reading order: verdict, explanation, then the ranking — with
+    // even spacing, centred in the remaining height so nothing floats in a blank.
     return wrap(
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex w-full flex-col items-center gap-[1.5em]">
         {r ? (
-          <>
-            <span
-              className={`text-7xl leading-none ${r.correct ? 'text-success' : 'text-destructive'}`}
-              aria-hidden
+          <div className="flex flex-col items-center gap-[0.5em]">
+            <ResultMark correct={r.correct} />
+            <p
+              className={`text-[2em] font-bold ${r.correct ? 'text-success' : 'text-destructive'}`}
             >
-              {r.correct ? '✓' : '✗'}
-            </span>
-            <p className={`text-3xl font-bold ${r.correct ? 'text-success' : 'text-destructive'}`}>
               {r.correct ? t('player.correct') : t('player.wrong')}
             </p>
-            <p className="text-xl">{t('player.points', { points: r.points })}</p>
-          </>
+            <p className="text-[1.25em]">{t('player.points', { points: r.points })}</p>
+            {r.closestRank ? (
+              <p className="text-muted-foreground text-[1em]">
+                {t('player.yourClosest', {
+                  rank: r.closestRank,
+                  distance: +(r.distance ?? 0).toFixed(2),
+                })}
+              </p>
+            ) : r.credit ? (
+              <p className="text-muted-foreground text-[1em]">
+                {t('player.yourCredit', { percent: Math.round(r.credit * 100) })}
+              </p>
+            ) : null}
+          </div>
         ) : (
           <p className="text-muted-foreground">{t('player.answersRevealed')}</p>
         )}
+        {/* What was asked and what this participant answered, next to the right answer. */}
+        {question && view.reveal ? (
+          question.options?.length && question.type !== 'ordering' ? (
+            <OptionGrid
+              options={question.options}
+              selectedIds={selected}
+              correctIds={view.reveal.correctOptionIds}
+              layout="list"
+            />
+          ) : (
+            <div className="flex w-full flex-col items-center gap-[0.5em]">
+              {question.type === 'ordering' && order.length ? (
+                <p className="text-muted-foreground text-[0.95em]">
+                  {t('reveal.yourAnswer')}{' '}
+                  <strong>
+                    {order
+                      .map((id) => question.options?.find((o) => o.id === id)?.text ?? id)
+                      .join(' → ')}
+                  </strong>
+                </p>
+              ) : freeValue ? (
+                <p className="text-muted-foreground text-[0.95em]">
+                  {t('reveal.yourAnswer')} <strong>{freeValue}</strong>
+                </p>
+              ) : null}
+              <RevealAnswer question={question} reveal={view.reveal} />
+            </div>
+          )
+        ) : null}
+        {view.reveal?.answerExplanation ? <AnswerExplanation reveal={view.reveal} /> : null}
         {you ? (
-          <p className="border-t pt-3 text-2xl">
+          <p className="w-full border-t pt-[1em] text-[1.5em]">
             {t('player.yourRankShort')}{' '}
             <span className="font-bold">{t('player.rankValue', { rank: you.rank })}</span>
             <span className="text-muted-foreground">
@@ -415,8 +462,8 @@ export function PlayerPage() {
         ) : r ? (
           <p className="text-muted-foreground">{t('player.rank', { rank: r.rank })}</p>
         ) : null}
-        {view.reveal ? <AnswerExplanation reveal={view.reveal} className="mt-2" /> : null}
       </div>,
+      { wide: true, center: true },
     );
   }
 
@@ -426,27 +473,40 @@ export function PlayerPage() {
     // reste en haut, l'énoncé occupe le centre et **défile** s'il est long, la zone
     // de réponse est ancrée en bas (position constante, jamais repoussée hors écran).
     return (
-      <section className="mx-auto flex h-full w-full max-w-sm flex-col gap-3 text-center">
+      <section
+        className={cn(
+          // Fills the viewport under the header (main padding included): the chrono
+          // on top, the prompt centred in the remaining height, the answer zone at the bottom.
+          'mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-[24em] flex-col gap-[0.75em] text-center md:max-w-[36em]',
+          TYPE_BASE.phone,
+        )}
+      >
+        {participantBar}
         {remaining !== null ? (
           <span
-            className="shrink-0 pt-2 text-4xl font-bold tabular-nums"
+            className="shrink-0 pt-[0.5em] text-[2.5em] font-bold tabular-nums"
             aria-label={t('player.timeRemaining')}
           >
             ⏱ {remaining}
           </span>
         ) : null}
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <Markdown role="heading" aria-level={1} className="text-xl font-semibold text-balance">
+        <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto py-[1em]">
+          <Markdown
+            role="heading"
+            aria-level={1}
+            className="text-[1.5em] font-semibold text-balance"
+          >
             {question.prompt}
           </Markdown>
         </div>
-        <div className="flex w-full shrink-0 flex-col items-center gap-3 pb-2">
+        <div className="flex w-full shrink-0 flex-col items-center gap-[0.75em] pb-[0.5em]">
+          <AnswerRules question={question} />
           {reading ? (
-            <p className="text-muted-foreground text-lg font-medium">
+            <p className="text-muted-foreground text-[1.1em] font-medium">
               {t('player.readQuestion')} <span className="tabular-nums">{readingLeft}</span>
             </p>
           ) : done ? (
-            <p className="text-xl font-semibold">{t('player.answerSaved')}</p>
+            <p className="text-[1.25em] font-semibold">{t('player.answerSaved')}</p>
           ) : (
             renderAnswerInput()
           )}

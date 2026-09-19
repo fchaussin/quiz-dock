@@ -9,6 +9,7 @@ import type { UpdateQuestionDtoAcceptedAnswersItem } from './updateQuestionDtoAc
 import type { UpdateQuestionDtoBackgroundGradient } from './updateQuestionDtoBackgroundGradient';
 import type { UpdateQuestionDtoOptionsItem } from './updateQuestionDtoOptionsItem';
 import type { UpdateQuestionDtoPointsMode } from './updateQuestionDtoPointsMode';
+import type { UpdateQuestionDtoScoring } from './updateQuestionDtoScoring';
 import type { UpdateQuestionDtoTextTone } from './updateQuestionDtoTextTone';
 import type { UpdateQuestionDtoType } from './updateQuestionDtoType';
 
@@ -51,6 +52,7 @@ export interface UpdateQuestionDto {
      */
   revealDelayS?: number | null;
   pointsMode?: UpdateQuestionDtoPointsMode;
+  scoring?: UpdateQuestionDtoScoring;
   numericValue?: number;
   /** @minimum 0 */
   numericTolerance?: number;

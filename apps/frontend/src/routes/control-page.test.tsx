@@ -40,6 +40,7 @@ const view = (partial: Partial<GameView>): GameView => ({
   quizId: null,
   quizDescription: null,
   outline: [],
+  nav: null,
   ...partial,
 });
 
@@ -52,7 +53,7 @@ describe('ControlPage (console hôte)', () => {
   it('LOBBY : PIN + QR + roster ; « Démarrer » émet host:start', async () => {
     localStorage.setItem('live.localUser', 'Animateur'); // passe requireAuth
     hookState.value = view({ players: [{ playerId: 'p1', nickname: 'Alice' }] });
-    const { container } = renderApp('/present/482913/control');
+    const { container } = renderApp('/session/482913/console');
 
     expect(await screen.findByLabelText('Code PIN')).toHaveTextContent('482913');
     expect(container.querySelector('svg[aria-label="QR code pour rejoindre"]')).toBeTruthy();
@@ -72,7 +73,7 @@ describe('ControlPage (console hôte)', () => {
       question: { prompt: 'Capitale ?' } as never,
       answerCount: { answered: 2, total: 3 },
     });
-    renderApp('/present/482913/control');
+    renderApp('/session/482913/console');
 
     expect(await screen.findByText('Capitale ?')).toBeInTheDocument();
     expect(screen.getByText(/2 \/ 3/)).toBeInTheDocument();
@@ -90,7 +91,7 @@ describe('ControlPage (console hôte)', () => {
     const share = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal('navigator', { ...navigator, share, canShare: () => false });
 
-    renderApp('/present/482913/control');
+    renderApp('/session/482913/console');
     const btn = await screen.findByRole('button', { name: /Partager/ });
     await act(async () => {
       btn.click();

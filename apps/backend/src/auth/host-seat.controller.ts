@@ -10,6 +10,7 @@ import { Public } from './public.decorator';
 const toDto = (s: HostSeatState): HostSeatDto => ({
   holder: s.holder,
   expiresAt: s.expiresAt?.toISOString() ?? null,
+  claimedAt: s.claimedAt?.toISOString() ?? null,
 });
 
 /**
@@ -25,7 +26,7 @@ export class HostSeatController {
   @Get()
   @ApiOkResponse({ type: HostSeatDto })
   async state(): Promise<HostSeatDto> {
-    if (process.env.AUTH_MODE === 'oidc') return { holder: null, expiresAt: null };
+    if (process.env.AUTH_MODE === 'oidc') return { holder: null, expiresAt: null, claimedAt: null };
     return toDto(await this.seat.state());
   }
 

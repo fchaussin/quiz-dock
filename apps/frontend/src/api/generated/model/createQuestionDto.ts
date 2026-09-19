@@ -9,6 +9,7 @@ import type { CreateQuestionDtoAcceptedAnswersItem } from './createQuestionDtoAc
 import type { CreateQuestionDtoBackgroundGradient } from './createQuestionDtoBackgroundGradient';
 import type { CreateQuestionDtoOptionsItem } from './createQuestionDtoOptionsItem';
 import type { CreateQuestionDtoPointsMode } from './createQuestionDtoPointsMode';
+import type { CreateQuestionDtoScoring } from './createQuestionDtoScoring';
 import type { CreateQuestionDtoTextTone } from './createQuestionDtoTextTone';
 import type { CreateQuestionDtoType } from './createQuestionDtoType';
 
@@ -51,6 +52,7 @@ export interface CreateQuestionDto {
      */
   revealDelayS?: number | null;
   pointsMode?: CreateQuestionDtoPointsMode;
+  scoring?: CreateQuestionDtoScoring;
   numericValue?: number;
   /** @minimum 0 */
   numericTolerance?: number;

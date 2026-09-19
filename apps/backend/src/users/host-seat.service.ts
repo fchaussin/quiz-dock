@@ -11,6 +11,8 @@ const SEAT_ID = 1;
 export interface HostSeatState {
   holder: string | null;
   expiresAt: Date | null;
+  /** When the current holder took (or renewed) the seat; null when free. */
+  claimedAt: Date | null;
 }
 
 /**
@@ -46,8 +48,8 @@ export class HostSeatService {
       where: { id: SEAT_ID },
       include: { user: { select: { displayName: true } } },
     });
-    if (!HostSeatService.isLive(seat)) return { holder: null, expiresAt: null };
-    return { holder: seat.user.displayName, expiresAt: seat.expiresAt };
+    if (!HostSeatService.isLive(seat)) return { holder: null, expiresAt: null, claimedAt: null };
+    return { holder: seat.user.displayName, expiresAt: seat.expiresAt, claimedAt: seat.claimedAt };
   }
 
   /**
@@ -90,7 +92,10 @@ export class HostSeatService {
    * user holds a live seat. First-time claimers get the sample quizzes.
    */
   async claim(user: User, expiresInMinutes: number | null): Promise<HostSeatState> {
-    const expiresAt = expiresInMinutes ? new Date(Date.now() + expiresInMinutes * 60_000) : null;
+    const claimedAt = new Date();
+    const expiresAt = expiresInMinutes
+      ? new Date(claimedAt.getTime() + expiresInMinutes * 60_000)
+      : null;
     await this.prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(${SEAT_LOCK_ID})`;
       const seat = await tx.hostSeat.findUnique({ where: { id: SEAT_ID } });
@@ -103,8 +108,8 @@ export class HostSeatService {
       }
       await tx.hostSeat.upsert({
         where: { id: SEAT_ID },
-        create: { id: SEAT_ID, userId: user.id, expiresAt },
-        update: { userId: user.id, claimedAt: new Date(), expiresAt },
+        create: { id: SEAT_ID, userId: user.id, claimedAt, expiresAt },
+        update: { userId: user.id, claimedAt, expiresAt },
       });
       await tx.user.update({ where: { id: user.id }, data: { role: UserRole.host } });
     });
@@ -112,7 +117,7 @@ export class HostSeatService {
       `Host seat claimed by "${user.displayName}" (${user.oidcSubject}), expires ${expiresAt?.toISOString() ?? 'never'}`,
     );
     await this.samples.createIfEmpty(user.id);
-    return { holder: user.displayName, expiresAt };
+    return { holder: user.displayName, expiresAt, claimedAt };
   }
 
   /** Full seat row with its holder (operator tooling), or `null` when no row. */

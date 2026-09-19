@@ -22,7 +22,7 @@ export function CallbackPage() {
       return;
     }
     completeOidcLogin()
-      .then(() => navigate({ to: '/dashboard' }))
+      .then(() => navigate({ to: '/quizzes' }))
       .catch((e: unknown) => setError(e instanceof Error ? e.message : t('callback.failed')));
   }, [completeOidcLogin, navigate, silent, t]);
 

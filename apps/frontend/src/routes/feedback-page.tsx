@@ -117,7 +117,7 @@ export function FeedbackPage() {
   const pages = summary ? Math.max(1, Math.ceil(summary.total / summary.pageSize)) : 1;
 
   return (
-    <section className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+    <section className="content-lg flex flex-col gap-6">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold">{t('feedback.title')}</h1>
         <Link

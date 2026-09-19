@@ -37,6 +37,17 @@ export const QUESTION_TYPES = [
   'poll',
 ] as const;
 
+/** Scoring variants each type accepts besides `standard`. */
+export const SCORING_BY_TYPE: Record<(typeof QUESTION_TYPES)[number], readonly string[]> = {
+  single_choice: [],
+  multiple_choice: ['partial'],
+  true_false: [],
+  text_input: ['lenient'],
+  numeric: ['closest'],
+  ordering: ['partial'],
+  poll: [],
+};
+
 /** Types reposant sur une liste d'options affichées. */
 const OPTION_TYPES = new Set([
   'single_choice',
@@ -61,7 +72,9 @@ export const questionContentSchema = z
     timeLimitS: z.number().int().min(5).max(120).default(20),
     // Auto-mode delay on REVEAL (#6); null = engine default. Bounds match the SQL CHECK.
     revealDelayS: z.number().int().min(1).max(300).nullable().optional(),
-    pointsMode: z.enum(['standard', 'double', 'none']).default('standard'),
+    pointsMode: z.enum(['standard', 'double', 'none', 'fixed']).default('standard'),
+    // Per-type scoring rule (see `SCORING_BY_TYPE`); `standard` everywhere by default.
+    scoring: z.enum(['standard', 'closest', 'partial', 'lenient']).default('standard'),
     numericValue: z.number().optional(),
     numericTolerance: z.number().min(0).optional(),
     options: z.array(optionInputSchema).max(8).default([]),
@@ -72,6 +85,9 @@ export const questionContentSchema = z
       ctx.addIssue({ code: 'custom', message, path });
     const correct = d.options.filter((o) => o.isCorrect).length;
     if (!noBackgroundConflict(d)) err('slide.background_conflict', ['backgroundGradient']);
+    if (d.scoring !== 'standard' && !SCORING_BY_TYPE[d.type].includes(d.scoring)) {
+      err('Scoring variant not available for this type.', ['scoring']);
+    }
 
     // Champs interdits hors de leur type.
     if (!OPTION_TYPES.has(d.type) && d.options.length > 0) {

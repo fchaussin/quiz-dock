@@ -235,7 +235,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
   const onDeleteQuiz = async () => {
     await removeQuiz.mutateAsync({ id: quiz.id });
     await queryClient.invalidateQueries({ queryKey: getQuizzesControllerListQueryKey() });
-    void navigate({ to: '/dashboard' });
+    void navigate({ to: '/quizzes' });
   };
 
   const onDeleteQuestion = async (qid: string) => {
@@ -340,7 +340,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
                 {editingDescription || isDirty ? (
                   <MarkdownEditor
                     aria-label={t('settings.descriptionLabel')}
-                    className="max-w-3xl"
+                    className="max-w-(--container-content-md)"
                     placeholder={t('settings.descriptionPlaceholder')}
                     value={field.state.value}
                     onChange={field.handleChange}
@@ -348,7 +348,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
                 ) : (
                   <button
                     type="button"
-                    className="text-muted-foreground hover:bg-accent/60 -mx-2 max-w-3xl rounded-md px-2 py-1 text-left text-sm"
+                    className="text-muted-foreground hover:bg-accent/60 -mx-2 max-w-(--container-content-md) rounded-md px-2 py-1 text-left text-sm"
                     onClick={() => setEditingDescription(true)}
                   >
                     {field.state.value ? (
@@ -405,7 +405,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
               {t('header.preview')}
             </a>
             <Link
-              to="/quizzes/$quizId/sessions"
+              to="/quizzes/$quizId/history"
               params={{ quizId: quiz.id }}
               className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
             >
@@ -769,7 +769,7 @@ function FeedbackSection({ quizId, className }: { quizId: string; className?: st
         <>
           <FeedbackSummary summary={summary} compact />
           <Link
-            to="/quizzes/$quizId/feedback"
+            to="/quizzes/$quizId/reviews"
             params={{ quizId }}
             className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'self-start')}
           >
@@ -1016,16 +1016,20 @@ function StatusBar({
   if (livePin) {
     return (
       <div className="border-primary/30 bg-primary/5 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-xl border px-5 py-4">
-        <div className="flex items-center gap-3">
-          <Radio className="text-primary size-5" />
-          <span className="text-sm">
-            {t('gameAccess.label')}{' '}
-            <strong className="font-mono text-2xl tracking-widest">{livePin}</strong>
-          </span>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <Radio className="text-primary size-5" />
+            <span className="text-sm">
+              {t('gameAccess.label')}{' '}
+              <strong className="font-mono text-2xl tracking-widest">{livePin}</strong>
+            </span>
+          </div>
+          {/* Edits reach the running session at its next step — form only, the played content stays. */}
+          <p className="text-muted-foreground text-xs">{t('gameAccess.liveEditsHint')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
-            to="/present/$pin/control"
+            to="/session/$pin/console"
             params={{ pin: livePin }}
             className={cn(buttonVariants({ size: 'sm' }))}
           >
@@ -1036,7 +1040,7 @@ function StatusBar({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => open(`/present/${livePin}/screen`)}
+            onClick={() => open(`/session/${livePin}/projection`)}
           >
             <Eye className="size-4" />
             {t('gameAccess.projectionScreen')}

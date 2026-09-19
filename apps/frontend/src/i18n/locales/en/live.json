@@ -58,7 +58,7 @@
     "endConfirmDescription": "The session will be permanently ended: the PIN is invalidated and players are disconnected. This action cannot be undone.",
     "archiveLabel": "Archive this session's results",
     "archiveHint": "Leaderboard and statistics will remain available after the session.",
-    "resume": "Resume",
+    "resume": "Back to live",
     "pause": "Pause",
     "timeRemaining": "Time remaining",
     "podium": "🏆 Podium",
@@ -74,10 +74,16 @@
       "ordering": "Order",
       "poll": "Poll"
     },
-    "breadcrumb": "Breadcrumb",
-    "myQuizzes": "My quizzes",
-    "sessionCrumb": "Session {{pin}}",
-    "backToEditorHint": "Back to the editor — the session keeps running"
+    "previousStep": "Previous",
+    "nextStep": "Next",
+    "reviewing": "Looking back — nothing is replayed",
+    "reviewHint": "Show this question again",
+    "tabs": {
+      "control": "Console",
+      "screen": "Projection",
+      "player": "Participant"
+    },
+    "openInWindow": "Open in a window"
   },
   "screen": {
     "sessionUnavailable": "Session unavailable.",
@@ -94,7 +100,8 @@
     "timeRemaining": "Time remaining",
     "joinAt": "Join at",
     "participants_one": "player",
-    "participants_other": "players"
+    "participants_other": "players",
+    "review": "Looking back"
   },
   "player": {
     "joinFailed": "Could not join the session.",
@@ -138,12 +145,20 @@
     "leave": "Leave",
     "leaveConfirmTitle": "Leave the session?",
     "leaveConfirmDescription": "You will lose your seat and your score. To come back you will have to join again with the PIN.",
-    "joinAnother": "Join another game"
+    "joinAnother": "Join another game",
+    "yourClosest": "{{rank}}. closest — ±{{distance}}",
+    "yourCredit": "{{percent}} % of the points",
+    "dragToReorder": "Drag to reorder"
   },
   "reveal": {
     "explanation": "Explanation",
     "goodOrder": "Correct order:",
-    "goodAnswer": "Correct answer:"
+    "goodAnswer": "Correct answer:",
+    "or": " or ",
+    "closestTitle": "Closest answers",
+    "closestDistance": "±{{distance}}",
+    "yourPick": "you",
+    "yourAnswer": "Your answer:"
   },
   "rating": {
     "thanks": "Thanks for your feedback 🙏",
@@ -161,5 +176,25 @@
     "launchFailed": "Failed to start the session.",
     "noResponse": "The server did not respond, please try again."
   },
-  "fallbackHost": "Host"
+  "fallbackHost": "Host",
+  "rules": {
+    "single_choice": "One correct answer — pick it.",
+    "multiple_choice": "Several correct answers — tick them all, then submit. All or nothing.",
+    "true_false": "True or false?",
+    "text_input": "Type your answer — case, accents and extra spaces are ignored.",
+    "numeric": "Enter a number — close enough counts.",
+    "ordering": "Put the options in the right order, then submit. All or nothing.",
+    "poll": "No right answer, no points — just your opinion.",
+    "double": "Double points",
+    "nopoints": "No points",
+    "numeric_closest": "Enter a number — the closest answer wins.",
+    "multiple_choice_partial": "Several correct answers — each right tick counts, each wrong one cancels one.",
+    "ordering_partial": "Put the options in the right order — every right position counts.",
+    "text_input_lenient": "Type your answer — small typos are forgiven.",
+    "fixed": "Fixed points"
+  },
+  "preview": {
+    "note": "Read-only preview of what a participant sees right now.",
+    "personalHidden": "Each participant also sees their own result and ranking here."
+  }
 }

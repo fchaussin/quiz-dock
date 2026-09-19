@@ -51,6 +51,17 @@ type QType =
   | 'ordering'
   | 'poll';
 
+type Scoring = 'standard' | 'closest' | 'partial' | 'lenient';
+/** Scoring variants each type offers besides the standard rule (mirrors the API schema). */
+const SCORING_BY_TYPE: Record<string, Scoring[]> = {
+  single_choice: [],
+  multiple_choice: ['partial'],
+  true_false: [],
+  text_input: ['lenient'],
+  numeric: ['closest'],
+  ordering: ['partial'],
+  poll: [],
+};
 const TYPES: QType[] = [
   'single_choice',
   'multiple_choice',
@@ -99,7 +110,8 @@ interface FormValues {
   background: BackgroundValue;
   timeLimitS: number;
   revealDelayS: number | null;
-  pointsMode: 'standard' | 'double' | 'none';
+  pointsMode: 'standard' | 'double' | 'none' | 'fixed';
+  scoring: Scoring;
   numericValue: number;
   numericTolerance: number;
   options: OptionValue[];
@@ -131,6 +143,7 @@ function initialValues(q?: QuizDetailDtoQuestionsItem): FormValues {
       timeLimitS: 20,
       revealDelayS: null,
       pointsMode: 'standard',
+      scoring: 'standard',
       numericValue: 0,
       numericTolerance: 0,
       options: [newOption(0), newOption(1)],
@@ -151,6 +164,7 @@ function initialValues(q?: QuizDetailDtoQuestionsItem): FormValues {
     timeLimitS: q.timeLimitS,
     revealDelayS: q.revealDelayS ?? null,
     pointsMode: q.pointsMode as FormValues['pointsMode'],
+    scoring: (q.scoring ?? 'standard') as Scoring,
     numericValue: q.numericValue ? Number(q.numericValue) : 0,
     numericTolerance: q.numericTolerance ? Number(q.numericTolerance) : 0,
     options: q.options.map((o, i) => ({
@@ -360,6 +374,27 @@ export function QuestionForm({
                 >
                   <option value="standard">{t('questionForm.pointsMode.standard')}</option>
                   <option value="double">{t('questionForm.pointsMode.double')}</option>
+                  <option value="fixed">{t('questionForm.pointsMode.fixed')}</option>
+                </Select>
+              </Label>
+            )}
+          </form.Field>
+        )}
+        {SCORING_BY_TYPE[type].length > 0 && (
+          <form.Field name="scoring">
+            {(field) => (
+              <Label title={t(`questionForm.scoringHelp.${type}`)}>
+                {t('questionForm.scoringLabel')}
+                <Select
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value as Scoring)}
+                >
+                  <option value="standard">{t(`questionForm.scoring.${type}.standard`)}</option>
+                  {SCORING_BY_TYPE[type].map((v) => (
+                    <option key={v} value={v}>
+                      {t(`questionForm.scoring.${type}.${v}`)}
+                    </option>
+                  ))}
                 </Select>
               </Label>
             )}
@@ -595,6 +630,7 @@ function buildPayload(v: FormValues) {
     timeLimitS: v.timeLimitS,
     revealDelayS: v.revealDelayS,
     pointsMode: v.type === 'poll' ? ('none' as const) : v.pointsMode,
+    scoring: SCORING_BY_TYPE[v.type].includes(v.scoring) ? v.scoring : ('standard' as const),
     ...(v.mediaId ? { mediaId: v.mediaId } : {}),
     answerExplanation: v.answerExplanation.trim() || null,
     backgroundMediaId: v.background.mediaId,

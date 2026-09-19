@@ -58,7 +58,7 @@
     "endConfirmDescription": "La sesión finalizará definitivamente: el PIN se invalida y los jugadores se desconectan. Esta acción es irreversible.",
     "archiveLabel": "Archivar los resultados de esta sesión",
     "archiveHint": "La clasificación y las estadísticas seguirán disponibles tras la sesión.",
-    "resume": "Reanudar",
+    "resume": "Volver al directo",
     "pause": "Pausa",
     "timeRemaining": "Tiempo restante",
     "podium": "🏆 Podio",
@@ -74,10 +74,16 @@
       "ordering": "Orden",
       "poll": "Encuesta"
     },
-    "breadcrumb": "Ruta",
-    "myQuizzes": "Mis cuestionarios",
-    "sessionCrumb": "Sesión {{pin}}",
-    "backToEditorHint": "Volver al editor — la sesión sigue en marcha"
+    "previousStep": "Anterior",
+    "nextStep": "Siguiente",
+    "reviewing": "Mirando atrás — nada se repite",
+    "reviewHint": "Volver a mostrar esta pregunta",
+    "tabs": {
+      "control": "Consola",
+      "screen": "Proyección",
+      "player": "Participante"
+    },
+    "openInWindow": "Abrir en una ventana"
   },
   "screen": {
     "sessionUnavailable": "Sesión no disponible.",
@@ -94,7 +100,8 @@
     "timeRemaining": "Tiempo restante",
     "joinAt": "Únete en",
     "participants_one": "jugador",
-    "participants_other": "jugadores"
+    "participants_other": "jugadores",
+    "review": "Mirando atrás"
   },
   "player": {
     "joinFailed": "No se pudo unir a la sesión.",
@@ -138,12 +145,20 @@
     "leave": "Salir",
     "leaveConfirmTitle": "¿Salir de la sesión?",
     "leaveConfirmDescription": "Perderás tu sitio y tu puntuación. Para volver tendrás que unirte de nuevo con el PIN.",
-    "joinAnother": "Unirse a otra partida"
+    "joinAnother": "Unirse a otra partida",
+    "yourClosest": "{{rank}}.º más cercano — ±{{distance}}",
+    "yourCredit": "{{percent}} % de los puntos",
+    "dragToReorder": "Arrastra para reordenar"
   },
   "reveal": {
     "explanation": "Explicación",
     "goodOrder": "Orden correcto:",
-    "goodAnswer": "Respuesta correcta:"
+    "goodAnswer": "Respuesta correcta:",
+    "or": " o ",
+    "closestTitle": "Respuestas más cercanas",
+    "closestDistance": "±{{distance}}",
+    "yourPick": "tú",
+    "yourAnswer": "Tu respuesta:"
   },
   "rating": {
     "thanks": "Gracias por tu opinión 🙏",
@@ -161,5 +176,25 @@
     "launchFailed": "No se pudo iniciar la sesión.",
     "noResponse": "El servidor no respondió, inténtalo de nuevo."
   },
-  "fallbackHost": "Anfitrión"
+  "fallbackHost": "Anfitrión",
+  "rules": {
+    "single_choice": "Una sola respuesta correcta — elígela.",
+    "multiple_choice": "Varias respuestas correctas — márcalas todas y envía. Todo o nada.",
+    "true_false": "¿Verdadero o falso?",
+    "text_input": "Escribe tu respuesta — mayúsculas, acentos y espacios de más no cuentan.",
+    "numeric": "Introduce un número — se admite un margen.",
+    "ordering": "Pon las opciones en el orden correcto y envía. Todo o nada.",
+    "poll": "Sin respuesta correcta ni puntos — solo tu opinión.",
+    "double": "Puntos dobles",
+    "nopoints": "Sin puntos",
+    "numeric_closest": "Introduce un número — gana la respuesta más cercana.",
+    "multiple_choice_partial": "Varias respuestas correctas — cada acierto cuenta, cada fallo resta uno.",
+    "ordering_partial": "Pon las opciones en orden — cada posición correcta cuenta.",
+    "text_input_lenient": "Escribe tu respuesta — las pequeñas erratas se perdonan.",
+    "fixed": "Puntos fijos"
+  },
+  "preview": {
+    "note": "Vista de solo lectura de lo que ve un participante ahora mismo.",
+    "personalHidden": "Cada participante ve aquí además su resultado y su puesto."
+  }
 }

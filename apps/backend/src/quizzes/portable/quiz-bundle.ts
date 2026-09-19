@@ -121,6 +121,7 @@ function questionOut(q: ExportableQuiz['questions'][number], pathFor: PathFor): 
   if (q.backgroundMediaId) item.backgroundImage = pathFor(q.backgroundMediaId);
   if (q.backgroundGradient)
     item.backgroundGradient = q.backgroundGradient as QuestionBundleItem['backgroundGradient'];
+  if (q.scoring !== 'standard') item.scoring = q.scoring;
   if (q.revealDelayS !== null) item.revealDelayS = q.revealDelayS;
   if (q.numericValue !== null) item.numericValue = Number(q.numericValue);
   if (q.numericTolerance !== null) item.numericTolerance = Number(q.numericTolerance);
@@ -302,6 +303,7 @@ export function fromBundle(bundle: QuizBundle, idFor: IdFor): ImportedQuiz {
           timeLimitS: it.timeLimitS,
           revealDelayS: it.revealDelayS,
           pointsMode: it.pointsMode,
+          scoring: it.scoring,
           numericValue: it.numericValue,
           numericTolerance: it.numericTolerance,
           options: (it.options ?? []).map((o) => ({

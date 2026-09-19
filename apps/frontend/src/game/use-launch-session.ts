@@ -20,7 +20,7 @@ export function useLaunchSession() {
       setIsLaunching(true);
       try {
         const { pin } = await createSession(quizId);
-        await navigate({ to: '/present/$pin/control', params: { pin } });
+        await navigate({ to: '/session/$pin/console', params: { pin } });
       } catch (e) {
         setError(e instanceof Error ? e.message : t('errors.launchFailed'));
       } finally {

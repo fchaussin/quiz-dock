@@ -57,8 +57,22 @@ enum PointsMode {
   standard
   double
   none
+  /// Full base points for a right answer, no speed weighting (thinking questions).
+  fixed
 
   @@map("points_mode")
+}
+
+/// Per-type scoring rule; `standard` is the historical behaviour of every type.
+/// numeric: `closest` ranks answers by distance. multiple_choice / ordering:
+/// `partial` gives credit per right element. text_input: `lenient` tolerates typos.
+enum QuestionScoring {
+  standard
+  closest
+  partial
+  lenient
+
+  @@map("question_scoring")
 }
 
 enum OptionColor {
@@ -171,27 +185,28 @@ model Quiz {
 
 /// §2.3 — question.
 model Question {
-  id                 String        @id @default(ulid()) @db.Char(26)
-  quizId             String        @map("quiz_id") @db.Char(26)
-  orderIndex         Int           @map("order_index")
+  id                 String          @id @default(ulid()) @db.Char(26)
+  quizId             String          @map("quiz_id") @db.Char(26)
+  orderIndex         Int             @map("order_index")
   type               QuestionType
   prompt             String
-  mediaId            String?       @map("media_id") @db.Char(26)
+  mediaId            String?         @map("media_id") @db.Char(26)
   /// Markdown shown at REVEAL only (#5) — never sent before.
-  answerExplanation  String?       @map("answer_explanation")
+  answerExplanation  String?         @map("answer_explanation")
   /// Optional full-cover background, like a slide's: image or generated gradient (exclusive).
-  backgroundMediaId  String?       @map("background_media_id") @db.Char(26)
-  backgroundGradient Json?         @map("background_gradient")
-  textTone           SlideTextTone @default(light) @map("text_tone")
-  textOutline        Boolean       @default(true) @map("text_outline")
-  timeLimitS         Int           @default(20) @map("time_limit_s")
+  backgroundMediaId  String?         @map("background_media_id") @db.Char(26)
+  backgroundGradient Json?           @map("background_gradient")
+  textTone           SlideTextTone   @default(light) @map("text_tone")
+  textOutline        Boolean         @default(true) @map("text_outline")
+  timeLimitS         Int             @default(20) @map("time_limit_s")
   /// Auto-mode delay on this question's REVEAL, seconds (#6); null = engine default.
-  revealDelayS       Int?          @map("reveal_delay_s")
-  pointsMode         PointsMode    @default(standard) @map("points_mode")
-  numericValue       Decimal?      @map("numeric_value")
-  numericTolerance   Decimal?      @map("numeric_tolerance")
-  createdAt          DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  revealDelayS       Int?            @map("reveal_delay_s")
+  pointsMode         PointsMode      @default(standard) @map("points_mode")
+  scoring            QuestionScoring @default(standard)
+  numericValue       Decimal?        @map("numeric_value")
+  numericTolerance   Decimal?        @map("numeric_tolerance")
+  createdAt          DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   quiz            Quiz                 @relation(fields: [quizId], references: [id], onDelete: Cascade)
   media           MediaAsset?          @relation("QuestionMedia", fields: [mediaId], references: [id])

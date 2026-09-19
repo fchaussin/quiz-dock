@@ -27,7 +27,7 @@ describe('DashboardPage', () => {
 
   it('affiche les quiz du animateur', async () => {
     mockApi([{ method: 'GET', path: '/quizzes', body: [quiz({ title: 'Histoire' })] }]);
-    renderApp('/dashboard');
+    renderApp('/quizzes');
     expect(await screen.findByText('Histoire')).toBeInTheDocument();
   });
 
@@ -47,14 +47,14 @@ describe('DashboardPage', () => {
         body: [quiz({ id: 'q1' }), quiz({ id: 'q2', title: 'Géo' })],
       },
     ]);
-    renderApp('/dashboard');
+    renderApp('/quizzes');
     expect(await screen.findByText('2 sessions en cours')).toBeInTheDocument();
     expect(screen.queryByText(/1 session en cours/)).toBeNull();
   });
 
   it('affiche un état vide sans quiz', async () => {
     mockApi([{ method: 'GET', path: '/quizzes', body: [] }]);
-    renderApp('/dashboard');
+    renderApp('/quizzes');
     expect(await screen.findByText(/Aucun quiz/)).toBeInTheDocument();
   });
 
@@ -63,7 +63,7 @@ describe('DashboardPage', () => {
       { method: 'GET', path: '/quizzes', body: [] },
       { method: 'POST', path: '/quizzes', status: 201, body: quiz() },
     ]);
-    renderApp('/dashboard');
+    renderApp('/quizzes');
     fireEvent.click(await screen.findByText('Nouveau quiz'));
     await waitFor(() => {
       const posted = fetchMock.mock.calls.some(
@@ -88,7 +88,7 @@ describe('DashboardPage', () => {
         body: quiz({ id: 'imported', title: 'Importé' }),
       },
     ]);
-    renderApp('/dashboard');
+    renderApp('/quizzes');
     const input = (await screen.findByLabelText('Importer')) as HTMLInputElement;
     const file = new File(['{}'], 'geo.quizdock.zip', { type: 'application/zip' });
     fireEvent.change(input, { target: { files: [file] } });
@@ -113,7 +113,7 @@ describe('DashboardPage', () => {
         body: { code: 'import.media_missing', params: { path: 'media/a.png' } },
       },
     ]);
-    renderApp('/dashboard');
+    renderApp('/quizzes');
     const input = (await screen.findByLabelText('Importer')) as HTMLInputElement;
     fireEvent.change(input, { target: { files: [new File(['x'], 'q.json')] } });
     expect(await screen.findByRole('alert')).toHaveTextContent('media/a.png');
@@ -129,7 +129,7 @@ describe('DashboardPage', () => {
       },
       { method: 'POST', path: '/games/482913/end', status: 204, body: {} },
     ]);
-    renderApp('/dashboard');
+    renderApp('/quizzes');
 
     fireEvent.click(await screen.findByRole('button', { name: 'Arrêter' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Arrêter la session' }));

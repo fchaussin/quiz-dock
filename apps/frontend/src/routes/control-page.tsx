@@ -1,22 +1,26 @@
-import type { GameMode, OutlineQuestion } from '@quiz-dock/contracts';
+import type { GameMode, GameStep, OutlineQuestion } from '@quiz-dock/contracts';
 import { Link, useParams } from '@tanstack/react-router';
 import {
   Ban,
   Check,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
   Eye,
   Gauge,
   Hand,
+  MonitorPlay,
   Pause,
   Play,
   Radio,
   Share2,
   SkipForward,
+  Smartphone,
   Square,
   Users,
 } from 'lucide-react';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
@@ -34,7 +38,9 @@ import {
   SlideView,
 } from '../game/live-components';
 import { useGameRemaining } from '../game/use-countdown';
+import { ParticipantPreview } from '../game/participant-preview';
 import { type GameView, useGameSession } from '../game/use-game-session';
+import { ScreenView } from './screen-page';
 
 /** Boutons d'ajustement du chrono (§8) : retire/ajoute des secondes en direct. */
 const CHRONO_STEPS = [-5, -1, 1, 5] as const;
@@ -42,21 +48,54 @@ const CHRONO_STEPS = [-5, -1, 1, 5] as const;
 /**
  * Console d'animation (hôte, §3). Tableau de bord de **contrôle** privé : récap du
  * quiz, déroulé des questions, rythme (manuel/auto), pause et ajustement du chrono.
- * Volontairement distinct du grand écran à vidéoprojeter (`/present/$pin/screen`) —
+ * Volontairement distinct du grand écran à vidéoprojeter (`/session/$pin/projection`) —
  * le QR d'invitation y reste discret (simple info), pour ne pas confondre les deux.
  */
+/**
+ * A console screen fills the viewport under the header (4rem) and the main
+ * padding (2 × 1.5rem): its action bar (`mt-auto`, sticky) then sits at the
+ * bottom of the screen whatever the height of the slide or question on screen.
+ */
+const CONSOLE_SECTION = 'content-lg flex min-h-[calc(100dvh-7rem)] flex-col py-6';
+
 export function ControlPage() {
   const { t } = useTranslation(['live', 'common']);
   // Same explanation as in the editor before switching full capture on (GDPR, archive size).
   const [confirmCapture, setConfirmCapture] = useState(false);
-  const { pin } = useParams({ from: '/present/$pin/control' });
+  const { pin } = useParams({ from: '/session/$pin/console' });
   const { view, socket } = useGameSession(pin, 'host');
   const [shareNote, setShareNote] = useState<string | null>(null);
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const joinUrl = `${window.location.origin}/join/${pin}`;
-  const screenUrl = `${window.location.origin}/present/${pin}/screen`;
+  const screenUrl = `${window.location.origin}/session/${pin}/projection`;
   const emit = (event: 'host:start' | 'host:reveal' | 'host:next') => socket?.emit(event, { pin });
+  const [tab, setTab] = useState<HostTab>('control');
+  // The Tab key cycles the three views (Shift+Tab backwards) unless the host is typing.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab' || e.ctrlKey || e.metaKey || e.altKey) return;
+      const el = e.target as HTMLElement | null;
+      if (
+        el &&
+        (el.closest('input, textarea, select, [contenteditable="true"]') || el.closest('dialog'))
+      ) {
+        return;
+      }
+      e.preventDefault();
+      setTab((current) => {
+        const i = HOST_TABS.indexOf(current);
+        return HOST_TABS[(i + (e.shiftKey ? -1 : 1) + HOST_TABS.length) % HOST_TABS.length];
+      });
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+  // Looking back over played steps (no replay): the server tells what is reachable.
+  const review = (step: GameStep) => socket?.emit('host:review', { pin, ...step });
+  const navBar = view.nav ? (
+    <StepNav nav={view.nav} onReview={review} onResume={() => emit('host:next')} />
+  ) : null;
   const endGame = (archive: boolean) => socket?.emit('host:end', { pin, archive });
   const setMode = (mode: GameMode) => socket?.emit('host:mode', { pin, mode });
   const setCapture = (fullCapture: boolean) => socket?.emit('host:capture', { pin, fullCapture });
@@ -122,16 +161,33 @@ export function ControlPage() {
     return (
       <section className="flex flex-col items-center gap-4 py-16 text-center">
         <p className="text-muted-foreground">{view.error ?? t('control.sessionUnavailable')}</p>
-        <Link to="/dashboard" className="underline">
+        <Link to="/quizzes" className="underline">
           {t('control.backToQuizzes')}
         </Link>
       </section>
     );
   }
 
+  // One session, three views: the console, the projected screen, a participant's phone.
+  const tabs = <HostTabs tab={tab} onTab={setTab} onOpenScreen={openScreen} />;
+  if (tab !== 'control') {
+    return (
+      <section className={cn(CONSOLE_SECTION, 'gap-5')}>
+        {tabs}
+        {tab === 'screen' ? (
+          <div className="overflow-hidden rounded-xl border">
+            <ScreenView pin={pin} />
+          </div>
+        ) : (
+          <ParticipantPreview view={view} />
+        )}
+      </section>
+    );
+  }
+
   const controlBar = (
     <>
-      <HostBreadcrumb view={view} pin={pin} />
+      {tabs}
       <ControlBar
         view={view}
         pin={pin}
@@ -146,7 +202,7 @@ export function ControlPage() {
   // ── LOBBY ────────────────────────────────────────────────────────────────
   if (view.state === 'LOBBY' || view.state === null) {
     return (
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-6 py-6">
+      <section className={cn(CONSOLE_SECTION, 'gap-6')}>
         <RecapHeader view={view} pin={pin} />
 
         {/* Invitation discrète : simple info, pas le grand écran de projection. */}
@@ -213,11 +269,11 @@ export function ControlPage() {
           </span>
         </label>
 
-        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap items-center justify-between gap-3">
-          <ModeToggle mode={view.mode} onChange={setMode} />
-          <div className="flex items-center gap-2">
-            <EndGameButton label={t('control.stopSession')} onConfirm={endGame} />
-            {screenButton}
+        <ActionBar
+          status={<ModeToggle mode={view.mode} onChange={setMode} />}
+          end={<EndGameButton label={t('control.stopSession')} onConfirm={endGame} />}
+          nav={screenButton}
+          primary={
             <Tooltip label={t('control.startTooltip')}>
               <Button
                 type="button"
@@ -229,8 +285,8 @@ export function ControlPage() {
                 {t('control.start')}
               </Button>
             </Tooltip>
-          </div>
-        </div>
+          }
+        />
         <QRCodeCanvas value={joinUrl} size={512} ref={qrCanvasRef} className="hidden" />
       </section>
     );
@@ -248,7 +304,7 @@ export function ControlPage() {
     return (
       <section className="flex flex-col items-center gap-4 py-16 text-center">
         <p className="text-xl font-semibold">{t('control.sessionEnded')}</p>
-        <Link to="/dashboard" className="underline">
+        <Link to="/quizzes" className="underline">
           {t('control.backToQuizzes')}
         </Link>
       </section>
@@ -258,25 +314,36 @@ export function ControlPage() {
   // ── SLIDE_SHOW (#7) ────────────────────────────────────────────────────────
   if (view.state === 'SLIDE_SHOW' && view.slide) {
     return (
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 py-6">
+      <section className={cn(CONSOLE_SECTION, 'gap-5')}>
         {controlBar}
-        <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
-        <div className="bg-card rounded-xl border p-5 sm:p-6">
+        <QuestionCarousel
+          outline={view.outline}
+          currentIndex={view.questionIndex}
+          onSelect={(i) => review({ questionIndex: i })}
+        />
+        {/* Reduced base: the slide is a preview in a card, not the projection. */}
+        <div className="bg-card flex rounded-xl border p-5 text-[0.8rem] sm:p-6">
           <SlideView slide={view.slide} />
         </div>
-        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            {view.paused && view.slide.displayDelayS ? (
+        <ActionBar
+          status={
+            view.paused && view.slide.displayDelayS ? (
               <span className="text-muted-foreground text-sm">{t('control.autoPaused')}</span>
             ) : view.autoNextAt ? (
               <AutoAdvanceCountdown deadline={view.autoNextAt} totalMs={view.autoNextMs ?? 0} />
-            ) : null}
-          </div>
-          <Button type="button" onClick={() => emit('host:next')}>
-            <SkipForward className="size-4" />
-            {t('control.continue')}
-          </Button>
-        </div>
+            ) : null
+          }
+          end={<EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />}
+          nav={navBar}
+          primary={
+            view.nav?.review ? null : (
+              <Button type="button" onClick={() => emit('host:next')}>
+                <SkipForward className="size-4" />
+                {t('control.continue')}
+              </Button>
+            )
+          }
+        />
       </section>
     );
   }
@@ -284,9 +351,13 @@ export function ControlPage() {
   // ── REVEAL / LEADERBOARD ───────────────────────────────────────────────────
   if (view.state === 'REVEAL' || view.state === 'LEADERBOARD') {
     return (
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 py-6">
+      <section className={cn(CONSOLE_SECTION, 'gap-5')}>
         {controlBar}
-        <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
+        <QuestionCarousel
+          outline={view.outline}
+          currentIndex={view.questionIndex}
+          onSelect={(i) => review({ questionIndex: i })}
+        />
         {view.question && view.reveal ? (
           <RevealAnswer question={view.question} reveal={view.reveal} />
         ) : null}
@@ -297,19 +368,25 @@ export function ControlPage() {
             <LeaderboardList rows={view.leaderboard.top} />
           </div>
         ) : null}
-        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            {view.mode === 'auto' && view.paused ? (
+        <ActionBar
+          status={
+            view.mode === 'auto' && view.paused ? (
               <span className="text-muted-foreground text-sm">{t('control.autoPaused')}</span>
             ) : view.mode === 'auto' && view.autoNextAt ? (
               <AutoAdvanceCountdown deadline={view.autoNextAt} totalMs={view.autoNextMs ?? 0} />
-            ) : null}
-          </div>
-          <Button type="button" onClick={() => emit('host:next')}>
-            <SkipForward className="size-4" />
-            {t('control.nextQuestion')}
-          </Button>
-        </div>
+            ) : null
+          }
+          end={<EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />}
+          nav={navBar}
+          primary={
+            view.nav?.review ? null : (
+              <Button type="button" onClick={() => emit('host:next')}>
+                <SkipForward className="size-4" />
+                {t('control.nextQuestion')}
+              </Button>
+            )
+          }
+        />
       </section>
     );
   }
@@ -317,12 +394,15 @@ export function ControlPage() {
   // ── PODIUM ──────────────────────────────────────────────────────────────────
   if (view.state === 'PODIUM') {
     return (
-      <section className="mx-auto flex w-full max-w-4xl flex-col items-center gap-6 py-8">
+      <section className={cn(CONSOLE_SECTION, 'items-center gap-6')}>
         <h2 className="text-2xl font-bold">{t('control.podium')}</h2>
         {view.podium ? <Podium rows={view.podium.podium} /> : null}
-        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex w-full justify-center">
-          <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
-        </div>
+        <ActionBar
+          nav={navBar}
+          primary={
+            <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
+          }
+        />
       </section>
     );
   }
@@ -344,7 +424,7 @@ export function ControlPage() {
   const correctIds = view.outline.find((q) => q.index === view.questionIndex)?.correctOptionIds;
 
   return (
-    <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 py-6">
+    <section className={cn(CONSOLE_SECTION, 'gap-5')}>
       {controlBar}
 
       {/* Question en cours — panneau principal agrandi (énoncé + réponses + chrono). */}
@@ -393,14 +473,45 @@ export function ControlPage() {
       {/* Déroulé du quiz (vue d'ensemble). */}
       <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
 
-      <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap gap-2">
-        <Button type="button" onClick={() => emit('host:reveal')}>
-          <Eye className="size-4" />
-          {t('control.revealNow')}
-        </Button>
-        <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
-      </div>
+      <ActionBar
+        end={<EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />}
+        primary={
+          <Button type="button" onClick={() => emit('host:reveal')}>
+            <Eye className="size-4" />
+            {t('control.revealNow')}
+          </Button>
+        }
+      />
     </section>
+  );
+}
+
+/**
+ * The console's action bar, the same on every screen so the hands never search:
+ * status on the left (mode, auto countdown), then — right-aligned, in this
+ * order — the way out (end the session), the secondary navigation (look back,
+ * projection), and the primary action at the far right.
+ */
+function ActionBar({
+  status,
+  end,
+  nav,
+  primary,
+}: {
+  status?: React.ReactNode;
+  end?: React.ReactNode;
+  nav?: React.ReactNode;
+  primary?: React.ReactNode;
+}) {
+  return (
+    <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-3">{status}</div>
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {end}
+        {nav}
+        {primary}
+      </div>
+    </div>
   );
 }
 
@@ -789,9 +900,12 @@ function ChronoControls({
 function QuestionCarousel({
   outline,
   currentIndex,
+  onSelect,
 }: {
   outline: OutlineQuestion[];
   currentIndex: number;
+  /** A played question is clickable: shows its reveal again (host navigation). */
+  onSelect?: (index: number) => void;
 }) {
   const { t } = useTranslation('live');
   if (outline.length === 0) return null;
@@ -802,14 +916,27 @@ function QuestionCarousel({
         {outline.map((q) => {
           const done = q.index < currentIndex;
           const current = q.index === currentIndex;
+          const clickable = Boolean(onSelect) && done;
           return (
             <li
               key={q.index}
               aria-current={current ? 'step' : undefined}
+              role={clickable ? 'button' : undefined}
+              tabIndex={clickable ? 0 : undefined}
+              title={clickable ? t('control.reviewHint') : undefined}
+              onClick={clickable ? () => onSelect?.(q.index) : undefined}
+              onKeyDown={
+                clickable
+                  ? (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') onSelect?.(q.index);
+                    }
+                  : undefined
+              }
               className={cn(
                 'flex w-44 shrink-0 snap-start flex-col gap-1 rounded-lg border p-3 text-sm transition-colors',
                 current && 'border-primary bg-primary/5 ring-primary ring-1',
                 done && 'opacity-60',
+                clickable && 'hover:border-primary hover:opacity-100 cursor-pointer',
               )}
             >
               <div className="flex items-center justify-between">
@@ -837,37 +964,95 @@ function QuestionCarousel({
   );
 }
 
-/**
- * Where the host is: My quizzes › quiz › this session. The editor link is safe —
- * the session keeps running on the server while the host is elsewhere.
- */
-function HostBreadcrumb({ view, pin }: { view: GameView; pin: string }) {
+type HostTab = 'control' | 'screen' | 'player';
+const HOST_TABS: HostTab[] = ['control', 'screen', 'player'];
+
+/** The three views of a running session; the projection can also open in its own window. */
+function HostTabs({
+  tab,
+  onTab,
+  onOpenScreen,
+}: {
+  tab: HostTab;
+  onTab: (t: HostTab) => void;
+  onOpenScreen: () => void;
+}) {
   const { t } = useTranslation('live');
+  const tabs: { id: HostTab; label: string; icon: React.ReactNode }[] = [
+    { id: 'control', label: t('control.tabs.control'), icon: <MonitorPlay className="size-4" /> },
+    { id: 'screen', label: t('control.tabs.screen'), icon: <Eye className="size-4" /> },
+    { id: 'player', label: t('control.tabs.player'), icon: <Smartphone className="size-4" /> },
+  ];
   return (
-    <nav
-      aria-label={t('control.breadcrumb')}
-      className="text-muted-foreground flex flex-wrap items-center gap-1 text-sm"
-    >
-      <Link to="/dashboard" className="hover:text-foreground hover:underline">
-        {t('control.myQuizzes')}
-      </Link>
-      <ChevronRight className="size-3.5" />
-      {view.quizId ? (
-        <Link
-          to="/quizzes/$quizId"
-          params={{ quizId: view.quizId }}
-          className="hover:text-foreground max-w-[16rem] truncate hover:underline"
-          title={t('control.backToEditorHint')}
-        >
-          {view.quizTitle ?? t('control.sessionInProgress')}
-        </Link>
-      ) : (
-        <span className="max-w-[16rem] truncate">
-          {view.quizTitle ?? t('control.sessionInProgress')}
-        </span>
-      )}
-      <ChevronRight className="size-3.5" />
-      <span className="text-foreground font-medium">{t('control.sessionCrumb', { pin })}</span>
-    </nav>
+    <div className="flex flex-wrap items-center gap-2 border-b">
+      <div role="tablist" className="flex gap-1">
+        {tabs.map((x) => (
+          <button
+            key={x.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === x.id}
+            onClick={() => onTab(x.id)}
+            className={cn(
+              '-mb-px flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+              tab === x.id
+                ? 'border-primary text-foreground'
+                : 'text-muted-foreground hover:text-foreground border-transparent',
+            )}
+          >
+            {x.icon}
+            {x.label}
+          </button>
+        ))}
+      </div>
+      {tab === 'screen' ? (
+        <Button type="button" variant="ghost" size="sm" className="ml-auto" onClick={onOpenScreen}>
+          <ExternalLink className="size-4" />
+          {t('control.openInWindow')}
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * Host navigation over what was already played: previous / next step while
+ * looking back, and the way back to the live position. Never replays anything.
+ */
+function StepNav({
+  nav,
+  onReview,
+  onResume,
+}: {
+  nav: NonNullable<GameView['nav']>;
+  onReview: (step: GameStep) => void;
+  onResume: () => void;
+}) {
+  const { t } = useTranslation('live');
+  if (!nav.prev && !nav.next && !nav.review) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {nav.prev ? (
+        <Button type="button" variant="outline" size="sm" onClick={() => onReview(nav.prev!)}>
+          <ChevronLeft className="size-4" />
+          {t('control.previousStep')}
+        </Button>
+      ) : null}
+      {nav.next ? (
+        <Button type="button" variant="outline" size="sm" onClick={() => onReview(nav.next!)}>
+          {t('control.nextStep')}
+          <ChevronRight className="size-4" />
+        </Button>
+      ) : null}
+      {nav.review ? (
+        <>
+          <span className="text-muted-foreground text-sm">{t('control.reviewing')}</span>
+          <Button type="button" size="sm" onClick={onResume}>
+            <SkipForward className="size-4" />
+            {t('control.resume')}
+          </Button>
+        </>
+      ) : null}
+    </div>
   );
 }

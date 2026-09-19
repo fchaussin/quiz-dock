@@ -3,14 +3,16 @@ import type {
   GameModePayload,
   GameOutlinePayload,
   GameState,
+  GameStatePayload,
+  GameStep,
   LeaderboardPayload,
   OutlineQuestion,
   PersonalResult,
   PodiumPayload,
   QuestionRevealPayload,
   QuestionStartPayload,
-  SlideShowPayload,
   QuestionTimePayload,
+  SlideShowPayload,
 } from '@quiz-dock/contracts';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -76,6 +78,8 @@ export interface GameView {
   quizDescription: string | null;
   /** Sommaire des questions (console hôte uniquement). */
   outline: OutlineQuestion[];
+  /** Host navigation over played steps (`game:state.nav`); `review` = a past step is on screen. */
+  nav: { prev: GameStep | null; next: GameStep | null; review: boolean } | null;
 }
 
 const INITIAL: GameView = {
@@ -105,6 +109,7 @@ const INITIAL: GameView = {
   quizId: null,
   quizDescription: null,
   outline: [],
+  nav: null,
 };
 
 /**
@@ -125,15 +130,17 @@ export function useGameSession(pin: string, role: LiveRole) {
   useEffect(() => {
     let active = true;
     let s: GameSocket | null = null;
+    let reconnectHandler: (() => void) | null = null;
 
     const patch = (p: Partial<GameView>) => setView((prev) => ({ ...prev, ...p }));
 
-    const onState = (p: { state: GameState; questionIndex: number; totalQuestions: number }) =>
+    const onState = (p: GameStatePayload) =>
       patch({
         status: 'ready',
         state: p.state,
         questionIndex: p.questionIndex,
         totalQuestions: p.totalQuestions,
+        nav: p.nav ?? null,
         // Nouvelle question : on purge le résultat/accusé précédent.
         ...(p.state === 'ANSWERING' ? { reveal: null, result: null, answerAccepted: null } : {}),
       });
@@ -225,37 +232,47 @@ export function useGameSession(pin: string, role: LiveRole) {
       sock.on('kicked', onKicked);
 
       // Kick — listeners déjà en place : la rafale `sendStateTo` ne peut être ratée.
-      if (role === 'host') {
-        sock.emit('host:attach', { pin }, (res: { ok: boolean }) => {
-          if (active && !res.ok) patch({ status: 'error', error: t('errors.sessionNotFound') });
-        });
-      } else if (role === 'spectator') {
-        sock.emit('spectator:join', { pin }, (res: { ok: boolean }) => {
-          if (active && !res.ok) patch({ status: 'error', error: t('errors.sessionNotFound') });
-        });
-      } else {
-        const session = loadPlayerSession();
-        if (session && session.pin === pin) {
-          sock.emit(
-            'player:reconnect',
-            { sessionToken: session.sessionToken },
-            (res: { ok: boolean }) => {
-              if (!active) return;
-              if (!res.ok) {
-                clearPlayerSession();
-                patch({ status: 'no-session' });
-              }
-            },
-          );
+      // Rejoué à chaque (re)connexion : après un redémarrage du serveur, le socket
+      // revient seul mais n'est plus dans la room — sans ré-attache, l'écran se fige.
+      const kick = () => {
+        if (!active) return;
+        if (role === 'host') {
+          sock.emit('host:attach', { pin }, (res: { ok: boolean }) => {
+            if (active && !res.ok) patch({ status: 'error', error: t('errors.sessionNotFound') });
+          });
+        } else if (role === 'spectator') {
+          sock.emit('spectator:join', { pin }, (res: { ok: boolean }) => {
+            if (active && !res.ok) patch({ status: 'error', error: t('errors.sessionNotFound') });
+          });
         } else {
-          patch({ status: 'no-session' });
+          const session = loadPlayerSession();
+          if (session && session.pin === pin) {
+            sock.emit(
+              'player:reconnect',
+              { sessionToken: session.sessionToken },
+              (res: { ok: boolean }) => {
+                if (!active) return;
+                if (!res.ok) {
+                  clearPlayerSession();
+                  patch({ status: 'no-session' });
+                }
+              },
+            );
+          } else {
+            patch({ status: 'no-session' });
+          }
         }
-      }
+      };
+      kick();
+      // `io` is the socket.io manager (absent on the lighter fakes some tests use).
+      sock.io?.on('reconnect', kick);
+      reconnectHandler = kick;
     });
 
     return () => {
       active = false;
       if (!s) return;
+      if (reconnectHandler) s.io?.off('reconnect', reconnectHandler);
       s.off('game:state', onState);
       s.off('game:roster', onRoster);
       s.off('player:joined', onJoined);

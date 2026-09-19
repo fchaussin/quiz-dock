@@ -1,23 +1,23 @@
 import { Link, Outlet, useMatches, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
+import { SeatCountdown, SeatMenuRow } from '@/components/seat-status';
+import { UserMenu } from '@/components/user-menu';
 import { useAuth } from '../auth/auth-context';
 import { APP_NAME, appConfig } from '../config';
 
 /** Route id → `titles.*` key in `common`; the document title reads "<page> · <app>". */
 const TITLE_KEYS: Record<string, string> = {
   '/login': 'login',
-  '/dashboard': 'dashboard',
+  '/quizzes': 'dashboard',
   '/quizzes/$quizId': 'editor',
   '/quizzes/$quizId/preview': 'preview',
-  '/quizzes/$quizId/feedback': 'feedback',
-  '/quizzes/$quizId/sessions': 'sessions',
-  '/quizzes/$quizId/sessions/$sessionId': 'session',
-  '/quizzes/$quizId/sessions/$sessionId/players/$playerResultId': 'player',
-  '/present/$pin/control': 'control',
-  '/present/$pin/screen': 'screen',
+  '/quizzes/$quizId/reviews': 'feedback',
+  '/quizzes/$quizId/history': 'sessions',
+  '/quizzes/$quizId/history/$sessionId': 'session',
+  '/quizzes/$quizId/history/$sessionId/players/$playerResultId': 'player',
+  '/session/$pin/console': 'control',
+  '/session/$pin/projection': 'screen',
   '/join': 'join',
   '/join/$pin': 'join',
 };
@@ -32,12 +32,12 @@ export function RootLayout() {
       .find(Boolean);
     document.title = key ? `${t(`common:titles.${key}`)} · ${APP_NAME}` : APP_NAME;
   }, [matches, t]);
-  const { user, logout } = useAuth();
+  const { user, mode, logout } = useAuth();
   const navigate = useNavigate();
   // Three shells: the projected screen has no chrome at all; participants (guests on a
   // phone) get the brand only; hosts and editors get the full app navigation.
   const routeId = matches[matches.length - 1]?.routeId ?? '';
-  const shell = routeId.startsWith('/present/$pin/screen')
+  const shell = routeId.startsWith('/session/$pin/projection')
     ? 'bare'
     : routeId.startsWith('/join')
       ? 'participant'
@@ -66,22 +66,24 @@ export function RootLayout() {
           </Link>
         )}
         <nav className="flex items-center gap-3 text-sm">
-          {shell === 'participant' ? null : user ? (
+          {shell === 'participant' ? (
+            // Filled by the player page (avatar, nickname, Leave) through a portal.
+            <div id="participant-topbar" className="flex items-center gap-2" />
+          ) : user ? (
             <>
-              <Link to="/dashboard" className="whitespace-nowrap hover:underline">
+              <Link to="/quizzes" className="whitespace-nowrap hover:underline">
                 {t('nav.myQuizzes')}
               </Link>
-              <span className="text-muted-foreground hidden sm:inline">{user}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
+              {/* A seat countdown stays in plain sight; renewal and log out live in the user menu. */}
+              {mode === 'none' ? <SeatCountdown user={user} /> : null}
+              <UserMenu
+                user={user}
+                onLogout={() => {
                   void Promise.resolve(logout()).then(() => navigate({ to: '/login' }));
                 }}
               >
-                <LogOut className="size-4" />
-                {t('nav.logout')}
-              </Button>
+                {mode === 'none' ? <SeatMenuRow user={user} /> : null}
+              </UserMenu>
             </>
           ) : (
             <Link to="/login" className="hover:underline">
@@ -94,8 +96,8 @@ export function RootLayout() {
       <main
         className={
           shell === 'participant'
-            ? 'mx-auto w-full max-w-lg flex-1 px-4 py-4'
-            : 'mx-auto w-full max-w-[90rem] flex-1 px-6 py-6 lg:px-10'
+            ? 'content-phone flex-1 px-4 py-4'
+            : 'content-shell flex-1 px-6 py-6 lg:px-10'
         }
       >
         <Outlet />

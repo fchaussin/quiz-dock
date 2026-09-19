@@ -34,6 +34,9 @@
 | Personne qui anime | formateur / animateur / hôte | **animateur** | identifiants code `host:*` conservés |
 | Code d'accès | PIN | **PIN** | conservé |
 
+> Le glossaire complet (tous les termes de l'interface, 5 langues, arbitrages) est tenu dans
+> [`apps/frontend/src/i18n/GLOSSARY.md`](../../apps/frontend/src/i18n/GLOSSARY.md).
+>
 > Le glossaire s'applique au **texte utilisateur** (valeurs du dictionnaire) et aux **codes** de
 > tokens d'erreur. Les identifiants code (`GameState`, `host:create`, modèle Prisma) **restent** —
 > notamment le terme protocole `host` ≠ terme utilisateur « animateur » (écart volontaire et assumé).

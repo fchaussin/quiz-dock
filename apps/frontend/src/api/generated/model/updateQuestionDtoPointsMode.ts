@@ -13,4 +13,5 @@ export const UpdateQuestionDtoPointsMode = {
   standard: 'standard',
   double: 'double',
   none: 'none',
+  fixed: 'fixed',
 } as const;

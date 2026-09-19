@@ -11,9 +11,7 @@ import { hostSeatControllerState, useHostSeatControllerState } from '../api/gene
 import { ApiError } from '../api/http';
 import { useAuth } from '../auth/auth-context';
 
-/** Auto-expiry choices offered when taking the host seat (minutes; 0 = never). */
-const EXPIRY_OPTIONS = [60, 240, 1440, 0] as const;
-const DEFAULT_EXPIRY = 240;
+import { SEAT_DEFAULT_EXPIRY, SEAT_EXPIRY_OPTIONS } from '../auth/seat-options';
 
 /** Connexion animateur : mode local (nom) ou redirection OIDC selon `AUTH_MODE`. */
 export function LoginPage() {
@@ -24,7 +22,7 @@ export function LoginPage() {
   const [seatTaken, setSeatTaken] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [claiming, setClaiming] = useState(false);
-  const [expiry, setExpiry] = useState<number>(DEFAULT_EXPIRY);
+  const [expiry, setExpiry] = useState<number>(SEAT_DEFAULT_EXPIRY);
   // Mode local : qui tient le siège d'hôte (et jusqu'à quand). Affiché avant même
   // de saisir un nom, pour expliquer le verrou.
   const seatQuery = useHostSeatControllerState({ query: { enabled: mode === 'none' } });
@@ -47,7 +45,7 @@ export function LoginPage() {
     const role = await loginLocal(name);
     if (role === 'host' || role === 'admin' || role === null) {
       // Titulaire du siège (ou backend injoignable : on laisse l'API trancher).
-      void navigate({ to: '/dashboard' });
+      void navigate({ to: '/quizzes' });
       return;
     }
     // Pas titulaire : le siège est libre (→ prise intentionnelle, après
@@ -65,7 +63,7 @@ export function LoginPage() {
     try {
       await claimHostSeat(expiry === 0 ? null : expiry);
       setConfirming(false);
-      void navigate({ to: '/dashboard' });
+      void navigate({ to: '/quizzes' });
     } catch (err) {
       setConfirming(false);
       if (err instanceof ApiError && err.status === 409) refuse();
@@ -81,7 +79,7 @@ export function LoginPage() {
   };
 
   return (
-    <Card className="mx-auto w-full max-w-sm">
+    <Card className="content-sm">
       <CardHeader>
         <CardTitle>{t('login.title')}</CardTitle>
       </CardHeader>
@@ -150,7 +148,7 @@ export function LoginPage() {
             value={expiry}
             onChange={(e) => setExpiry(Number(e.target.value))}
           >
-            {EXPIRY_OPTIONS.map((minutes) => (
+            {SEAT_EXPIRY_OPTIONS.map((minutes) => (
               <option key={minutes} value={minutes}>
                 {minutes === 0
                   ? t('claim.expiryNever')

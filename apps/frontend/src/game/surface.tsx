@@ -16,7 +16,8 @@ export function gradientCss(g: SlideGradient): string {
 export function Surface({
   background,
   textTone,
-  textOutline,
+  // The subtitle-like halo is the design default: only an explicit `false` removes it.
+  textOutline = true,
   className,
   children,
 }: {

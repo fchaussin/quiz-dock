@@ -17,4 +17,9 @@ export interface HostSeatDto {
      * @nullable
      */
   expiresAt: string | null;
+  /**
+     * When the holder took or renewed the seat (lets a client renew for the same duration); null when free.
+     * @nullable
+     */
+  claimedAt: string | null;
 }
