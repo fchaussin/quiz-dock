@@ -239,7 +239,8 @@
     "uploading": "上傳中…",
     "add": "新增媒體（圖片/音訊）",
     "fileInputLabel": "媒體檔案",
-    "uploadError": "上傳失敗。"
+    "uploadError": "上傳失敗。",
+    "demoDisabled": "示範實例已停用媒體上傳。"
   },
   "background": {
     "legend": "背景",

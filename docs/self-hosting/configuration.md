@@ -27,6 +27,7 @@ needed. Where you set them depends on how you run it:
 | `APP_NAME` | `QuizDock` | app | Brand name shown in the header, tab title and share text. |
 | `APP_LANG` | `en` | app | UI language for the instance: `en` · `fr` · `es` · `zh` · `zh-TW`. One per deployment (no browser detection). |
 | `AUTH_MODE` | `none` | app | `none` = local mode (no IdP, single host seat); `oidc` = validate JWTs from any OpenID Connect provider. See §3. |
+| `DEMO_MODE` | `false` | app | `true` = public demo guards: the host seat lasts 5 min (renewable), media uploads are refused, and everything is wiped every hour. See §4. |
 | `PORT` | `3000` | app | In-container HTTP port. Map it to a host port (`-p 18080:3000`). |
 | `DATABASE_URL` | — | app, migrate | PostgreSQL connection string, e.g. `postgresql://user:pass@host:5432/quizdock`. **Required** (provided by compose; baked into `:standalone`). |
 | `REDIS_URL` | — | app | Redis connection string, e.g. `redis://host:6379`. Live-game state only. |
@@ -126,7 +127,8 @@ hosts identify with a name, and there is a single **host seat**:
   (checked lazily, no scheduler). The first claim also loads the two sample quizzes.
 - A name is the only key: entering the holder's name again (on any device) resumes
   the seat — handy across devices, and the reason this is *not* a security boundary.
-  Use it for demos and trusted networks; use OIDC otherwise.
+  Use it on trusted networks; use OIDC otherwise. (A public instance is a different
+  matter: see §4, `DEMO_MODE`.)
 
 `GET /auth/host-seat` (public) reports the holder and expiry; `POST /auth/host-seat/claim`
 and `POST /auth/host-seat/release` are what the SPA calls.
@@ -219,3 +221,23 @@ The dev compose file then defaults `OIDC_ISSUER` to `http://localhost:18080/real
 | `403 auth.host_required` | The user is authenticated but has no `host` role in the claim `OIDC_ROLES_CLAIM` points at. |
 | `unexpected "aud" claim value` | Token `aud` ≠ `OIDC_AUDIENCE`. Fix it or leave `OIDC_AUDIENCE` empty. |
 | Redirect loop / `invalid redirect_uri` | Add `<origin>/auth/callback` to the IdP client's allowed redirect URIs. |
+
+---
+
+## 4. Public demo instance
+
+Not to be confused with local mode: `AUTH_MODE` says *who may host* (a name, or an
+OIDC account); `DEMO_MODE` says *the instance is open to strangers* and adds guards on
+top, whatever the auth mode. `DEMO_MODE=true` is meant for `:standalone` with no volume,
+where anyone can take the host seat, write quizzes and run sessions. The guards:
+
+- **Host seat: 5 minutes at a time** (local mode only — OIDC has no seat). The expiry
+  choice disappears from the sign-in dialog; the seat can be renewed for another
+  5 minutes from the user menu while held. The server ignores any other duration.
+- **No media uploads** (`403 media.demo_disabled`, also for imported bundles that carry
+  media). The upload buttons are hidden.
+- **Hourly reset** to a blank install: users, quizzes, media, session archives, the seat
+  and the live state. A reset waits while a session is being played, at most 3 hours.
+
+The SPA shows a banner saying so. The sample quizzes come back with the next seat claim,
+as on any fresh install.

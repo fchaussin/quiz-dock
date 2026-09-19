@@ -42,7 +42,8 @@
     "unsupported_type": "不支持的媒体类型（图片/音频）。",
     "file_missing": "缺少文件（“file”字段）。",
     "file_too_large": "文件过大（最大 {{max}} 字节）。",
-    "not_found": "未找到媒体。"
+    "not_found": "未找到媒体。",
+    "demo_disabled": "演示实例已禁用媒体上传。"
   },
   "import": {
     "file_missing": "缺少文件（“file”字段）。",

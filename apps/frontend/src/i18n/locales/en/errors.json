@@ -42,7 +42,8 @@
     "unsupported_type": "Unsupported media type (image/audio).",
     "file_missing": "Missing file (“file” field).",
     "file_too_large": "File too large (max {{max}} bytes).",
-    "not_found": "Media not found."
+    "not_found": "Media not found.",
+    "demo_disabled": "Media uploads are disabled on the demo instance."
   },
   "import": {
     "file_missing": "Missing file (“file” field).",

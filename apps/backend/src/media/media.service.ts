@@ -1,8 +1,9 @@
 import { createReadStream, type ReadStream } from 'node:fs';
-import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, unlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -10,6 +11,7 @@ import {
   PayloadTooLargeException,
 } from '@nestjs/common';
 import { type MediaAsset, MediaKind } from '@prisma/client';
+import { isDemoMode } from '../demo/demo.config';
 import { PrismaService } from '../prisma/prisma.service';
 
 interface UploadFile {
@@ -46,6 +48,9 @@ export class MediaService implements OnModuleInit {
     ownerId: string,
     file: UploadFile | undefined,
   ): Promise<{ mediaId: string; url: string }> {
+    if (isDemoMode()) {
+      throw new ForbiddenException('media.demo_disabled');
+    }
     if (!file) {
       throw new BadRequestException('media.file_missing');
     }
@@ -112,6 +117,12 @@ export class MediaService implements OnModuleInit {
     }
     await this.prisma.mediaAsset.delete({ where: { id } });
     await unlink(join(this.dir, id)).catch(() => undefined);
+  }
+
+  /** Empties the media directory (demo reset — the rows go with the users). */
+  async removeAllFiles(): Promise<void> {
+    const names = await readdir(this.dir);
+    await Promise.all(names.map((n) => unlink(join(this.dir, n)).catch(() => undefined)));
   }
 
   /** Exposé pour les tests / vérifications. */

@@ -35,6 +35,7 @@ function makeService(seat: Seat | null, knownUsers: User[] = [alice, bob]) {
     $transaction: jest.fn((fn: (t: typeof tx) => unknown) => fn(tx)),
     hostSeat: {
       findUnique: jest.fn().mockResolvedValue(seat),
+      updateMany: jest.fn().mockResolvedValue({ count: seat ? 1 : 0 }),
       deleteMany: jest.fn(async ({ where }: { where: { userId: string } }) => ({
         count: seat?.userId === where.userId ? 1 : 0,
       })),
@@ -81,6 +82,16 @@ describe('HostSeatService.provision', () => {
   });
 });
 
+describe('HostSeatService.capExpiry', () => {
+  it('cuts a seat without expiry (or a longer one) to N minutes from now', async () => {
+    const { service, prisma } = makeService({ id: 1, userId: alice.id, expiresAt: null });
+    expect(await service.capExpiry(5)).toBe(true);
+    const call = (prisma.hostSeat.updateMany as jest.Mock).mock.calls[0][0];
+    expect(call.where.OR).toEqual([{ expiresAt: null }, { expiresAt: { gt: expect.any(Date) } }]);
+    expect(call.data.expiresAt.getTime()).toBeLessThanOrEqual(Date.now() + 5 * 60_000);
+  });
+});
+
 describe('HostSeatService.claim', () => {
   it('takes a free seat under the advisory lock, with expiry, and loads the samples', async () => {
     const { service, tx, samples } = makeService(null);
@@ -101,6 +112,21 @@ describe('HostSeatService.claim', () => {
   it('claims without expiry when expiresInMinutes is null', async () => {
     const { service } = makeService(null);
     expect((await service.claim(alice, null)).expiresAt).toBeNull();
+  });
+
+  it('on a demo instance the seat lasts DEMO_SEAT_MINUTES whatever was asked', async () => {
+    const env = process.env;
+    process.env = { ...env, DEMO_MODE: 'true' };
+    try {
+      const { service } = makeService(null);
+      const before = Date.now();
+      const state = await service.claim(alice, null);
+      const left = state.expiresAt!.getTime() - before;
+      expect(left).toBeGreaterThan(4 * 60_000);
+      expect(left).toBeLessThanOrEqual(5 * 60_000 + 1_000);
+    } finally {
+      process.env = env;
+    }
   });
 
   it('refuses (409 host_seat.taken) while another user holds a live seat', async () => {

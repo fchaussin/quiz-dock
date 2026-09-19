@@ -8,6 +8,7 @@
 
 export * from './activeGameDto';
 export * from './authConfigDto';
+export * from './authConfigDtoDemo';
 export * from './authConfigDtoMode';
 export * from './authConfigDtoOidc';
 export * from './claimHostSeatDto';

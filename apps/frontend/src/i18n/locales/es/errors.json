@@ -42,7 +42,8 @@
     "unsupported_type": "Tipo de medio no compatible (imagen/audio).",
     "file_missing": "Falta el archivo (campo «file»).",
     "file_too_large": "Archivo demasiado grande (máx. {{max}} bytes).",
-    "not_found": "Medio no encontrado."
+    "not_found": "Medio no encontrado.",
+    "demo_disabled": "La subida de medios está desactivada en la instancia de demo."
   },
   "import": {
     "file_missing": "Falta el archivo (campo “file”).",

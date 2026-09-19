@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { type HostSeat, type User, UserRole } from '@prisma/client';
 import { type AuthPrincipal, LOCAL_SUB_PREFIX } from '../auth/auth-provider';
+import { DEMO_SEAT_MINUTES, isDemoMode } from '../demo/demo.config';
 import { PrismaService } from '../prisma/prisma.service';
 import { SampleQuizzesService } from '../quizzes/samples/sample-quizzes.service';
 
@@ -23,7 +24,8 @@ export interface HostSeatState {
  * freed on release (log out) or lazily once `expiresAt` is past — no scheduler.
  *
  * Not a security boundary: a local identity is a self-declared name, so whoever
- * types the holder's name shares their seat. Meant for demos and trusted networks.
+ * types the holder's name shares their seat. Meant for trusted networks; a public
+ * instance adds the `DEMO_MODE` guards on top (short seat, no uploads, reset).
  */
 @Injectable()
 export class HostSeatService {
@@ -89,9 +91,12 @@ export class HostSeatService {
   /**
    * Takes the seat for `user` (or renews its expiry when already held by them).
    * Serialised by a transaction-scoped advisory lock; refused (409) while another
-   * user holds a live seat. First-time claimers get the sample quizzes.
+   * user holds a live seat. First-time claimers get the sample quizzes. On a demo
+   * instance the requested expiry is ignored: the seat always lasts
+   * `DEMO_SEAT_MINUTES` from now, renewal included.
    */
-  async claim(user: User, expiresInMinutes: number | null): Promise<HostSeatState> {
+  async claim(user: User, requestedMinutes: number | null): Promise<HostSeatState> {
+    const expiresInMinutes = isDemoMode() ? DEMO_SEAT_MINUTES : requestedMinutes;
     const claimedAt = new Date();
     const expiresAt = expiresInMinutes
       ? new Date(claimedAt.getTime() + expiresInMinutes * 60_000)
@@ -118,6 +123,21 @@ export class HostSeatService {
     );
     await this.samples.createIfEmpty(user.id);
     return { holder: user.displayName, expiresAt, claimedAt };
+  }
+
+  /**
+   * Shortens a live seat to at most `minutes` from now (demo instance starting
+   * over a seat taken before the guard existed). Returns whether a seat was cut.
+   */
+  async capExpiry(minutes: number): Promise<boolean> {
+    const now = new Date();
+    const cap = new Date(now.getTime() + minutes * 60_000);
+    const res = await this.prisma.hostSeat.updateMany({
+      where: { id: SEAT_ID, OR: [{ expiresAt: null }, { expiresAt: { gt: cap } }] },
+      data: { expiresAt: cap },
+    });
+    if (res.count > 0) this.log.log(`Host seat capped to ${minutes} min`);
+    return res.count > 0;
   }
 
   /** Full seat row with its holder (operator tooling), or `null` when no row. */

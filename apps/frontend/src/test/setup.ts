@@ -1,6 +1,40 @@
 import '@testing-library/jest-dom/vitest';
 import '../i18n'; // init i18n synchrone — t() renvoie le texte FR réel dans les tests
 
+// Node ≥ 25 ships experimental `localStorage`/`sessionStorage` globals (undefined
+// unless --localstorage-file is set); vitest's jsdom env keeps existing globals,
+// so the page gets none. A minimal in-memory Storage stands in.
+class MemoryStorage implements Storage {
+  private map = new Map<string, string>();
+  get length() {
+    return this.map.size;
+  }
+  key(i: number) {
+    return [...this.map.keys()][i] ?? null;
+  }
+  getItem(k: string) {
+    return this.map.get(k) ?? null;
+  }
+  setItem(k: string, v: string) {
+    this.map.set(k, String(v));
+  }
+  removeItem(k: string) {
+    this.map.delete(k);
+  }
+  clear() {
+    this.map.clear();
+  }
+}
+for (const name of ['localStorage', 'sessionStorage'] as const) {
+  if (globalThis[name] === undefined) {
+    Object.defineProperty(globalThis, name, {
+      value: new MemoryStorage(),
+      configurable: true,
+      writable: true,
+    });
+  }
+}
+
 // jsdom n'implémente pas scrollTo ; TanStack Router l'appelle (scroll restoration).
 window.scrollTo = () => undefined;
 

@@ -239,7 +239,8 @@
     "uploading": "Uploading…",
     "add": "Add media (image/audio)",
     "fileInputLabel": "Media file",
-    "uploadError": "Upload failed."
+    "uploadError": "Upload failed.",
+    "demoDisabled": "Media uploads are disabled on the demo instance."
   },
   "background": {
     "legend": "Background",

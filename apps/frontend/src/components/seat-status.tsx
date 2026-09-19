@@ -13,6 +13,7 @@ import {
   useHostSeatControllerState,
 } from '../api/generated/auth/auth';
 import { SEAT_EXPIRY_OPTIONS } from '../auth/seat-options';
+import { getDemo } from '../config';
 
 /** Re-read the seat this often; the server is the truth (operator release, takeover…). */
 const REFRESH_MS = 60_000;
@@ -102,6 +103,7 @@ export function SeatMenuRow({ user }: { user: string }) {
   const seat = useSeat(user);
   const release = useHostSeatControllerRelease();
   const [forMinutes, setForMinutes] = useState<number>(SEAT_EXPIRY_OPTIONS[1]);
+  const demo = getDemo();
   if (!seat) return null;
   const onRelease = () =>
     release.mutate(undefined, {
@@ -121,30 +123,35 @@ export function SeatMenuRow({ user }: { user: string }) {
           </span>
         </span>
       </span>
-      {/* Extend from now, for one of the sign-in durations (or without expiry). */}
+      {/* Extend from now, for one of the sign-in durations (or without expiry). On a
+          demo the server fixes the length: a single renew button. */}
       <div className="flex items-center gap-1.5">
-        <Select
-          aria-label={t('seat.extendLabel')}
-          className="h-7 flex-1 text-xs"
-          value={forMinutes}
-          onChange={(e) => setForMinutes(Number(e.target.value))}
-        >
-          {SEAT_EXPIRY_OPTIONS.map((m) => (
-            <option key={m} value={m}>
-              {m === 0 ? t('claim.expiryNever') : t('claim.expiryHours', { count: m / 60 })}
-            </option>
-          ))}
-        </Select>
+        {demo ? null : (
+          <Select
+            aria-label={t('seat.extendLabel')}
+            className="h-7 flex-1 text-xs"
+            value={forMinutes}
+            onChange={(e) => setForMinutes(Number(e.target.value))}
+          >
+            {SEAT_EXPIRY_OPTIONS.map((m) => (
+              <option key={m} value={m}>
+                {m === 0 ? t('claim.expiryNever') : t('claim.expiryHours', { count: m / 60 })}
+              </option>
+            ))}
+          </Select>
+        )}
         <Button
           type="button"
           variant="outline"
           size="sm"
           className="h-7 gap-1 px-2 text-xs"
           disabled={seat.pending}
-          onClick={() => seat.extend(forMinutes === 0 ? null : forMinutes)}
+          onClick={() =>
+            seat.extend(demo ? demo.seatMinutes : forMinutes === 0 ? null : forMinutes)
+          }
         >
           <RefreshCw className="size-3" />
-          {t('seat.extend')}
+          {demo ? t('seat.demoExtend', { count: demo.seatMinutes }) : t('seat.extend')}
         </Button>
       </div>
       <Button

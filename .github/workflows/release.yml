@@ -4,9 +4,12 @@ name: Release
 #   1. GitHub Release (source de vérité, canonique) — job `github-release`.
 #   2. Images Docker Hub qui en découlent — jobs `publish` + `standalone`.
 #   3. Overview Docker Hub synchronisée depuis README.md — job `dockerhub-readme`.
+#   4. Redéploiement de la démo publique (Render, image :standalone) — job `deploy-demo`.
 # Secrets requis (repo → Settings → Secrets and variables → Actions) :
 #   DOCKERHUB_USERNAME = fchaussin
 #   DOCKERHUB_TOKEN    = access token Docker Hub (Read & Write)
+#   RENDER_DEPLOY_HOOK = Deploy Hook URL du service Render (optionnel : sans lui,
+#                        l'étape est sautée — Render ne surveille pas le registre).
 on:
   push:
     tags: ['v*.*.*']
@@ -158,3 +161,20 @@ jobs:
             APP_VERSION=${{ github.ref_name }}
           cache-from: type=gha,scope=standalone
           cache-to: type=gha,mode=max,scope=standalone
+
+  # Public demo (Render, `:standalone` + DEMO_MODE=true). Render does not watch the
+  # registry: without this POST the instance keeps running the cached image.
+  deploy-demo:
+    needs: standalone
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the Render deploy hook
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "RENDER_DEPLOY_HOOK not set — demo not redeployed."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK" >/dev/null
+          echo "Render deploy triggered."

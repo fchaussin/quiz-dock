@@ -12,6 +12,7 @@ import { ApiError } from '../api/http';
 import { useAuth } from '../auth/auth-context';
 
 import { SEAT_DEFAULT_EXPIRY, SEAT_EXPIRY_OPTIONS } from '../auth/seat-options';
+import { getDemo } from '../config';
 
 /** Connexion animateur : mode local (nom) ou redirection OIDC selon `AUTH_MODE`. */
 export function LoginPage() {
@@ -23,6 +24,7 @@ export function LoginPage() {
   const [confirming, setConfirming] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [expiry, setExpiry] = useState<number>(SEAT_DEFAULT_EXPIRY);
+  const demo = getDemo();
   // Mode local : qui tient le siège d'hôte (et jusqu'à quand). Affiché avant même
   // de saisir un nom, pour expliquer le verrou.
   const seatQuery = useHostSeatControllerState({ query: { enabled: mode === 'none' } });
@@ -141,22 +143,27 @@ export function LoginPage() {
           <li>{t('claim.ruleRelease')}</li>
           <li>{t('claim.ruleName')}</li>
         </ul>
-        <Label htmlFor="seat-expiry">
-          {t('claim.expiryLabel')}
-          <Select
-            id="seat-expiry"
-            value={expiry}
-            onChange={(e) => setExpiry(Number(e.target.value))}
-          >
-            {SEAT_EXPIRY_OPTIONS.map((minutes) => (
-              <option key={minutes} value={minutes}>
-                {minutes === 0
-                  ? t('claim.expiryNever')
-                  : t('claim.expiryHours', { count: minutes / 60 })}
-              </option>
-            ))}
-          </Select>
-        </Label>
+        {demo ? (
+          // The server fixes the seat length on a demo; the choice would be a lie.
+          <p className="text-sm">{t('claim.demoExpiry', { count: demo.seatMinutes })}</p>
+        ) : (
+          <Label htmlFor="seat-expiry">
+            {t('claim.expiryLabel')}
+            <Select
+              id="seat-expiry"
+              value={expiry}
+              onChange={(e) => setExpiry(Number(e.target.value))}
+            >
+              {SEAT_EXPIRY_OPTIONS.map((minutes) => (
+                <option key={minutes} value={minutes}>
+                  {minutes === 0
+                    ? t('claim.expiryNever')
+                    : t('claim.expiryHours', { count: minutes / 60 })}
+                </option>
+              ))}
+            </Select>
+          </Label>
+        )}
       </ConfirmDialog>
     </Card>
   );

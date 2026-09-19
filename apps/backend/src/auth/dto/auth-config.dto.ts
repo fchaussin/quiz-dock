@@ -3,10 +3,13 @@ import { z } from 'zod';
 
 /**
  * Config d'auth exposée à la SPA (publique) : elle en déduit le mode et, en OIDC,
- * les paramètres du fournisseur. Source de vérité = variables d'env du backend.
+ * les paramètres du fournisseur ; `demo` porte ce que la SPA doit montrer d'une
+ * instance `DEMO_MODE` (le serveur impose le reste). Source de vérité = variables
+ * d'env du backend.
  */
 export const authConfigSchema = z.object({
   mode: z.enum(['none', 'oidc']),
+  demo: z.object({ seatMinutes: z.number().int() }).nullable(),
   oidc: z
     .object({
       authority: z.string(),
