@@ -206,7 +206,8 @@ export function SlideView({ slide, large }: { slide: SlideShowPayload; large?: b
       background={slide.background}
       textTone={slide.textTone}
       textOutline={slide.textOutline}
-      className="h-full min-h-full w-full"
+      // No explicit height: a flex parent stretches it (`h-full` would opt out of stretching).
+      className="w-full flex-1"
     >
       <article
         className={cn(
@@ -259,9 +260,9 @@ const TEXT_SIZE_STAGE: Record<SlideTextSize, string> = {
   large: 'text-[40px]',
 };
 const TEXT_SIZE_PHONE: Record<SlideTextSize, string> = {
-  small: 'text-base',
-  medium: 'text-xl',
-  large: 'text-2xl',
+  small: 'text-base md:text-xl',
+  medium: 'text-xl md:text-2xl',
+  large: 'text-2xl md:text-4xl',
 };
 
 const IMAGE_WIDTH: Record<SlideImageSize, string> = {
@@ -279,7 +280,7 @@ function SlideBlockView({ block, large }: { block: SlideLeafBlock; large?: boole
           className={cn(
             'font-bold text-balance',
             TEXT_ALIGN[block.align ?? 'center'],
-            large ? 'text-6xl leading-tight' : 'text-2xl',
+            large ? 'text-6xl leading-tight' : 'text-2xl md:text-4xl',
           )}
         >
           {block.text}
@@ -289,7 +290,7 @@ function SlideBlockView({ block, large }: { block: SlideLeafBlock; large?: boole
           className={cn(
             'font-semibold text-balance',
             TEXT_ALIGN[block.align ?? 'center'],
-            large ? 'text-4xl' : 'text-xl',
+            large ? 'text-4xl' : 'text-xl md:text-2xl',
           )}
         >
           {block.text}
