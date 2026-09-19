@@ -476,7 +476,9 @@ export function PlayerPage() {
     return (
       <section
         className={cn(
-          'mx-auto flex h-full w-full max-w-[24em] flex-col gap-[0.75em] text-center',
+          // Fills the viewport under the header (main padding included): the chrono
+          // on top, the prompt centred in the remaining height, the answer zone at the bottom.
+          'mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-[24em] flex-col gap-[0.75em] text-center md:max-w-[36em]',
           TYPE_BASE.phone,
         )}
       >
@@ -489,11 +491,11 @@ export function PlayerPage() {
             ⏱ {remaining}
           </span>
         ) : null}
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto py-[1em]">
           <Markdown
             role="heading"
             aria-level={1}
-            className="text-[1.25em] font-semibold text-balance"
+            className="text-[1.5em] font-semibold text-balance"
           >
             {question.prompt}
           </Markdown>
