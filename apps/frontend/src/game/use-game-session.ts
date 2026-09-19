@@ -3,14 +3,16 @@ import type {
   GameModePayload,
   GameOutlinePayload,
   GameState,
+  GameStatePayload,
+  GameStep,
   LeaderboardPayload,
   OutlineQuestion,
   PersonalResult,
   PodiumPayload,
   QuestionRevealPayload,
   QuestionStartPayload,
-  SlideShowPayload,
   QuestionTimePayload,
+  SlideShowPayload,
 } from '@quiz-dock/contracts';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -76,6 +78,8 @@ export interface GameView {
   quizDescription: string | null;
   /** Sommaire des questions (console hôte uniquement). */
   outline: OutlineQuestion[];
+  /** Host navigation over played steps (`game:state.nav`); `review` = a past step is on screen. */
+  nav: { prev: GameStep | null; next: GameStep | null; review: boolean } | null;
 }
 
 const INITIAL: GameView = {
@@ -105,6 +109,7 @@ const INITIAL: GameView = {
   quizId: null,
   quizDescription: null,
   outline: [],
+  nav: null,
 };
 
 /**
@@ -128,12 +133,13 @@ export function useGameSession(pin: string, role: LiveRole) {
 
     const patch = (p: Partial<GameView>) => setView((prev) => ({ ...prev, ...p }));
 
-    const onState = (p: { state: GameState; questionIndex: number; totalQuestions: number }) =>
+    const onState = (p: GameStatePayload) =>
       patch({
         status: 'ready',
         state: p.state,
         questionIndex: p.questionIndex,
         totalQuestions: p.totalQuestions,
+        nav: p.nav ?? null,
         // Nouvelle question : on purge le résultat/accusé précédent.
         ...(p.state === 'ANSWERING' ? { reveal: null, result: null, answerAccepted: null } : {}),
       });

@@ -269,6 +269,73 @@ describe('GameGateway (intégration socket)', () => {
     expect(podium.you?.score).toBeGreaterThan(0);
   }, 15_000);
 
+  it('host:review shows a played question again (no replay), host:next resumes the live position', async () => {
+    const host = connect({ localUser: 'Animateur' });
+    const { pin } = await host.emitWithAck('host:create', { quizId });
+    const player = connect();
+    await player.emitWithAck('player:join', { pin, nickname: 'Zoé' });
+
+    const states: Array<{
+      state: string;
+      questionIndex: number;
+      nav?: { review: boolean; prev: unknown; next: unknown };
+    }> = [];
+    player.on('game:state', (p) => states.push(p as never));
+    const firstReveal = new Promise<void>((resolve) =>
+      player.once('question:reveal', () => resolve()),
+    );
+    const podiumP = new Promise<void>((resolve) => player.once('game:podium', () => resolve()));
+    const qStart = new Promise<{ startedAt: number; options: Array<{ id: string; text: string }> }>(
+      (resolve) => player.once('question:start', (q) => resolve(q as never)),
+    );
+    host.emit('host:start', { pin });
+    const q = await qStart;
+    const parisId = q.options.find((o) => o.text === 'Paris')!.id;
+    await new Promise((r) => setTimeout(r, Math.max(0, q.startedAt - Date.now()) + 50));
+    player.emit('player:submit', { pin, questionIndex: 0, answer: parisId });
+    await firstReveal;
+    host.emit('host:next', { pin });
+    await podiumP;
+    // At the podium the host may look back at question 1.
+    expect(states.at(-1)).toMatchObject({
+      state: 'PODIUM',
+      nav: { review: false, prev: { questionIndex: 0 }, next: null },
+    });
+
+    // Review: the question comes back with its reveal and the player's archived result.
+    const reviewStart = new Promise<{ questionIndex: number; endsAt: number }>((resolve) =>
+      player.once('question:start', (p) => resolve(p as never)),
+    );
+    const reviewReveal = new Promise<{
+      correctOptionIds?: string[];
+      yourResult?: { correct: boolean };
+    }>((resolve) => player.once('question:reveal', (r) => resolve(r as never)));
+    host.emit('host:review', { pin, questionIndex: 0 });
+    const rs = await reviewStart;
+    expect(rs).toMatchObject({ questionIndex: 0, endsAt: 0 }); // chrono already over: nothing to answer
+    const rr = await reviewReveal;
+    expect(rr.correctOptionIds).toEqual([parisId]);
+    expect(rr.yourResult?.correct).toBe(true);
+    expect(states.at(-1)).toMatchObject({
+      state: 'REVEAL',
+      questionIndex: 0,
+      nav: { review: true, prev: null, next: null },
+    });
+
+    // Answering again is refused: the question is not live.
+    const ackP = new Promise<{ accepted: boolean }>((resolve) =>
+      player.once('answer:ack', (a) => resolve(a as never)),
+    );
+    player.emit('player:submit', { pin, questionIndex: 0, answer: parisId });
+    expect((await ackP).accepted).toBe(false);
+
+    // Next resumes the live position (podium), the same for every screen.
+    const back = new Promise<void>((resolve) => player.once('game:podium', () => resolve()));
+    host.emit('host:next', { pin });
+    await back;
+    expect(states.at(-1)).toMatchObject({ state: 'PODIUM', nav: { review: false } });
+  }, 15_000);
+
   it('archivage (§2.7) : capture intégrale → host:end{archive} persiste les tables, idempotent', async () => {
     const host = connect({ localUser: 'Animateur' });
     const { pin } = await host.emitWithAck('host:create', { quizId, fullCapture: true });

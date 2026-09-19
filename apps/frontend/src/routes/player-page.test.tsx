@@ -52,6 +52,7 @@ const view = (partial: Partial<GameView>): GameView => ({
   quizId: null,
   quizDescription: null,
   outline: [],
+  nav: null,
   ...partial,
 });
 

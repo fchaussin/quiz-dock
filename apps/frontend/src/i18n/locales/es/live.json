@@ -58,7 +58,7 @@
     "endConfirmDescription": "La sesión finalizará definitivamente: el PIN se invalida y los jugadores se desconectan. Esta acción es irreversible.",
     "archiveLabel": "Archivar los resultados de esta sesión",
     "archiveHint": "La clasificación y las estadísticas seguirán disponibles tras la sesión.",
-    "resume": "Reanudar",
+    "resume": "Volver al directo",
     "pause": "Pausa",
     "timeRemaining": "Tiempo restante",
     "podium": "🏆 Podio",
@@ -77,7 +77,11 @@
     "breadcrumb": "Ruta",
     "myQuizzes": "Mis cuestionarios",
     "sessionCrumb": "Sesión {{pin}}",
-    "backToEditorHint": "Volver al editor — la sesión sigue en marcha"
+    "backToEditorHint": "Volver al editor — la sesión sigue en marcha",
+    "previousStep": "Anterior",
+    "nextStep": "Siguiente",
+    "reviewing": "Mirando atrás — nada se repite",
+    "reviewHint": "Volver a mostrar esta pregunta"
   },
   "screen": {
     "sessionUnavailable": "Sesión no disponible.",
@@ -94,7 +98,8 @@
     "timeRemaining": "Tiempo restante",
     "joinAt": "Únete en",
     "participants_one": "jugador",
-    "participants_other": "jugadores"
+    "participants_other": "jugadores",
+    "review": "Mirando atrás"
   },
   "player": {
     "joinFailed": "No se pudo unir a la sesión.",

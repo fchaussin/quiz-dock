@@ -4,6 +4,8 @@ import type {
   AnswerValue,
   GameMode,
   GameModePayload,
+  GameStatePayload,
+  GameStep,
   LeaderboardPayload,
   LeaderboardRow,
   PodiumPayload,
@@ -138,13 +140,14 @@ export class GameEngine {
       pausedRemainingMs: '',
       autoNextAt: '0',
     });
+    const meta = await this.game.getMeta(pin);
     this.server.to(pin).emit('game:state', {
       state: GameState.SlideShow,
       questionIndex: slide.beforeQuestionIndex,
       totalQuestions: snapshot.questions.length,
+      nav: meta ? this.navFor(meta, snapshot) : undefined,
     });
     this.server.to(pin).emit('slide:show', buildSlideShow(slide, slideIndex));
-    const meta = await this.game.getMeta(pin);
     if (meta) await this.scheduleAutoNextIfNeeded(pin, meta);
     this.server.to(pin).emit('game:mode', await this.readMode(pin));
   }
@@ -234,13 +237,13 @@ export class GameEngine {
     await this.redis.hset(gameKeys.game(pin), { state: GameState.Reveal });
     this.log.debug(`REVEAL ${pin} q${index} (${trigger})`);
 
+    const snapshot = await this.game.getSnapshot(pin);
     this.server.to(pin).emit('game:state', {
       state: GameState.Reveal,
       questionIndex: index,
       totalQuestions: meta.totalQuestions,
+      nav: snapshot ? this.navFor({ ...meta, state: GameState.Reveal }, snapshot) : undefined,
     });
-
-    const snapshot = await this.game.getSnapshot(pin);
     if (snapshot) {
       await this.emitReveal(pin, snapshot, index);
     }
@@ -330,6 +333,11 @@ export class GameEngine {
    */
   async next(pin: string, hostUserId: string): Promise<void> {
     const meta = await this.requireHost(pin, hostUserId);
+    // Looking back: "next" brings every screen back to the live position.
+    if (meta.reviewStep) {
+      await this.resume(pin);
+      return;
+    }
     if (meta.state !== GameState.Reveal && meta.state !== GameState.SlideShow) {
       throw new BadRequestException('session.reveal_required');
     }
@@ -364,6 +372,141 @@ export class GameEngine {
     await this.enterStep(pin, snapshot, meta.currentIndex + 1);
   }
 
+  // ── Looking back (host navigation) ──────────────────────────────────────────
+
+  /**
+   * `host:review`: shows a played step again on every screen — a question's
+   * reveal (archived answers, no chrono, nothing accepted) or a shown slide.
+   * Nothing is replayed or rescored; the live position is kept in `state` /
+   * `currentIndex` and `host:next` resumes it. Only from a settled state
+   * (reveal, slide, podium), never mid-question.
+   */
+  async review(pin: string, hostUserId: string, step: GameStep): Promise<void> {
+    const meta = await this.requireHost(pin, hostUserId);
+    if (
+      ![GameState.Reveal, GameState.SlideShow, GameState.Podium].includes(meta.state as GameState)
+    ) {
+      throw new BadRequestException('session.review_unavailable');
+    }
+    const snapshot = await this.requireSnapshot(pin);
+    const played = this.playedSteps(meta, snapshot);
+    const key = stepKey(step);
+    if (!played.includes(key)) throw new BadRequestException('session.step_not_played');
+    if (key === this.liveStepKey(meta)) {
+      await this.resume(pin);
+      return;
+    }
+    this.cancelTimer(this.autoNextTimers, pin);
+    await this.redis.hset(gameKeys.game(pin), { reviewStep: key, autoNextAt: '0' });
+    const fresh = { ...meta, reviewStep: key, autoNextAt: 0 };
+    const sockets = await this.server.in(pin).fetchSockets();
+    for (const socket of sockets) await this.emitReviewTo(socket, pin, fresh, snapshot);
+    this.server.to(pin).emit('game:mode', this.buildModePayload(fresh));
+  }
+
+  /** Back to the live position on every screen; re-arms the auto pace if it applies. */
+  private async resume(pin: string): Promise<void> {
+    await this.redis.hset(gameKeys.game(pin), { reviewStep: '' });
+    const sockets = await this.server.in(pin).fetchSockets();
+    for (const socket of sockets) await this.sendStateTo(socket, pin);
+    await this.scheduleAutoNextIfNeeded(pin);
+    this.server.to(pin).emit('game:mode', await this.readMode(pin));
+  }
+
+  /** The reviewed step as the live screens should show it (state + content + nav). */
+  private async emitReviewTo(
+    socket: Emitter,
+    pin: string,
+    meta: GameMeta,
+    snapshot: QuizSnapshot,
+  ): Promise<void> {
+    const step = parseStepKey(meta.reviewStep ?? '');
+    if (!step) return;
+    const nav = this.navFor(meta, snapshot);
+    if ('slideIndex' in step) {
+      const slide = snapshot.slides[step.slideIndex];
+      if (!slide) return;
+      socket.emit('game:state', {
+        state: GameState.SlideShow,
+        questionIndex: slide.beforeQuestionIndex,
+        totalQuestions: meta.totalQuestions,
+        nav,
+      });
+      socket.emit('slide:show', buildSlideShow(slide, step.slideIndex));
+      return;
+    }
+    const index = step.questionIndex;
+    const question = snapshot.questions[index];
+    if (!question) return;
+    // The question itself (prompt, options) with a chrono already over, then its reveal.
+    socket.emit('question:start', buildQuestionStart(question, index, 0, 0));
+    socket.emit('game:state', {
+      state: GameState.Reveal,
+      questionIndex: index,
+      totalQuestions: meta.totalQuestions,
+      nav,
+    });
+    const records = await this.readAnswers(pin, index);
+    const common = buildRevealCommon(question, [...records.values()]);
+    const ranked = await this.rankedPlayers(pin);
+    const rankOf = new Map(ranked.map((p, i) => [p.id, i + 1]));
+    const playerId = socket.data.playerId;
+    socket.emit('question:reveal', this.personalReveal(common, records, ranked, rankOf, playerId));
+    socket.emit(
+      'leaderboard',
+      this.personalLeaderboard(this.topRows(ranked), ranked, rankOf, playerId),
+    );
+  }
+
+  /** The step the live position sits on (`q<i>` / `s<i>`), '' in the lobby or at the podium. */
+  private liveStepKey(meta: GameMeta): string {
+    if (meta.state === GameState.SlideShow) return `s${meta.slideIndex ?? 0}`;
+    if (meta.state === GameState.Reveal || meta.state === GameState.Answering) {
+      return `q${meta.currentIndex}`;
+    }
+    return '';
+  }
+
+  /**
+   * Every step shown so far, in sequence order: slides anchored before a
+   * question come first, then the question once its reveal happened.
+   */
+  private playedSteps(meta: GameMeta, snapshot: QuizSnapshot): string[] {
+    const steps: string[] = [];
+    const liveKey = this.liveStepKey(meta);
+    const reached = (k: string) => steps.push(k);
+    for (let q = 0; q <= snapshot.questions.length; q++) {
+      snapshot.slides.forEach((s, i) => {
+        if (s.beforeQuestionIndex === q) reached(`s${i}`);
+      });
+      if (q < snapshot.questions.length) reached(`q${q}`);
+    }
+    if (meta.state === GameState.Podium) return steps;
+    const at = steps.indexOf(liveKey);
+    if (at < 0) return [];
+    // A question counts as played once revealed; mid-question it is not a target.
+    return steps.slice(
+      0,
+      meta.state === GameState.Reveal ? at + 1 : at + (liveKey.startsWith('s') ? 1 : 0),
+    );
+  }
+
+  /** Previous / next targets for the host, around the reviewed step or the live position. */
+  private navFor(meta: GameMeta, snapshot: QuizSnapshot): NonNullable<GameStatePayload['nav']> {
+    const played = this.playedSteps(meta, snapshot);
+    const review = Boolean(meta.reviewStep);
+    const here = review ? (meta.reviewStep as string) : this.liveStepKey(meta);
+    const at = review || here ? played.indexOf(here) : played.length;
+    const prev =
+      at > 0 ? played[at - 1] : at < 0 && played.length ? played[played.length - 1] : null;
+    const next = review && at >= 0 && at < played.length - 1 ? played[at + 1] : null;
+    return {
+      prev: prev ? parseStepKey(prev) : null,
+      next: next ? parseStepKey(next) : null,
+      review,
+    };
+  }
+
   /** Dernière question révélée → PODIUM (top 3 + rang perso). */
   private async toPodium(pin: string, meta: GameMeta): Promise<void> {
     await this.redis.hset(gameKeys.game(pin), { state: GameState.Podium });
@@ -373,10 +516,12 @@ export class GameEngine {
       .slice(0, 3)
       .map((p, i) => ({ nickname: p.nickname, score: p.score, rank: i + 1, avatar: p.avatar }));
 
+    const snapshot = await this.game.getSnapshot(pin);
     this.server.to(pin).emit('game:state', {
       state: GameState.Podium,
       questionIndex: meta.currentIndex,
       totalQuestions: meta.totalQuestions,
+      nav: snapshot ? this.navFor({ ...meta, state: GameState.Podium }, snapshot) : undefined,
     });
     const top = this.topRows(ranked);
     const sockets = await this.server.in(pin).fetchSockets();
@@ -421,10 +566,12 @@ export class GameEngine {
     // Consentement capture intégrale (§2.10) : tout (ré)attaché — dont les joueurs
     // arrivés après le host:create — doit voir l'avis « réponses conservées ».
     if (meta.fullCapture) socket.emit('notice', { fullCapture: true });
+    const snapshotForNav = await this.game.getSnapshot(pin);
     socket.emit('game:state', {
       state: meta.state as GameState,
       questionIndex: meta.currentIndex,
       totalQuestions: meta.totalQuestions,
+      nav: snapshotForNav && !meta.reviewStep ? this.navFor(meta, snapshotForNav) : undefined,
     });
     // Instantané du lobby : sans lui, un host/projeté qui (re)charge verrait une
     // liste de joueurs vide (les `player:joined` passés sont perdus). §6/§9.
@@ -435,6 +582,11 @@ export class GameEngine {
     const snapshot = await this.game.getSnapshot(pin);
     if (!snapshot || meta.currentIndex < 0) return;
 
+    // Looking back: every (re)attached screen shows the reviewed step, not the live one.
+    if (meta.reviewStep) {
+      await this.emitReviewTo(socket, pin, meta, snapshot);
+      return;
+    }
     if (meta.state === GameState.SlideShow) {
       const slide = snapshot.slides[meta.slideIndex ?? -1];
       if (slide) socket.emit('slide:show', buildSlideShow(slide, meta.slideIndex ?? 0));
@@ -1098,4 +1250,14 @@ export class GameEngine {
     }
     return snapshot;
   }
+}
+
+/** `q<i>` / `s<i>` ↔ GameStep. */
+function stepKey(step: GameStep): string {
+  return 'slideIndex' in step ? `s${step.slideIndex}` : `q${step.questionIndex}`;
+}
+function parseStepKey(key: string): GameStep | null {
+  const m = /^([qs])(\d+)$/.exec(key);
+  if (!m) return null;
+  return m[1] === 's' ? { slideIndex: Number(m[2]) } : { questionIndex: Number(m[2]) };
 }

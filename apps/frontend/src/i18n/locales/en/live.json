@@ -58,7 +58,7 @@
     "endConfirmDescription": "The session will be permanently ended: the PIN is invalidated and players are disconnected. This action cannot be undone.",
     "archiveLabel": "Archive this session's results",
     "archiveHint": "Leaderboard and statistics will remain available after the session.",
-    "resume": "Resume",
+    "resume": "Back to live",
     "pause": "Pause",
     "timeRemaining": "Time remaining",
     "podium": "🏆 Podium",
@@ -77,7 +77,11 @@
     "breadcrumb": "Breadcrumb",
     "myQuizzes": "My quizzes",
     "sessionCrumb": "Session {{pin}}",
-    "backToEditorHint": "Back to the editor — the session keeps running"
+    "backToEditorHint": "Back to the editor — the session keeps running",
+    "previousStep": "Previous",
+    "nextStep": "Next",
+    "reviewing": "Looking back — nothing is replayed",
+    "reviewHint": "Show this question again"
   },
   "screen": {
     "sessionUnavailable": "Session unavailable.",
@@ -94,7 +98,8 @@
     "timeRemaining": "Time remaining",
     "joinAt": "Join at",
     "participants_one": "player",
-    "participants_other": "players"
+    "participants_other": "players",
+    "review": "Looking back"
   },
   "player": {
     "joinFailed": "Could not join the session.",

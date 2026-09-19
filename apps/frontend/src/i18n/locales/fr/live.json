@@ -77,7 +77,11 @@
     "breadcrumb": "Fil d’Ariane",
     "myQuizzes": "Mes quiz",
     "sessionCrumb": "Session {{pin}}",
-    "backToEditorHint": "Retour à l’éditeur — la session continue en arrière-plan"
+    "backToEditorHint": "Retour à l’éditeur — la session continue en arrière-plan",
+    "previousStep": "Précédent",
+    "nextStep": "Suivant",
+    "reviewing": "Retour en arrière — rien n’est rejoué",
+    "reviewHint": "Réafficher cette question"
   },
   "screen": {
     "sessionUnavailable": "Session indisponible.",
@@ -94,7 +98,8 @@
     "timeRemaining": "Temps restant",
     "joinAt": "Rejoignez sur",
     "participants_one": "participant",
-    "participants_other": "participants"
+    "participants_other": "participants",
+    "review": "Retour en arrière"
   },
   "player": {
     "joinFailed": "Impossible de rejoindre la session.",

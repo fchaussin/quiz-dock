@@ -194,6 +194,11 @@ export function ScreenPage() {
       )}
     >
       {fullscreenBtn}
+      {view.nav?.review ? (
+        <span className="bg-muted text-muted-foreground absolute left-[1em] top-[1em] z-20 rounded-full px-[0.8em] py-[0.3em] text-[0.8em] font-medium">
+          {t('screen.review')}
+        </span>
+      ) : null}
       {view.question?.background && view.state !== 'SLIDE_SHOW' ? (
         // A question with a background owns the surface like a slide does.
         <Surface

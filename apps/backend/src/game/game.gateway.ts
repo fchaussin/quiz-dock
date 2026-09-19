@@ -13,6 +13,7 @@ import type {
   AnswerValue,
   ClientToServerEvents,
   GameMode,
+  GameStep,
   ServerToClientEvents,
 } from '@quiz-dock/contracts';
 import type { User } from '@prisma/client';
@@ -299,6 +300,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect {
     @MessageBody() payload: { pin: string },
   ): Promise<void> {
     await this.engine.next(payload.pin, this.requireHostId(socket));
+  }
+
+  /** `host:review` : shows a played step again (question reveal or slide); `host:next` resumes. */
+  @SubscribeMessage('host:review')
+  async hostReview(
+    @ConnectedSocket() socket: GameSocket,
+    @MessageBody() payload: { pin: string } & GameStep,
+  ): Promise<void> {
+    const step: GameStep =
+      'slideIndex' in payload
+        ? { slideIndex: Number(payload.slideIndex) }
+        : { questionIndex: Number(payload.questionIndex) };
+    await this.engine.review(payload.pin, this.requireHostId(socket), step);
   }
 
   /** `host:end` : termine la partie. */

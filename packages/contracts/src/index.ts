@@ -76,6 +76,7 @@ export const ClientEvents = {
   HostAttach: 'host:attach',
   HostStart: 'host:start',
   HostNext: 'host:next',
+  HostReview: 'host:review',
   HostReveal: 'host:reveal',
   HostKick: 'host:kick',
   HostEnd: 'host:end',
@@ -220,10 +221,19 @@ export interface SlideShowPayload {
   displayDelayS: number | null;
 }
 
+/** A step of the sequence the host can jump back to: a played question (its reveal) or a shown slide. */
+export type GameStep = { questionIndex: number } | { slideIndex: number };
+
 export interface GameStatePayload {
   state: GameState;
   questionIndex: number;
   totalQuestions: number;
+  /**
+   * Host navigation over what was already played: `prev`/`next` steps when the
+   * host may look back (null = none), `review` when the screens show a past step
+   * rather than the live position (`host:next` then resumes the live position).
+   */
+  nav?: { prev: GameStep | null; next: GameStep | null; review: boolean };
 }
 
 /**
@@ -316,6 +326,8 @@ export interface ClientToServerEvents {
   'host:attach': (p: { pin: string }, ack: (res: { ok: boolean }) => void) => void;
   'host:start': (p: { pin: string }) => void;
   'host:next': (p: { pin: string }) => void;
+  /** Show a played step again (no replay, no rescoring); `host:next` resumes. */
+  'host:review': (p: { pin: string } & GameStep) => void;
   'host:reveal': (p: { pin: string }) => void;
   'host:kick': (p: { pin: string; playerId: string }) => void;
   /**

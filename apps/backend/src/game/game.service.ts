@@ -413,5 +413,6 @@ function deserializeMeta(raw: Record<string, string>): GameMeta {
     slideIndex: raw.slideIndex ? Number(raw.slideIndex) : -1,
     prevState: raw.prevState,
     pausedRemainingMs: raw.pausedRemainingMs ? Number(raw.pausedRemainingMs) : undefined,
+    reviewStep: raw.reviewStep ?? '',
   };
 }

@@ -1,8 +1,10 @@
-import type { GameMode, OutlineQuestion } from '@quiz-dock/contracts';
+import type { GameMode, GameStep, OutlineQuestion } from '@quiz-dock/contracts';
 import { Link, useParams } from '@tanstack/react-router';
 import {
   Ban,
   Check,
+  ChevronLeft,
+  ChevronRight,
   Eye,
   Gauge,
   Hand,
@@ -16,7 +18,6 @@ import {
 } from 'lucide-react';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
@@ -57,6 +58,11 @@ export function ControlPage() {
   const joinUrl = `${window.location.origin}/join/${pin}`;
   const screenUrl = `${window.location.origin}/present/${pin}/screen`;
   const emit = (event: 'host:start' | 'host:reveal' | 'host:next') => socket?.emit(event, { pin });
+  // Looking back over played steps (no replay): the server tells what is reachable.
+  const review = (step: GameStep) => socket?.emit('host:review', { pin, ...step });
+  const navBar = view.nav ? (
+    <StepNav nav={view.nav} onReview={review} onResume={() => emit('host:next')} />
+  ) : null;
   const endGame = (archive: boolean) => socket?.emit('host:end', { pin, archive });
   const setMode = (mode: GameMode) => socket?.emit('host:mode', { pin, mode });
   const setCapture = (fullCapture: boolean) => socket?.emit('host:capture', { pin, fullCapture });
@@ -260,7 +266,11 @@ export function ControlPage() {
     return (
       <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 py-6">
         {controlBar}
-        <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
+        <QuestionCarousel
+          outline={view.outline}
+          currentIndex={view.questionIndex}
+          onSelect={(i) => review({ questionIndex: i })}
+        />
         {/* Reduced base: the slide is a preview in a card, not the projection. */}
         <div className="bg-card flex rounded-xl border p-5 text-[0.8rem] sm:p-6">
           <SlideView slide={view.slide} />
@@ -273,10 +283,13 @@ export function ControlPage() {
               <AutoAdvanceCountdown deadline={view.autoNextAt} totalMs={view.autoNextMs ?? 0} />
             ) : null}
           </div>
-          <Button type="button" onClick={() => emit('host:next')}>
-            <SkipForward className="size-4" />
-            {t('control.continue')}
-          </Button>
+          {navBar}
+          {view.nav?.review ? null : (
+            <Button type="button" onClick={() => emit('host:next')}>
+              <SkipForward className="size-4" />
+              {t('control.continue')}
+            </Button>
+          )}
         </div>
       </section>
     );
@@ -287,7 +300,11 @@ export function ControlPage() {
     return (
       <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 py-6">
         {controlBar}
-        <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
+        <QuestionCarousel
+          outline={view.outline}
+          currentIndex={view.questionIndex}
+          onSelect={(i) => review({ questionIndex: i })}
+        />
         {view.question && view.reveal ? (
           <RevealAnswer question={view.question} reveal={view.reveal} />
         ) : null}
@@ -306,10 +323,13 @@ export function ControlPage() {
               <AutoAdvanceCountdown deadline={view.autoNextAt} totalMs={view.autoNextMs ?? 0} />
             ) : null}
           </div>
-          <Button type="button" onClick={() => emit('host:next')}>
-            <SkipForward className="size-4" />
-            {t('control.nextQuestion')}
-          </Button>
+          {navBar}
+          {view.nav?.review ? null : (
+            <Button type="button" onClick={() => emit('host:next')}>
+              <SkipForward className="size-4" />
+              {t('control.nextQuestion')}
+            </Button>
+          )}
         </div>
       </section>
     );
@@ -321,7 +341,8 @@ export function ControlPage() {
       <section className="mx-auto flex w-full max-w-4xl flex-col items-center gap-6 py-8">
         <h2 className="text-2xl font-bold">{t('control.podium')}</h2>
         {view.podium ? <Podium rows={view.podium.podium} /> : null}
-        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex w-full justify-center">
+        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex w-full flex-wrap items-center justify-between gap-3">
+          <div className="flex-1">{navBar}</div>
           <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
         </div>
       </section>
@@ -790,9 +811,12 @@ function ChronoControls({
 function QuestionCarousel({
   outline,
   currentIndex,
+  onSelect,
 }: {
   outline: OutlineQuestion[];
   currentIndex: number;
+  /** A played question is clickable: shows its reveal again (host navigation). */
+  onSelect?: (index: number) => void;
 }) {
   const { t } = useTranslation('live');
   if (outline.length === 0) return null;
@@ -803,14 +827,27 @@ function QuestionCarousel({
         {outline.map((q) => {
           const done = q.index < currentIndex;
           const current = q.index === currentIndex;
+          const clickable = Boolean(onSelect) && done;
           return (
             <li
               key={q.index}
               aria-current={current ? 'step' : undefined}
+              role={clickable ? 'button' : undefined}
+              tabIndex={clickable ? 0 : undefined}
+              title={clickable ? t('control.reviewHint') : undefined}
+              onClick={clickable ? () => onSelect?.(q.index) : undefined}
+              onKeyDown={
+                clickable
+                  ? (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') onSelect?.(q.index);
+                    }
+                  : undefined
+              }
               className={cn(
                 'flex w-44 shrink-0 snap-start flex-col gap-1 rounded-lg border p-3 text-sm transition-colors',
                 current && 'border-primary bg-primary/5 ring-primary ring-1',
                 done && 'opacity-60',
+                clickable && 'hover:border-primary hover:opacity-100 cursor-pointer',
               )}
             >
               <div className="flex items-center justify-between">
@@ -870,5 +907,47 @@ function HostBreadcrumb({ view, pin }: { view: GameView; pin: string }) {
       <ChevronRight className="size-3.5" />
       <span className="text-foreground font-medium">{t('control.sessionCrumb', { pin })}</span>
     </nav>
+  );
+}
+
+/**
+ * Host navigation over what was already played: previous / next step while
+ * looking back, and the way back to the live position. Never replays anything.
+ */
+function StepNav({
+  nav,
+  onReview,
+  onResume,
+}: {
+  nav: NonNullable<GameView['nav']>;
+  onReview: (step: GameStep) => void;
+  onResume: () => void;
+}) {
+  const { t } = useTranslation('live');
+  if (!nav.prev && !nav.next && !nav.review) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {nav.prev ? (
+        <Button type="button" variant="outline" size="sm" onClick={() => onReview(nav.prev!)}>
+          <ChevronLeft className="size-4" />
+          {t('control.previousStep')}
+        </Button>
+      ) : null}
+      {nav.next ? (
+        <Button type="button" variant="outline" size="sm" onClick={() => onReview(nav.next!)}>
+          {t('control.nextStep')}
+          <ChevronRight className="size-4" />
+        </Button>
+      ) : null}
+      {nav.review ? (
+        <>
+          <span className="text-muted-foreground text-sm">{t('control.reviewing')}</span>
+          <Button type="button" size="sm" onClick={onResume}>
+            <SkipForward className="size-4" />
+            {t('control.resume')}
+          </Button>
+        </>
+      ) : null}
+    </div>
   );
 }

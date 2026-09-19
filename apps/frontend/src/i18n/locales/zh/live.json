@@ -58,7 +58,7 @@
     "endConfirmDescription": "会话将被永久结束：PIN 失效，玩家被断开连接。此操作不可撤销。",
     "archiveLabel": "归档本次会话的结果",
     "archiveHint": "会话结束后仍可查看排行榜和统计数据。",
-    "resume": "继续",
+    "resume": "回到当前",
     "pause": "暂停",
     "timeRemaining": "剩余时间",
     "podium": "🏆 领奖台",
@@ -77,7 +77,11 @@
     "breadcrumb": "路径",
     "myQuizzes": "我的测验",
     "sessionCrumb": "会话 {{pin}}",
-    "backToEditorHint": "返回编辑器 — 会话继续进行"
+    "backToEditorHint": "返回编辑器 — 会话继续进行",
+    "previousStep": "上一步",
+    "nextStep": "下一步",
+    "reviewing": "回顾中——不会重新作答",
+    "reviewHint": "再次显示此题"
   },
   "screen": {
     "sessionUnavailable": "会话不可用。",
@@ -94,7 +98,8 @@
     "timeRemaining": "剩余时间",
     "joinAt": "加入地址",
     "participants_one": "名玩家",
-    "participants_other": "名玩家"
+    "participants_other": "名玩家",
+    "review": "回顾"
   },
   "player": {
     "joinFailed": "无法加入会话。",

@@ -132,6 +132,8 @@ export interface GameMeta {
   prevState?: string;
   /** ms de question restantes, figées quand `clockFrozen` (pause ou §7.1). */
   pausedRemainingMs?: number;
+  /** Step shown again by the host (`q<i>` / `s<i>`), '' when the screens follow the live position. */
+  reviewStep?: string;
 }
 
 /** Réponse gradée stockée au submit (Redis hash `:answers:{idx}`) — REVEAL la relit. */

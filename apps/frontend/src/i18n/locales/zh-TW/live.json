@@ -58,7 +58,7 @@
     "endConfirmDescription": "會話將被永久結束：PIN 失效，玩家被斷開連接。此操作不可撤銷。",
     "archiveLabel": "歸檔本次會話的結果",
     "archiveHint": "會話結束後仍可查看排行榜和統計數據。",
-    "resume": "繼續",
+    "resume": "回到目前",
     "pause": "暫停",
     "timeRemaining": "剩餘時間",
     "podium": "🏆 領獎台",
@@ -77,7 +77,11 @@
     "breadcrumb": "導覽路徑",
     "myQuizzes": "我的測驗",
     "sessionCrumb": "會話 {{pin}}",
-    "backToEditorHint": "返回編輯器 — 會話繼續進行"
+    "backToEditorHint": "返回編輯器 — 會話繼續進行",
+    "previousStep": "上一步",
+    "nextStep": "下一步",
+    "reviewing": "回顧中——不會重新作答",
+    "reviewHint": "再次顯示此題"
   },
   "screen": {
     "sessionUnavailable": "會話不可用。",
@@ -94,7 +98,8 @@
     "timeRemaining": "剩餘時間",
     "joinAt": "加入網址",
     "participants_one": "名玩家",
-    "participants_other": "名玩家"
+    "participants_other": "名玩家",
+    "review": "回顧"
   },
   "player": {
     "joinFailed": "無法加入會話。",
