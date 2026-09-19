@@ -86,6 +86,33 @@ export class GameEngine {
   /** Lié par le gateway dans `afterInit` (le serveur Socket.IO porte les rooms). */
   bindServer(server: GameServer): void {
     this.server = server;
+    this.recoverTimers().catch((err: Error) => this.log.error(`recoverTimers: ${err.message}`));
+  }
+
+  /**
+   * Timers live in this process: after a restart (deploy, crash, dev reload)
+   * every session mid-question would stay stuck at the end of its countdown,
+   * and auto-paced sessions would stop advancing. Re-arm them from Redis.
+   */
+  private async recoverTimers(): Promise<void> {
+    const keys = await this.redis.keys('game:[0-9]*');
+    let armed = 0;
+    for (const key of keys) {
+      if (!/^game:\d+$/.test(key)) continue;
+      const pin = key.slice('game:'.length);
+      const meta = await this.game.getMeta(pin);
+      if (!meta) continue;
+      if (meta.state === GameState.Answering && !meta.clockFrozen) {
+        this.scheduleReveal(pin, meta.currentIndex, meta.questionEndsAt + GRACE_MS - Date.now());
+        armed++;
+      } else if (meta.state === GameState.Reveal || meta.state === GameState.SlideShow) {
+        if (meta.mode === 'auto' && !meta.paused && !meta.reviewStep) {
+          await this.scheduleAutoNextIfNeeded(pin, meta);
+          armed++;
+        }
+      }
+    }
+    if (armed > 0) this.log.log(`Recovered ${armed} live timer(s) after restart`);
   }
 
   /** `host:start` : LOBBY → 1re question. Garde propriété hôte + état. */
