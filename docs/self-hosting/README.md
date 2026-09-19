@@ -11,7 +11,7 @@ infrastructure — for operators and integrators (not contributors).
 
 - **[CLI — install, maintain, administer](cli.md)** — the `quizdock` script
   (init, up, backup/restore, upgrade) and the admin commands shipped in the
-  image (doctor, host seat, users, retention purge).
+  image (doctor, host seat, users, quiz export / import, retention purge).
 - **[Configuration, branding & OIDC](configuration.md)** — every environment
   variable, white-labeling (name, language, logo, CSS), and wiring your own
   OIDC identity provider.

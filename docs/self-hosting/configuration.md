@@ -199,7 +199,7 @@ is not reachable from the backend, set `OIDC_JWKS_URI` to the internal service U
 ### Example IdP for development
 
 The repository ships one worked example so you can try OIDC locally: a Keycloak
-realm in [`keycloak/realm-export.json`](../keycloak/realm-export.json) (realm
+realm in [`keycloak/realm-export.json`](../../keycloak/realm-export.json) (realm
 `quiz-dock`, public client `quiz-dock-frontend`, roles `host`/`player`, exposed under
 `realm_access.roles`). It is only an example — nothing in QuizDock depends on it.
 Start it with the `keycloak` compose profile:
