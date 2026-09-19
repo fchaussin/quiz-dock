@@ -228,7 +228,9 @@ export function PlayerPage() {
     return <p className="text-muted-foreground">{t('player.unsupportedType')}</p>;
   };
 
-  const wrap = (children: React.ReactNode) => (
+  // `wide` lets a screen use a laptop's width (the reveal lays out side by side);
+  // `center` places the content in the middle of the remaining height.
+  const wrap = (children: React.ReactNode, opts: { wide?: boolean; center?: boolean } = {}) => (
     <Surface
       background={view.question?.background}
       textTone={view.question?.textTone}
@@ -238,7 +240,13 @@ export function PlayerPage() {
         !view.question?.background && 'bg-transparent',
       )}
     >
-      <section className="mx-auto flex w-full max-w-sm flex-col items-center gap-6 py-6 text-center">
+      <section
+        className={cn(
+          'mx-auto flex w-full flex-1 flex-col items-center gap-6 py-6 text-center',
+          opts.wide ? 'max-w-sm md:max-w-xl' : 'max-w-sm',
+          opts.center && 'min-h-[calc(100dvh-6rem)]',
+        )}
+      >
         {view.status === 'ready' && view.state !== 'ENDED' && !view.kicked ? (
           <div className="flex w-full items-center gap-2 text-sm">
             <Avatar name={avatarName} size={28} />
@@ -255,7 +263,11 @@ export function PlayerPage() {
             </Button>
           </div>
         ) : null}
-        {children}
+        {opts.center ? (
+          <div className="my-auto flex w-full flex-col items-center gap-6">{children}</div>
+        ) : (
+          children
+        )}
         <ConfirmDialog
           open={confirmLeave}
           destructive
@@ -386,10 +398,12 @@ export function PlayerPage() {
     // Classement perso : `you` (du leaderboard) est toujours présent au reveal, même
     // si le joueur n'a pas répondu (pas de `result`). On l'affiche systématiquement.
     const you = view.leaderboard?.you;
+    // One column, in reading order: verdict, explanation, then the ranking — with
+    // even spacing, centred in the remaining height so nothing floats in a blank.
     return wrap(
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex w-full flex-col items-center gap-6">
         {r ? (
-          <>
+          <div className="flex flex-col items-center gap-2">
             <span
               className={`text-7xl leading-none ${r.correct ? 'text-success' : 'text-destructive'}`}
               aria-hidden
@@ -400,12 +414,13 @@ export function PlayerPage() {
               {r.correct ? t('player.correct') : t('player.wrong')}
             </p>
             <p className="text-xl">{t('player.points', { points: r.points })}</p>
-          </>
+          </div>
         ) : (
           <p className="text-muted-foreground">{t('player.answersRevealed')}</p>
         )}
+        {view.reveal?.answerExplanation ? <AnswerExplanation reveal={view.reveal} /> : null}
         {you ? (
-          <p className="border-t pt-3 text-2xl">
+          <p className="w-full border-t pt-4 text-2xl">
             {t('player.yourRankShort')}{' '}
             <span className="font-bold">{t('player.rankValue', { rank: you.rank })}</span>
             <span className="text-muted-foreground">
@@ -415,8 +430,8 @@ export function PlayerPage() {
         ) : r ? (
           <p className="text-muted-foreground">{t('player.rank', { rank: r.rank })}</p>
         ) : null}
-        {view.reveal ? <AnswerExplanation reveal={view.reveal} className="mt-2" /> : null}
       </div>,
+      { wide: true, center: true },
     );
   }
 
