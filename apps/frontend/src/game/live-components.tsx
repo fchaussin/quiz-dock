@@ -71,9 +71,9 @@ export function OptionGrid({
    * grid of colour/shape tiles as the tap targets — long labels stay readable,
    * targets stay big.
    */
-  layout?: 'tiles' | 'split';
+  layout?: 'tiles' | 'split' | 'list';
 }) {
-  if (layout === 'split') {
+  if (layout === 'split' || layout === 'list') {
     return (
       <SplitOptions
         options={options}
@@ -81,6 +81,7 @@ export function OptionGrid({
         selectedIds={selectedIds}
         correctIds={correctIds}
         disabled={disabled}
+        tiles={layout === 'split'}
       />
     );
   }
@@ -141,13 +142,17 @@ function SplitOptions({
   selectedIds,
   correctIds,
   disabled,
+  tiles = true,
 }: {
   options: PublicOption[];
   onPick?: (optionId: string) => void;
   selectedIds?: string[];
   correctIds?: string[];
   disabled?: boolean;
+  /** Without the tap tiles: the list alone (a participant's reveal). */
+  tiles?: boolean;
 }) {
+  const { t } = useTranslation('live');
   const picked = (id: string) => selectedIds?.includes(id) ?? false;
   return (
     <div className="flex w-full flex-col gap-[1em]">
@@ -173,36 +178,49 @@ function SplitOptions({
                 {o.text}
               </Markdown>
             ) : null}
+            {/* At the reveal: the right answer(s) and what this participant picked. */}
+            {correctIds?.includes(o.id) ? (
+              <span className="bg-success inline-flex size-[1.3em] shrink-0 items-center justify-center rounded-full text-[0.85em] text-white">
+                ✓
+              </span>
+            ) : null}
+            {correctIds && picked(o.id) ? (
+              <span className="text-muted-foreground shrink-0 text-[0.8em]">
+                {t('reveal.yourPick')}
+              </span>
+            ) : null}
           </li>
         ))}
       </ol>
       {/* The tap targets: colour + shape only, big and steady whatever the labels. */}
-      <div className="grid w-full grid-cols-2 gap-[0.6em]">
-        {options.map((o) => {
-          const isCorrect = correctIds?.includes(o.id);
-          const Tag = onPick ? 'button' : 'div';
-          return (
-            <Tag
-              key={o.id}
-              type={onPick ? 'button' : undefined}
-              disabled={onPick ? disabled : undefined}
-              onClick={onPick ? () => onPick(o.id) : undefined}
-              aria-label={o.text ?? o.color}
-              aria-pressed={onPick ? picked(o.id) : undefined}
-              className={cn(
-                'flex min-h-[3.5em] items-center justify-center rounded-[0.75em] text-[2em] leading-none text-white shadow transition',
-                COLOR_BG[o.color] ?? OPTION_BG_FALLBACK,
-                onPick && !disabled && 'hover:brightness-110 active:scale-[0.97] cursor-pointer',
-                correctIds && !isCorrect && 'opacity-40',
-                isCorrect && 'ring-4 ring-white',
-                picked(o.id) && 'ring-4 ring-black/60',
-              )}
-            >
-              <span aria-hidden>{SHAPE_GLYPH[o.shape] ?? '●'}</span>
-            </Tag>
-          );
-        })}
-      </div>
+      {tiles ? (
+        <div className="grid w-full grid-cols-2 gap-[0.6em]">
+          {options.map((o) => {
+            const isCorrect = correctIds?.includes(o.id);
+            const Tag = onPick ? 'button' : 'div';
+            return (
+              <Tag
+                key={o.id}
+                type={onPick ? 'button' : undefined}
+                disabled={onPick ? disabled : undefined}
+                onClick={onPick ? () => onPick(o.id) : undefined}
+                aria-label={o.text ?? o.color}
+                aria-pressed={onPick ? picked(o.id) : undefined}
+                className={cn(
+                  'flex min-h-[3.5em] items-center justify-center rounded-[0.75em] text-[2em] leading-none text-white shadow transition',
+                  COLOR_BG[o.color] ?? OPTION_BG_FALLBACK,
+                  onPick && !disabled && 'hover:brightness-110 active:scale-[0.97] cursor-pointer',
+                  correctIds && !isCorrect && 'opacity-40',
+                  isCorrect && 'ring-4 ring-white',
+                  picked(o.id) && 'ring-4 ring-black/60',
+                )}
+              >
+                <span aria-hidden>{SHAPE_GLYPH[o.shape] ?? '●'}</span>
+              </Tag>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }

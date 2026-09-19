@@ -156,7 +156,9 @@
     "goodAnswer": "Correct answer:",
     "or": " or ",
     "closestTitle": "Closest answers",
-    "closestDistance": "±{{distance}}"
+    "closestDistance": "±{{distance}}",
+    "yourPick": "you",
+    "yourAnswer": "Your answer:"
   },
   "rating": {
     "thanks": "Thanks for your feedback 🙏",

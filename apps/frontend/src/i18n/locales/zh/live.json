@@ -156,7 +156,9 @@
     "goodAnswer": "正确答案：",
     "or": " 或 ",
     "closestTitle": "最接近的答案",
-    "closestDistance": "±{{distance}}"
+    "closestDistance": "±{{distance}}",
+    "yourPick": "你",
+    "yourAnswer": "你的答案："
   },
   "rating": {
     "thanks": "感谢你的评价 🙏",

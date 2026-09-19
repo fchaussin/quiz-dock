@@ -24,6 +24,7 @@ import {
   AnswerExplanation,
   AnswerRules,
   OptionGrid,
+  RevealAnswer,
   SlideView,
   TYPE_BASE,
 } from '../game/live-components';
@@ -420,6 +421,35 @@ export function PlayerPage() {
         ) : (
           <p className="text-muted-foreground">{t('player.answersRevealed')}</p>
         )}
+        {/* What was asked and what this participant answered, next to the right answer. */}
+        {question && view.reveal ? (
+          question.options?.length && question.type !== 'ordering' ? (
+            <OptionGrid
+              options={question.options}
+              selectedIds={selected}
+              correctIds={view.reveal.correctOptionIds}
+              layout="list"
+            />
+          ) : (
+            <div className="flex w-full flex-col items-center gap-[0.5em]">
+              {question.type === 'ordering' && order.length ? (
+                <p className="text-muted-foreground text-[0.95em]">
+                  {t('reveal.yourAnswer')}{' '}
+                  <strong>
+                    {order
+                      .map((id) => question.options?.find((o) => o.id === id)?.text ?? id)
+                      .join(' → ')}
+                  </strong>
+                </p>
+              ) : freeValue ? (
+                <p className="text-muted-foreground text-[0.95em]">
+                  {t('reveal.yourAnswer')} <strong>{freeValue}</strong>
+                </p>
+              ) : null}
+              <RevealAnswer question={question} reveal={view.reveal} />
+            </div>
+          )
+        ) : null}
         {view.reveal?.answerExplanation ? <AnswerExplanation reveal={view.reveal} /> : null}
         {you ? (
           <p className="w-full border-t pt-[1em] text-[1.5em]">

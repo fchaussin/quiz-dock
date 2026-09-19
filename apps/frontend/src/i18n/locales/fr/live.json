@@ -156,7 +156,9 @@
     "goodAnswer": "Bonne réponse :",
     "or": " ou ",
     "closestTitle": "Réponses les plus proches",
-    "closestDistance": "±{{distance}}"
+    "closestDistance": "±{{distance}}",
+    "yourPick": "toi",
+    "yourAnswer": "Ta réponse :"
   },
   "rating": {
     "thanks": "Merci pour ton avis 🙏",
