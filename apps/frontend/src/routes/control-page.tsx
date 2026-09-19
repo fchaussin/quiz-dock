@@ -46,6 +46,13 @@ const CHRONO_STEPS = [-5, -1, 1, 5] as const;
  * Volontairement distinct du grand écran à vidéoprojeter (`/present/$pin/screen`) —
  * le QR d'invitation y reste discret (simple info), pour ne pas confondre les deux.
  */
+/**
+ * A console screen fills the viewport under the header (4rem) and the main
+ * padding (2 × 1.5rem): its action bar (`mt-auto`, sticky) then sits at the
+ * bottom of the screen whatever the height of the slide or question on screen.
+ */
+const CONSOLE_SECTION = 'mx-auto flex min-h-[calc(100dvh-7rem)] w-full max-w-4xl flex-col py-6';
+
 export function ControlPage() {
   const { t } = useTranslation(['live', 'common']);
   // Same explanation as in the editor before switching full capture on (GDPR, archive size).
@@ -152,7 +159,7 @@ export function ControlPage() {
   // ── LOBBY ────────────────────────────────────────────────────────────────
   if (view.state === 'LOBBY' || view.state === null) {
     return (
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-6 py-6">
+      <section className={cn(CONSOLE_SECTION, 'gap-6')}>
         <RecapHeader view={view} pin={pin} />
 
         {/* Invitation discrète : simple info, pas le grand écran de projection. */}
@@ -219,7 +226,7 @@ export function ControlPage() {
           </span>
         </label>
 
-        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap items-center justify-between gap-3">
+        <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap items-center justify-between gap-3">
           <ModeToggle mode={view.mode} onChange={setMode} />
           <div className="flex items-center gap-2">
             <EndGameButton label={t('control.stopSession')} onConfirm={endGame} />
@@ -264,7 +271,7 @@ export function ControlPage() {
   // ── SLIDE_SHOW (#7) ────────────────────────────────────────────────────────
   if (view.state === 'SLIDE_SHOW' && view.slide) {
     return (
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 py-6">
+      <section className={cn(CONSOLE_SECTION, 'gap-5')}>
         {controlBar}
         <QuestionCarousel
           outline={view.outline}
@@ -275,7 +282,7 @@ export function ControlPage() {
         <div className="bg-card flex rounded-xl border p-5 text-[0.8rem] sm:p-6">
           <SlideView slide={view.slide} />
         </div>
-        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">
+        <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">
           <div className="min-w-0 flex-1">
             {view.paused && view.slide.displayDelayS ? (
               <span className="text-muted-foreground text-sm">{t('control.autoPaused')}</span>
@@ -298,7 +305,7 @@ export function ControlPage() {
   // ── REVEAL / LEADERBOARD ───────────────────────────────────────────────────
   if (view.state === 'REVEAL' || view.state === 'LEADERBOARD') {
     return (
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 py-6">
+      <section className={cn(CONSOLE_SECTION, 'gap-5')}>
         {controlBar}
         <QuestionCarousel
           outline={view.outline}
@@ -315,7 +322,7 @@ export function ControlPage() {
             <LeaderboardList rows={view.leaderboard.top} />
           </div>
         ) : null}
-        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">
+        <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">
           <div className="min-w-0 flex-1">
             {view.mode === 'auto' && view.paused ? (
               <span className="text-muted-foreground text-sm">{t('control.autoPaused')}</span>
@@ -338,10 +345,10 @@ export function ControlPage() {
   // ── PODIUM ──────────────────────────────────────────────────────────────────
   if (view.state === 'PODIUM') {
     return (
-      <section className="mx-auto flex w-full max-w-4xl flex-col items-center gap-6 py-8">
+      <section className={cn(CONSOLE_SECTION, 'items-center gap-6')}>
         <h2 className="text-2xl font-bold">{t('control.podium')}</h2>
         {view.podium ? <Podium rows={view.podium.podium} /> : null}
-        <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex w-full flex-wrap items-center justify-between gap-3">
+        <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex w-full flex-wrap items-center justify-between gap-3">
           <div className="flex-1">{navBar}</div>
           <EndGameButton label={t('control.endSession')} offerArchive onConfirm={endGame} />
         </div>
@@ -366,7 +373,7 @@ export function ControlPage() {
   const correctIds = view.outline.find((q) => q.index === view.questionIndex)?.correctOptionIds;
 
   return (
-    <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 py-6">
+    <section className={cn(CONSOLE_SECTION, 'gap-5')}>
       {controlBar}
 
       {/* Question en cours — panneau principal agrandi (énoncé + réponses + chrono). */}
@@ -415,7 +422,7 @@ export function ControlPage() {
       {/* Déroulé du quiz (vue d'ensemble). */}
       <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
 
-      <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap gap-2">
+      <div className="sticky bottom-0 z-10 -mx-6 mt-auto border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex flex-wrap gap-2">
         <Button type="button" onClick={() => emit('host:reveal')}>
           <Eye className="size-4" />
           {t('control.revealNow')}
