@@ -38,8 +38,11 @@ expect in each setup and what to configure so the right address is offered.
 | **Dev stack** (`docker compose up`, Vite on :15173) | As above, with the port of the page you are on | `HOST_LAN_IPS` in `.env` |
 | **Console opened on `localhost`** | "This page" is useless for phones: the console opens the help by itself and pre-selects a LAN address when one is known | — |
 
-In every case the host can type any address (`Other address…`); it is kept on
-the session (console, projection and share link agree), frozen once the
+Behind a reverse proxy nothing needs configuring: "this page" is the address the
+browser resolved through the proxy (scheme and host included), and it is what
+the console proposes. A remembered address or a LAN candidate is only applied
+by itself when the console runs on `localhost`. In every case the host can
+type any address (`Other address…`); it is kept on the session (console, projection and share link agree), frozen once the
 session starts, and remembered by the browser for the next one. Phones must be
 on the same network as the machine, and its firewall must let the port through.
 Over HTTPS, an `http://` LAN address triggers a warning on phones: a public

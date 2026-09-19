@@ -44,6 +44,40 @@ describe('JoinAddressPicker', () => {
     ]);
   });
 
+  it('on a server (not localhost) keeps the origin the proxy resolved, whatever the browser remembers', async () => {
+    localStorage.setItem('live.joinBaseUrl', 'http://192.168.0.3:15173');
+    mockApi([
+      {
+        method: 'GET',
+        path: '/games/join-addresses',
+        body: { publicUrl: null, lanIps: ['192.168.0.3'], lanSource: 'configured' },
+      },
+    ]);
+    // jsdom's origin is localhost: pretend the page was reached through https://quiz.example.org.
+    vi.stubGlobal('location', {
+      ...window.location,
+      origin: 'https://quiz.example.org',
+      protocol: 'https:',
+      port: '',
+    });
+    const onChange = renderPicker('https://quiz.example.org');
+    await screen.findByLabelText('Adresse pour rejoindre');
+    await new Promise((r) => setTimeout(r, 50));
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('prefers APP_PUBLIC_URL when the deployment declares one', async () => {
+    mockApi([
+      {
+        method: 'GET',
+        path: '/games/join-addresses',
+        body: { publicUrl: 'https://quiz.example.org', lanIps: [], lanSource: 'hidden' },
+      },
+    ]);
+    const onChange = renderPicker(window.location.origin);
+    await waitFor(() => expect(onChange).toHaveBeenCalledWith('https://quiz.example.org'));
+  });
+
   it('lets the host type any address and remembers the session’s choice', async () => {
     mockApi([{ method: 'GET', path: '/games/join-addresses', body: { publicUrl: null, lan: [] } }]);
     const onChange = renderPicker('http://quiz.example.org');

@@ -58,8 +58,10 @@ export function JoinAddressPicker({
     } catch {
       /* storage unavailable */
     }
-    const preferred =
-      remembered ?? data.data.publicUrl ?? (onLocalhost ? lan[0] : undefined) ?? null;
+    // A server install keeps the address the browser resolved through the reverse
+    // proxy (this page's origin) — or APP_PUBLIC_URL when set. A remembered address
+    // and the LAN candidates only step in on localhost, where the origin is useless.
+    const preferred = data.data.publicUrl ?? (onLocalhost ? (remembered ?? lan[0] ?? null) : null);
     if (preferred && preferred !== current) onChange(preferred);
   }, [data, initialised, current, onLocalhost, lan, onChange]);
 
