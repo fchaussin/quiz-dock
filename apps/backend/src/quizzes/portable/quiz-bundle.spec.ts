@@ -47,6 +47,7 @@ function makeQuiz(): ExportableQuiz {
         timeLimitS: 30,
         revealDelayS: 8,
         pointsMode: 'double',
+        scoring: 'standard',
         numericValue: null,
         numericTolerance: null,
         createdAt: now,
@@ -92,6 +93,7 @@ function makeQuiz(): ExportableQuiz {
         timeLimitS: 20,
         revealDelayS: null,
         pointsMode: 'standard',
+        scoring: 'standard',
         numericValue: new Prisma.Decimal('3.14'),
         numericTolerance: new Prisma.Decimal('0.01'),
         createdAt: now,
@@ -137,7 +139,7 @@ function makeQuiz(): ExportableQuiz {
         updatedAt: now,
       },
     ],
-  } as ExportableQuiz;
+  } as unknown as ExportableQuiz;
 }
 
 const pathFor = (id: string) => `media/${id}.png`;
