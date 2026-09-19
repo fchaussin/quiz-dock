@@ -9,8 +9,9 @@
 #   compose     docker-compose.prod.yml — app + PostgreSQL + Redis (production)
 #   standalone  one container (fchaussin/quizdock:standalone) — demo / first try
 #
-# Admin commands (doctor, seat:*, user:*, samples:load, sessions:purge) are
-# relayed to the `qd` CLI shipped inside the image (/usr/local/bin/qd).
+# Admin commands (doctor, seat:*, user:*, quiz:*, samples:load, sessions:purge)
+# are relayed to the `qd` CLI shipped inside the image (/usr/local/bin/qd);
+# quiz bundles cross the container boundary on stdin / stdout.
 set -eu
 
 IMAGE="${QUIZDOCK_IMAGE:-fchaussin/quizdock}"
@@ -317,6 +318,9 @@ Administration (relayed to the CLI inside the container)
   seat:status | seat:release
   user:list | user:set-role <sub|email> admin|player
   samples:load <sub|email>
+  quiz:list [<sub|email>]
+  quiz:export <id> <file.zip>       Write a quiz bundle (quiz.json + media/) on the host
+  quiz:import <file> <sub|email>    Create a draft from a bundle (zip or quiz.json)
   sessions:purge [--dry-run]
   admin <command…>      Any other in-image command (\`admin help\`)
 
@@ -336,8 +340,17 @@ case "$cmd" in
   backup) cmd_backup "$@" ;;
   restore) cmd_restore "$@" ;;
   upgrade) cmd_upgrade "$@" ;;
-  doctor | seat:status | seat:release | user:list | user:set-role | samples:load | sessions:purge | migrate:status)
+  doctor | seat:status | seat:release | user:list | user:set-role | samples:load | sessions:purge | migrate:status | quiz:list)
     need_docker; need_init; admin "$cmd" "$@" ;;
+  quiz:export)
+    [ $# -eq 2 ] || die "usage: $0 quiz:export <id> <file.zip>"
+    need_docker; need_init
+    admin quiz:export "$1" - >"$2" || { rm -f "$2"; exit 1; }
+    echo "Exported quiz $1 to $2." ;;
+  quiz:import)
+    [ $# -eq 2 ] || die "usage: $0 quiz:import <file> <sub|email>"
+    [ -f "$1" ] || die "no such file: $1"
+    need_docker; need_init; admin quiz:import - "$2" <"$1" ;;
   admin) need_docker; need_init; admin "$@" ;;
   help | -h | --help) cmd_help ;;
   *) die "unknown command \`$cmd\` — see \`$0 help\`." ;;

@@ -4,11 +4,13 @@ import { parseArgs } from './cli/args';
 import { CliModule } from './cli/cli.module';
 import { defaultPingRedis, defaultProbeWritable, doctor } from './cli/commands/doctor';
 import { migrationStatus } from './cli/commands/migrate-status';
+import { diskIo, quizExport, quizImport, quizList } from './cli/commands/quiz';
 import { seatRelease, seatStatus } from './cli/commands/seat';
 import { sessionsPurge } from './cli/commands/sessions';
 import { samplesLoad, userList, userSetRole } from './cli/commands/users';
 import { CliError, ConsoleOutput } from './cli/output';
 import { PrismaService } from './prisma/prisma.service';
+import { QuizPortableService } from './quizzes/portable/quiz-portable.service';
 import { SampleQuizzesService } from './quizzes/samples/sample-quizzes.service';
 import { HostSeatService } from './users/host-seat.service';
 
@@ -25,6 +27,12 @@ Usage: qd <command> [options]      (in the container; = node dist/cli.js)
                     Grant (sticky) or revoke the admin role
   samples:load <sub|email>
                     Add the built-in sample quizzes to that user's bank
+  quiz:list [<sub|email>]
+                    List quizzes (id, title, owner, status…), optionally one user's
+  quiz:export <id> <file.zip|->
+                    Write the quiz as a bundle (quiz.json + media/), "-" = stdout
+  quiz:import <file|-> <sub|email>
+                    Create a draft from a bundle (zip or quiz.json), "-" = stdin
   sessions:purge [--dry-run]
                     Delete archived sessions past their retention date
   help              This message
@@ -47,8 +55,10 @@ async function main(argv: string[]): Promise<number> {
     out.line(USAGE);
     return 0;
   }
+  // A bundle streamed to stdout must be the only thing written there.
+  const toStdout = args.command === 'quiz:export' && args.positional[1] === '-';
   const app = await NestFactory.createApplicationContext(CliModule, {
-    logger: ['error', 'warn'],
+    logger: toStdout ? ['error'] : ['error', 'warn'],
   });
   try {
     const prisma = app.get(PrismaService);
@@ -98,6 +108,28 @@ async function main(argv: string[]): Promise<number> {
           prisma,
           app.get(SampleQuizzesService),
           need(args.positional[0], '<sub|email>'),
+        );
+        return 0;
+      case 'quiz:list':
+        await quizList(out, prisma, args.positional[0]);
+        return 0;
+      case 'quiz:export':
+        await quizExport(
+          out,
+          app.get(QuizPortableService),
+          need(args.positional[0], '<id>'),
+          need(args.positional[1], '<file.zip|->'),
+          diskIo,
+        );
+        return 0;
+      case 'quiz:import':
+        await quizImport(
+          out,
+          prisma,
+          app.get(QuizPortableService),
+          need(args.positional[0], '<file|->'),
+          need(args.positional[1], '<sub|email>'),
+          diskIo,
         );
         return 0;
       case 'sessions:purge':
