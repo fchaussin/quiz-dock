@@ -702,7 +702,7 @@ export class GameEngine {
       const rankOf = new Map(ranked.map((p, i) => [p.id, i + 1]));
       const podium = ranked
         .slice(0, 3)
-        .map((p, i) => ({ nickname: p.nickname, score: p.score, rank: i + 1 }));
+        .map((p, i) => ({ nickname: p.nickname, score: p.score, rank: i + 1, avatar: p.avatar }));
       socket.emit(
         'game:podium',
         this.personalPodium(podium, ranked, rankOf, playerId, await this.feedbackEnabled(pin)),

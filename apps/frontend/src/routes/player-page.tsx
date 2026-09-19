@@ -64,8 +64,15 @@ export function PlayerPage() {
   // bloque donc la saisie pendant la lecture pour ne jamais perdre de réponse.
   const readingLeft = useCountdown(question ? question.startedAt : null);
   const reading = readingLeft !== null && readingLeft > 0;
-  // Avatar affiché : graine choisie, sinon dérivée du pseudo.
-  const avatarName = avatarSeed || nickname || '?';
+  // Avatar affiché : dans le lobby, la graine choisie localement (aperçu avant
+  // enregistrement) ; une fois la partie lancée, **celle que le serveur connaît**
+  // (la même que sur le podium, la projection et la console) — un rechargement
+  // sans graine locale ou un choix non enregistré ne doivent pas diverger.
+  const myId = loadPlayerSession()?.playerId;
+  const serverAvatar = view.players.find((p) => p.playerId === myId)?.avatar;
+  const inLobby = view.state === null || view.state === 'LOBBY';
+  const avatarName =
+    (inLobby ? avatarSeed || serverAvatar : serverAvatar || avatarSeed) || nickname || '?';
 
   // Graine déjà synchronisée vers le serveur (pour n'émettre que sur changement réel).
   const [syncedSeed, setSyncedSeed] = useState(avatarSeed);
