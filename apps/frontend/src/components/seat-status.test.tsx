@@ -9,7 +9,7 @@ describe('SeatStatus (topbar, local mode)', () => {
     vi.unstubAllGlobals();
   });
 
-  it('counts down the holder’s seat and renews it for the same duration', async () => {
+  it('counts down the holder’s seat and extends it for a chosen duration', async () => {
     const claimedAt = new Date(Date.now() - 30 * 60_000).toISOString();
     const expiresAt = new Date(Date.now() + 90 * 60_000).toISOString(); // chosen: 2 h
     const fetchMock = mockApi([
@@ -26,17 +26,18 @@ describe('SeatStatus (topbar, local mode)', () => {
     expect(await screen.findByText(/1 h 30 min restantes/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Marc/ }));
 
-    fireEvent.click(screen.getByRole('button', { name: /Renouveler/ }));
+    fireEvent.change(screen.getByLabelText('Prolonger le siège pour'), { target: { value: '60' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Prolonger$/ }));
     await waitFor(() => {
       const call = fetchMock.mock.calls.find(
         ([url, opts]) => String(url).includes('/auth/host-seat/claim') && opts?.method === 'POST',
       );
       expect(call).toBeDefined();
-      expect(JSON.parse(String(call?.[1]?.body))).toEqual({ expiresInMinutes: 120 });
+      expect(JSON.parse(String(call?.[1]?.body))).toEqual({ expiresInMinutes: 60 });
     });
   });
 
-  it('says nothing about expiry when the seat has none, and nothing at all for a non-holder', async () => {
+  it('shows no expiry for a seat without one, still lets the holder extend or release it', async () => {
     mockApi([
       {
         method: 'GET',
@@ -48,6 +49,8 @@ describe('SeatStatus (topbar, local mode)', () => {
     renderApp('/dashboard');
     fireEvent.click(await screen.findByRole('button', { name: /Marc/ }));
     expect(await screen.findByText(/Sans expiration/)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Renouveler/ })).toBeNull();
+    // Still extendable (to set an expiry) and releasable.
+    expect(screen.getByRole('button', { name: /^Prolonger$/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Libérer le siège/ })).toBeInTheDocument();
   });
 });
