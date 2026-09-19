@@ -5,14 +5,17 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  ExternalLink,
   Eye,
   Gauge,
   Hand,
+  MonitorPlay,
   Pause,
   Play,
   Radio,
   Share2,
   SkipForward,
+  Smartphone,
   Square,
   Users,
 } from 'lucide-react';
@@ -35,7 +38,9 @@ import {
   SlideView,
 } from '../game/live-components';
 import { useGameRemaining } from '../game/use-countdown';
+import { ParticipantPreview } from '../game/participant-preview';
 import { type GameView, useGameSession } from '../game/use-game-session';
+import { ScreenView } from './screen-page';
 
 /** Boutons d'ajustement du chrono (§8) : retire/ajoute des secondes en direct. */
 const CHRONO_STEPS = [-5, -1, 1, 5] as const;
@@ -65,6 +70,7 @@ export function ControlPage() {
   const joinUrl = `${window.location.origin}/join/${pin}`;
   const screenUrl = `${window.location.origin}/present/${pin}/screen`;
   const emit = (event: 'host:start' | 'host:reveal' | 'host:next') => socket?.emit(event, { pin });
+  const [tab, setTab] = useState<HostTab>('control');
   // Looking back over played steps (no replay): the server tells what is reachable.
   const review = (step: GameStep) => socket?.emit('host:review', { pin, ...step });
   const navBar = view.nav ? (
@@ -142,9 +148,26 @@ export function ControlPage() {
     );
   }
 
+  // One session, three views: the console, the projected screen, a participant's phone.
+  const tabs = <HostTabs tab={tab} onTab={setTab} onOpenScreen={openScreen} />;
+  if (tab !== 'control') {
+    return (
+      <section className={cn(CONSOLE_SECTION, 'gap-5')}>
+        {tabs}
+        {tab === 'screen' ? (
+          <div className="overflow-hidden rounded-xl border">
+            <ScreenView pin={pin} />
+          </div>
+        ) : (
+          <ParticipantPreview view={view} />
+        )}
+      </section>
+    );
+  }
+
   const controlBar = (
     <>
-      <HostBreadcrumb view={view} pin={pin} />
+      {tabs}
       <ControlBar
         view={view}
         pin={pin}
@@ -882,38 +905,53 @@ function QuestionCarousel({
   );
 }
 
-/**
- * Where the host is: My quizzes › quiz › this session. The editor link is safe —
- * the session keeps running on the server while the host is elsewhere.
- */
-function HostBreadcrumb({ view, pin }: { view: GameView; pin: string }) {
+type HostTab = 'control' | 'screen' | 'player';
+
+/** The three views of a running session; the projection can also open in its own window. */
+function HostTabs({
+  tab,
+  onTab,
+  onOpenScreen,
+}: {
+  tab: HostTab;
+  onTab: (t: HostTab) => void;
+  onOpenScreen: () => void;
+}) {
   const { t } = useTranslation('live');
+  const tabs: { id: HostTab; label: string; icon: React.ReactNode }[] = [
+    { id: 'control', label: t('control.tabs.control'), icon: <MonitorPlay className="size-4" /> },
+    { id: 'screen', label: t('control.tabs.screen'), icon: <Eye className="size-4" /> },
+    { id: 'player', label: t('control.tabs.player'), icon: <Smartphone className="size-4" /> },
+  ];
   return (
-    <nav
-      aria-label={t('control.breadcrumb')}
-      className="text-muted-foreground flex flex-wrap items-center gap-1 text-sm"
-    >
-      <Link to="/dashboard" className="hover:text-foreground hover:underline">
-        {t('control.myQuizzes')}
-      </Link>
-      <ChevronRight className="size-3.5" />
-      {view.quizId ? (
-        <Link
-          to="/quizzes/$quizId"
-          params={{ quizId: view.quizId }}
-          className="hover:text-foreground max-w-[16rem] truncate hover:underline"
-          title={t('control.backToEditorHint')}
-        >
-          {view.quizTitle ?? t('control.sessionInProgress')}
-        </Link>
-      ) : (
-        <span className="max-w-[16rem] truncate">
-          {view.quizTitle ?? t('control.sessionInProgress')}
-        </span>
-      )}
-      <ChevronRight className="size-3.5" />
-      <span className="text-foreground font-medium">{t('control.sessionCrumb', { pin })}</span>
-    </nav>
+    <div className="flex flex-wrap items-center gap-2 border-b">
+      <div role="tablist" className="flex gap-1">
+        {tabs.map((x) => (
+          <button
+            key={x.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === x.id}
+            onClick={() => onTab(x.id)}
+            className={cn(
+              '-mb-px flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+              tab === x.id
+                ? 'border-primary text-foreground'
+                : 'text-muted-foreground hover:text-foreground border-transparent',
+            )}
+          >
+            {x.icon}
+            {x.label}
+          </button>
+        ))}
+      </div>
+      {tab === 'screen' ? (
+        <Button type="button" variant="ghost" size="sm" className="ml-auto" onClick={onOpenScreen}>
+          <ExternalLink className="size-4" />
+          {t('control.openInWindow')}
+        </Button>
+      ) : null}
+    </div>
   );
 }
 

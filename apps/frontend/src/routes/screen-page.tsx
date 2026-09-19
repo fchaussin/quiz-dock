@@ -28,8 +28,13 @@ import { useGameSession } from '../game/use-game-session';
  * vidéoprojection.
  */
 export function ScreenPage() {
-  const { t } = useTranslation('live');
   const { pin } = useParams({ from: '/present/$pin/screen' });
+  return <ScreenView pin={pin} />;
+}
+
+/** The projected screen itself; also embedded in the host console's Projection tab. */
+export function ScreenView({ pin }: { pin: string }) {
+  const { t } = useTranslation('live');
   const { view } = useGameSession(pin, 'spectator');
   const { ref, isFullscreen, toggle, supported } = useFullscreen<HTMLDivElement>();
   const remaining = useGameRemaining(view);

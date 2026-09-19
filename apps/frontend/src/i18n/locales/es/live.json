@@ -74,14 +74,16 @@
       "ordering": "Orden",
       "poll": "Encuesta"
     },
-    "breadcrumb": "Ruta",
-    "myQuizzes": "Mis cuestionarios",
-    "sessionCrumb": "Sesión {{pin}}",
-    "backToEditorHint": "Volver al editor — la sesión sigue en marcha",
     "previousStep": "Anterior",
     "nextStep": "Siguiente",
     "reviewing": "Mirando atrás — nada se repite",
-    "reviewHint": "Volver a mostrar esta pregunta"
+    "reviewHint": "Volver a mostrar esta pregunta",
+    "tabs": {
+      "control": "Consola",
+      "screen": "Proyección",
+      "player": "Participante"
+    },
+    "openInWindow": "Abrir en una ventana"
   },
   "screen": {
     "sessionUnavailable": "Sesión no disponible.",
@@ -188,5 +190,9 @@
     "ordering_partial": "Pon las opciones en orden — cada posición correcta cuenta.",
     "text_input_lenient": "Escribe tu respuesta — las pequeñas erratas se perdonan.",
     "fixed": "Puntos fijos"
+  },
+  "preview": {
+    "note": "Vista de solo lectura de lo que ve un participante ahora mismo.",
+    "personalHidden": "Cada participante ve aquí además su resultado y su puesto."
   }
 }

@@ -74,14 +74,16 @@
       "ordering": "排序",
       "poll": "投票"
     },
-    "breadcrumb": "路径",
-    "myQuizzes": "我的测验",
-    "sessionCrumb": "会话 {{pin}}",
-    "backToEditorHint": "返回编辑器 — 会话继续进行",
     "previousStep": "上一步",
     "nextStep": "下一步",
     "reviewing": "回顾中——不会重新作答",
-    "reviewHint": "再次显示此题"
+    "reviewHint": "再次显示此题",
+    "tabs": {
+      "control": "控制台",
+      "screen": "投影",
+      "player": "参与者"
+    },
+    "openInWindow": "在新窗口打开"
   },
   "screen": {
     "sessionUnavailable": "会话不可用。",
@@ -188,5 +190,9 @@
     "ordering_partial": "把选项按正确顺序排列——每个正确位置都计分。",
     "text_input_lenient": "输入你的答案——小的拼写错误可以原谅。",
     "fixed": "固定积分"
+  },
+  "preview": {
+    "note": "参与者此刻所见的只读预览。",
+    "personalHidden": "每位参与者在此还会看到自己的结果和排名。"
   }
 }

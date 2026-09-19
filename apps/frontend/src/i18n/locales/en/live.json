@@ -74,14 +74,16 @@
       "ordering": "Order",
       "poll": "Poll"
     },
-    "breadcrumb": "Breadcrumb",
-    "myQuizzes": "My quizzes",
-    "sessionCrumb": "Session {{pin}}",
-    "backToEditorHint": "Back to the editor — the session keeps running",
     "previousStep": "Previous",
     "nextStep": "Next",
     "reviewing": "Looking back — nothing is replayed",
-    "reviewHint": "Show this question again"
+    "reviewHint": "Show this question again",
+    "tabs": {
+      "control": "Console",
+      "screen": "Projection",
+      "player": "Participant"
+    },
+    "openInWindow": "Open in a window"
   },
   "screen": {
     "sessionUnavailable": "Session unavailable.",
@@ -188,5 +190,9 @@
     "ordering_partial": "Put the options in the right order — every right position counts.",
     "text_input_lenient": "Type your answer — small typos are forgiven.",
     "fixed": "Fixed points"
+  },
+  "preview": {
+    "note": "Read-only preview of what a participant sees right now.",
+    "personalHidden": "Each participant also sees their own result and ranking here."
   }
 }

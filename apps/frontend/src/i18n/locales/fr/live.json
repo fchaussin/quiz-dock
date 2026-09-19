@@ -74,14 +74,16 @@
       "ordering": "Ordre",
       "poll": "Sondage"
     },
-    "breadcrumb": "Fil d’Ariane",
-    "myQuizzes": "Mes quiz",
-    "sessionCrumb": "Session {{pin}}",
-    "backToEditorHint": "Retour à l’éditeur — la session continue en arrière-plan",
     "previousStep": "Précédent",
     "nextStep": "Suivant",
     "reviewing": "Retour en arrière — rien n’est rejoué",
-    "reviewHint": "Réafficher cette question"
+    "reviewHint": "Réafficher cette question",
+    "tabs": {
+      "control": "Console",
+      "screen": "Projection",
+      "player": "Participant"
+    },
+    "openInWindow": "Ouvrir dans une fenêtre"
   },
   "screen": {
     "sessionUnavailable": "Session indisponible.",
@@ -188,5 +190,9 @@
     "ordering_partial": "Remets les options dans le bon ordre — chaque bonne position compte.",
     "text_input_lenient": "Tape ta réponse — les petites fautes sont pardonnées.",
     "fixed": "Points fixes"
+  },
+  "preview": {
+    "note": "Aperçu en lecture seule de ce qu’un participant voit en ce moment.",
+    "personalHidden": "Chaque participant voit ici en plus son résultat et son classement."
   }
 }
