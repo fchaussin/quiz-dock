@@ -27,7 +27,6 @@
   },
   "broadcast": {
     "title": "Broadcast",
-    "fullCaptureLabel": "Full answer capture",
     "fullCaptureHelp": "Keeps each player's answer details (individual tracking). Enable before presenting.",
     "publish": "Publish (ready)",
     "presenting": "Starting…",
@@ -37,7 +36,8 @@
     "restore": "Restore",
     "presentError": "Failed to start the session.",
     "archiveTitle": "Archiving",
-    "archiveHelp": "An archived quiz leaves the main list; it can be restored."
+    "archiveHelp": "An archived quiz leaves the main list; it can be restored.",
+    "fullCaptureNext": "Full answer capture for the next session"
   },
   "feedback": {
     "enableLabel": "Allow player feedback",
@@ -153,13 +153,6 @@
     "confirmLabel": "Delete",
     "zoneTitle": "Danger zone"
   },
-  "gameAccess": {
-    "label": "Active session — PIN",
-    "controlScreen": "Control screen",
-    "projectionScreen": "Projection screen",
-    "invitationScreen": "Invitation screen",
-    "liveEditsHint": "Layout and presentation edits (backgrounds, contrast, explanations, slides) reach the running session at its next step; questions and answers stay as launched."
-  },
   "questionForm": {
     "typeLabel": "Type",
     "promptLabel": "Prompt",
@@ -220,6 +213,11 @@
       "ordering": "Partial credit: share of the elements at the right position.",
       "text_input": "Tolerate typos: one edit up to 5 letters, two beyond (after case/accent normalisation).",
       "numeric": "Closest answer wins: scored at the reveal — exact (within tolerance) = full points, then 75 / 50 / 30 %, 10 % beyond; no speed bonus."
+    },
+    "removeOptionConfirm": {
+      "title": "Remove this option?",
+      "description": "“{{label}}” will be removed from the question.",
+      "confirmLabel": "Remove"
     }
   },
   "preview": {
@@ -274,5 +272,12 @@
     "numeric": "The participant enters a number; correct when within ± tolerance of the target.",
     "ordering": "The participant sorts the options into the order set by the positions (#). All or nothing.",
     "poll": "Opinion only: no correct answer, no points; the distribution is shown at the reveal."
+  },
+  "sessions": {
+    "running_one": "{{count}} session running",
+    "running_other": "{{count}} sessions running",
+    "players_one": "{{count}} player",
+    "players_other": "{{count}} players",
+    "liveEditsHint": "Layout and presentation edits (backgrounds, contrast, explanations, slides) reach running sessions at their next step; questions and answers stay as launched."
   }
 }

@@ -40,3 +40,6 @@ docs/
 ## Notes de fonctionnalité
 
 - [`quiz-bundle.md`](quiz-bundle.md) — format d'import / export d'un quiz (`quiz.json` + `media/`).
+- [`scoring.md`](scoring.md) — barèmes : points, vitesse, série, variantes par type (plus proche, crédit partiel, tolérant).
+- [`live-session.md`](live-session.md) — session live : snapshot fond/forme, états, retour en arrière, reprise après redémarrage, adresse des invitations.
+- [`../apps/frontend/src/i18n/GLOSSARY.md`](../apps/frontend/src/i18n/GLOSSARY.md) — vocabulaire de l'interface (5 langues) et arbitrages.

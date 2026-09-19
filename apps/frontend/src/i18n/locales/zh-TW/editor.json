@@ -27,7 +27,6 @@
   },
   "broadcast": {
     "title": "廣播",
-    "fullCaptureLabel": "完整記錄回答",
     "fullCaptureHelp": "保留每位玩家的回答詳情（個人追蹤）。請在示範前啟用。",
     "publish": "發布（就緒）",
     "presenting": "正在啟動…",
@@ -37,7 +36,8 @@
     "restore": "恢復",
     "presentError": "啟動會話失敗。",
     "archiveTitle": "歸檔",
-    "archiveHelp": "歸檔的測驗會從主清單中隱藏，可以隨時還原。"
+    "archiveHelp": "歸檔的測驗會從主清單中隱藏，可以隨時還原。",
+    "fullCaptureNext": "下一場次完整記錄回答"
   },
   "feedback": {
     "enableLabel": "允許參與者評價",
@@ -153,13 +153,6 @@
     "confirmLabel": "刪除",
     "zoneTitle": "危險區域"
   },
-  "gameAccess": {
-    "label": "進行中的會話 — PIN",
-    "controlScreen": "控制螢幕",
-    "projectionScreen": "投影螢幕",
-    "invitationScreen": "邀請螢幕",
-    "liveEditsHint": "版面修改（背景、對比度、解析、投影片）會在進行中的場次下一步生效；題目和答案保持啟動時的版本。"
-  },
   "questionForm": {
     "typeLabel": "類型",
     "promptLabel": "題目",
@@ -220,6 +213,11 @@
       "ordering": "部分得分：位置正確的元素所占比例。",
       "text_input": "容忍拼字錯誤：5 個字母內允許 1 處，之外允許 2 處（大小寫/重音正規化後）。",
       "numeric": "最接近者勝：揭曉時計分——精確（在誤差內）= 滿分，其後 75 / 50 / 30 %，再往後 10 %；無速度加分。"
+    },
+    "removeOptionConfirm": {
+      "title": "刪除此選項？",
+      "description": "「{{label}}」將從題目中移除。",
+      "confirmLabel": "刪除"
     }
   },
   "preview": {
@@ -274,5 +272,12 @@
     "numeric": "參與者輸入數字；在目標值 ± 誤差範圍內即為正確。",
     "ordering": "參與者按位置 (#) 定義的順序排列選項。全對才得分。",
     "poll": "僅收集意見：沒有正確答案，不計分；揭曉時顯示分布。"
+  },
+  "sessions": {
+    "running_one": "{{count}} 場進行中",
+    "running_other": "{{count}} 場進行中",
+    "players_one": "{{count}} 名玩家",
+    "players_other": "{{count}} 名玩家",
+    "liveEditsHint": "版面修改（背景、對比度、解析、投影片）會在進行中的場次下一步生效；題目和答案保持啟動時的版本。"
   }
 }

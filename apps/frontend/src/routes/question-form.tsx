@@ -20,7 +20,7 @@ import { useForm, useStore } from '@tanstack/react-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GripVertical, Plus, X } from 'lucide-react';
+import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard';
@@ -243,6 +243,8 @@ export function QuestionForm({
   const cancel = () => (dirty ? setConfirmDiscard(true) : onClose());
   const mediaId = useStore(form.store, (s) => s.values.mediaId);
   const options = useStore(form.store, (s) => s.values.options);
+  // Index of the option whose removal awaits confirmation.
+  const [pendingRemoval, setPendingRemoval] = useState<number | null>(null);
   const answers = useStore(form.store, (s) => s.values.acceptedAnswers);
 
   // Colour and shape are a pair fixed by position (red ▲, blue ◆, yellow ●, green ■):
@@ -470,10 +472,16 @@ export function QuestionForm({
                       type="button"
                       variant="ghost"
                       size="icon"
+                      className="text-muted-foreground hover:text-destructive"
                       aria-label={t('questionForm.removeOption', { index: i + 1 })}
-                      onClick={() => setOptions(options.filter((_, idx) => idx !== i))}
+                      onClick={() =>
+                        // An empty option goes without asking; a typed one is worth a confirmation.
+                        (opt.text ?? '').trim()
+                          ? setPendingRemoval(i)
+                          : setOptions(options.filter((_, idx) => idx !== i))
+                      }
                     >
-                      <X className="size-4" />
+                      <Trash2 className="size-4" />
                     </Button>
                   )}
                 </SortableOption>
@@ -516,6 +524,7 @@ export function QuestionForm({
                 type="button"
                 variant="ghost"
                 size="icon"
+                className="text-muted-foreground hover:text-destructive"
                 aria-label={t('questionForm.removeAnswer', { index: i + 1 })}
                 onClick={() =>
                   form.setFieldValue(
@@ -524,7 +533,7 @@ export function QuestionForm({
                   )
                 }
               >
-                <X className="size-4" />
+                <Trash2 className="size-4" />
               </Button>
             </div>
           ))}
@@ -605,6 +614,24 @@ export function QuestionForm({
           {t('common:cancel')}
         </Button>
       </div>
+      <ConfirmDialog
+        open={pendingRemoval !== null}
+        destructive
+        title={t('questionForm.removeOptionConfirm.title')}
+        description={t('questionForm.removeOptionConfirm.description', {
+          label:
+            pendingRemoval !== null
+              ? options[pendingRemoval]?.text || `#${pendingRemoval + 1}`
+              : '',
+        })}
+        confirmLabel={t('questionForm.removeOptionConfirm.confirmLabel')}
+        onCancel={() => setPendingRemoval(null)}
+        onConfirm={() => {
+          if (pendingRemoval !== null)
+            setOptions(options.filter((_, idx) => idx !== pendingRemoval));
+          setPendingRemoval(null);
+        }}
+      />
       <ConfirmDialog
         open={confirmDiscard}
         destructive

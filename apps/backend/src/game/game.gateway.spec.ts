@@ -390,6 +390,37 @@ describe('GameGateway (intégration socket)', () => {
     }
   }, 15_000);
 
+  it('host:join-url: the invitation address reaches every screen, also on (re)attach, and locks at start', async () => {
+    const host = connect({ localUser: 'Animateur' });
+    const { pin } = await host.emitWithAck('host:create', { quizId });
+    const screen = connect();
+    const urlP = new Promise<{ baseUrl: string | null }>((resolve) =>
+      screen.once('game:join-url', (p) => resolve(p as never)),
+    );
+    await screen.emitWithAck('spectator:join', { pin });
+    host.emit('host:join-url', { pin, baseUrl: '192.168.1.103:15173/' });
+    expect(await urlP).toEqual({ baseUrl: 'http://192.168.1.103:15173' });
+
+    // A screen that attaches later gets it with the state burst.
+    const late = connect();
+    const lateP = new Promise<{ baseUrl: string | null }>((resolve) =>
+      late.once('game:join-url', (p) => resolve(p as never)),
+    );
+    await late.emitWithAck('spectator:join', { pin });
+    expect(await lateP).toEqual({ baseUrl: 'http://192.168.1.103:15173' });
+
+    // Once started, the address is frozen (the QR on the projection must not move).
+    const player = connect();
+    await player.emitWithAck('player:join', { pin, nickname: 'Lou' });
+    host.emit('host:start', { pin });
+    await new Promise<void>((resolve) => player.once('question:start', () => resolve()));
+    const errP = new Promise<{ code?: string }>((resolve) =>
+      host.once('error', (e) => resolve(e as never)),
+    );
+    host.emit('host:join-url', { pin, baseUrl: 'http://other:1' });
+    expect((await errP).code).toBe('session.already_started');
+  }, 15_000);
+
   it('archivage (§2.7) : capture intégrale → host:end{archive} persiste les tables, idempotent', async () => {
     const host = connect({ localUser: 'Animateur' });
     const { pin } = await host.emitWithAck('host:create', { quizId, fullCapture: true });

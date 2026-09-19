@@ -171,16 +171,31 @@ describe('EditorPage', () => {
     expect(publish).toBeDisabled();
   });
 
-  it('« Présenter » crée la partie et révèle les 3 accès (contrôle/projection/invitation)', async () => {
-    mockApi([{ method: 'GET', path: '/quizzes/q1', body: detail({ status: 'ready' }) }]);
-    renderApp('/quizzes/q1');
+  it('« Présenter » crée la session et ouvre sa console ; les sessions en cours du quiz sont listées', async () => {
+    mockApi([
+      { method: 'GET', path: '/quizzes/q1', body: detail({ status: 'ready' }) },
+      {
+        method: 'GET',
+        path: '/games/mine',
+        body: [
+          { pin: '111111', quizId: 'q1', title: 'Mon quiz', state: 'LOBBY', playerCount: 3 },
+          { pin: '222222', quizId: 'other', title: 'Autre', state: 'LOBBY', playerCount: 0 },
+        ],
+      },
+    ]);
+    const { router } = renderApp('/quizzes/q1');
 
-    fireEvent.click(await screen.findByRole('button', { name: /Présenter/ }));
+    // Only this quiz's sessions, each linking to its console.
+    expect(await screen.findByText('1 session en cours')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /111111/ })).toHaveAttribute(
+      'href',
+      '/session/111111/console',
+    );
+    expect(screen.queryByText(/222222/)).toBeNull();
 
-    expect(await screen.findByText(/Session en cours/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /contrôle/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /projection/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /invitation/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Présenter/ }));
+    // createSession is mocked (pin 482913): the editor hands over to the session's console.
+    await waitFor(() => expect(router.state.location.pathname).toBe('/session/482913/console'));
   });
 
   it('title is edited in place: « Enregistrer » only appears once something changed', async () => {

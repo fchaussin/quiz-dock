@@ -58,7 +58,7 @@
     "endConfirmDescription": "会话将被永久结束：PIN 失效，玩家被断开连接。此操作不可撤销。",
     "archiveLabel": "归档本次会话的结果",
     "archiveHint": "会话结束后仍可查看排行榜和统计数据。",
-    "resume": "回到当前",
+    "resume": "继续",
     "pause": "暂停",
     "timeRemaining": "剩余时间",
     "podium": "🏆 领奖台",
@@ -83,7 +83,28 @@
       "screen": "投影",
       "player": "参与者"
     },
-    "openInWindow": "在新窗口打开"
+    "openInWindow": "在新窗口打开",
+    "joinAddress": "加入地址",
+    "joinAddressPublic": "公开地址",
+    "joinAddressThisPage": "本页",
+    "joinAddressCustom": "其他地址…",
+    "joinAddressApply": "应用",
+    "joinAddressHelpToggle": "为什么是这个地址？",
+    "joinAddressHelp": {
+      "why": "参与者的手机通过打开此地址加入。“localhost”或“127.0.0.1”只在本机有效：手机无法访问，二维码和链接将无处可去。",
+      "whereTitle": "本地实例请使用这台电脑的网络地址",
+      "where": "（形如 192.168.x.x 的 IP），并保留本页的端口{{port}}：",
+      "mac": "Mac：系统设置 › Wi‑Fi › 你的网络旁的“详细信息…” › IP 地址（或 网络 › 你的连接）。",
+      "windows": "Windows：设置 › 网络和 Internet › Wi‑Fi（或以太网） › 你的网络 › IPv4 地址。",
+      "linux": "Linux：网络指示器 › 连接详情，或在终端运行“ip a”。",
+      "sameNetwork": "手机必须与这台电脑在同一 Wi‑Fi / 网络，且电脑防火墙需放行该端口。",
+      "deployed": "在有域名的服务器上，请在配置中设置 APP_PUBLIC_URL：它会被优先推荐。",
+      "publicConfigured": "此实例已配置公开地址（{{url}}）：请使用它，参与者可从任何地方访问。",
+      "lanKnown": "列出的是这台电脑在局域网中的地址：选择参与者所在网络（Wi‑Fi、有线）的那个。",
+      "lanHidden": "此实例运行在 Docker Desktop（或 bridge 网络的容器）中，看不到电脑的网络：无法检测本地地址。请在下方输入——或在 .env 文件中加入 HOST_LAN_IPS=<你的 IP>（或 docker run 时加“-e HOST_LAN_IPS=…”），下次即会列出。",
+      "https": "本页通过 HTTPS 提供：http:// 的本地地址会在手机上显示警告——带证书的公开地址才是正解。"
+    },
+    "backToLive": "回到当前"
   },
   "screen": {
     "sessionUnavailable": "会话不可用。",
@@ -148,7 +169,8 @@
     "joinAnother": "加入另一场",
     "yourClosest": "第 {{rank}} 接近——±{{distance}}",
     "yourCredit": "{{percent}} % 的分数",
-    "dragToReorder": "拖动以排序"
+    "dragToReorder": "拖动以排序",
+    "pollThanks": "感谢你的意见！"
   },
   "reveal": {
     "explanation": "解析",

@@ -24,6 +24,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Tooltip } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -39,6 +40,8 @@ import {
 } from '../game/live-components';
 import { useGameRemaining } from '../game/use-countdown';
 import { ParticipantPreview } from '../game/participant-preview';
+import { joinBase, joinHostLabel, joinUrlFor } from '../game/join-url';
+import { JoinAddressPicker } from '../game/join-address-picker';
 import { type GameView, useGameSession } from '../game/use-game-session';
 import { ScreenView } from './screen-page';
 
@@ -67,7 +70,7 @@ export function ControlPage() {
   const [shareNote, setShareNote] = useState<string | null>(null);
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const joinUrl = `${window.location.origin}/join/${pin}`;
+  const joinUrl = joinUrlFor(view, pin);
   const screenUrl = `${window.location.origin}/session/${pin}/projection`;
   const emit = (event: 'host:start' | 'host:reveal' | 'host:next') => socket?.emit(event, { pin });
   const [tab, setTab] = useState<HostTab>('control');
@@ -224,7 +227,7 @@ export function ControlPage() {
             </Tooltip>
             <div className="flex flex-col gap-1">
               <span className="text-muted-foreground text-xs uppercase tracking-widest">
-                {window.location.host}/join
+                {joinHostLabel(view)}
               </span>
               <span
                 className="font-mono text-3xl font-bold tracking-[0.2em]"
@@ -235,6 +238,11 @@ export function ControlPage() {
             </div>
           </div>
           {shareNote ? <p className="text-muted-foreground text-sm">{shareNote}</p> : null}
+          {/* Where the QR and the link point: a console opened on localhost must not invite to localhost. */}
+          <JoinAddressPicker
+            current={joinBase(view)}
+            onChange={(baseUrl) => socket?.emit('host:join-url', { pin, baseUrl })}
+          />
         </div>
 
         <div className="flex flex-col gap-2">
@@ -256,12 +264,12 @@ export function ControlPage() {
             setCapture(true);
           }}
         />
-        <label className="flex items-start gap-2 rounded-lg border p-4 text-sm">
-          <input
-            type="checkbox"
+        <label className="flex items-start gap-3 rounded-lg border p-4 text-sm">
+          <Switch
             className="mt-0.5"
             checked={view.fullCapture}
-            onChange={(e) => (e.target.checked ? setConfirmCapture(true) : setCapture(false))}
+            onCheckedChange={(checked) => (checked ? setConfirmCapture(true) : setCapture(false))}
+            aria-label={t('control.captureLabel')}
           />
           <span>
             <span className="font-medium">{t('control.captureLabel')}</span>
@@ -1049,7 +1057,7 @@ function StepNav({
           <span className="text-muted-foreground text-sm">{t('control.reviewing')}</span>
           <Button type="button" size="sm" onClick={onResume}>
             <SkipForward className="size-4" />
-            {t('control.resume')}
+            {t('control.backToLive')}
           </Button>
         </>
       ) : null}

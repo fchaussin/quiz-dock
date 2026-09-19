@@ -58,7 +58,7 @@
     "endConfirmDescription": "會話將被永久結束：PIN 失效，玩家被斷開連接。此操作不可撤銷。",
     "archiveLabel": "歸檔本次會話的結果",
     "archiveHint": "會話結束後仍可查看排行榜和統計數據。",
-    "resume": "回到目前",
+    "resume": "繼續",
     "pause": "暫停",
     "timeRemaining": "剩餘時間",
     "podium": "🏆 領獎台",
@@ -83,7 +83,28 @@
       "screen": "投影",
       "player": "參與者"
     },
-    "openInWindow": "在新視窗開啟"
+    "openInWindow": "在新視窗開啟",
+    "joinAddress": "加入位址",
+    "joinAddressPublic": "公開位址",
+    "joinAddressThisPage": "本頁",
+    "joinAddressCustom": "其他位址…",
+    "joinAddressApply": "套用",
+    "joinAddressHelpToggle": "為什麼是這個位址？",
+    "joinAddressHelp": {
+      "why": "參與者的手機透過開啟此位址加入。「localhost」或「127.0.0.1」只在本機有效：手機無法連上，QR code 和連結將無處可去。",
+      "whereTitle": "本機實例請使用這台電腦的網路位址",
+      "where": "（形如 192.168.x.x 的 IP），並保留本頁的連接埠{{port}}：",
+      "mac": "Mac：系統設定 › Wi‑Fi › 你的網路旁的「詳細資訊…」 › IP 位址（或 網路 › 你的連線）。",
+      "windows": "Windows：設定 › 網路和網際網路 › Wi‑Fi（或乙太網路） › 你的網路 › IPv4 位址。",
+      "linux": "Linux：網路指示器 › 連線詳細資料，或在終端機執行「ip a」。",
+      "sameNetwork": "手機必須與這台電腦在同一 Wi‑Fi / 網路，且電腦防火牆需放行該連接埠。",
+      "deployed": "在有網域名稱的伺服器上，請在設定中填入 APP_PUBLIC_URL：它會被優先建議。",
+      "publicConfigured": "此實例已設定公開位址（{{url}}）：請使用它，參與者可從任何地方連上。",
+      "lanKnown": "列出的是這台電腦在區域網路中的位址：選擇參與者所在網路（Wi‑Fi、有線）的那個。",
+      "lanHidden": "此實例執行在 Docker Desktop（或 bridge 網路的容器）中，看不到電腦的網路：無法偵測本機位址。請在下方輸入——或在 .env 檔案中加入 HOST_LAN_IPS=<你的 IP>（或 docker run 時加「-e HOST_LAN_IPS=…」），下次即會列出。",
+      "https": "本頁透過 HTTPS 提供：http:// 的本機位址會在手機上顯示警告——帶憑證的公開位址才是正解。"
+    },
+    "backToLive": "回到目前"
   },
   "screen": {
     "sessionUnavailable": "會話不可用。",
@@ -148,7 +169,8 @@
     "joinAnother": "加入另一場遊戲",
     "yourClosest": "第 {{rank}} 接近——±{{distance}}",
     "yourCredit": "{{percent}} % 的分數",
-    "dragToReorder": "拖曳以重新排序"
+    "dragToReorder": "拖曳以重新排序",
+    "pollThanks": "感謝你的意見！"
   },
   "reveal": {
     "explanation": "解析",

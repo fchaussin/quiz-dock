@@ -27,7 +27,6 @@
   },
   "broadcast": {
     "title": "Diffusion",
-    "fullCaptureLabel": "Capture intégrale des réponses",
     "fullCaptureHelp": "Conserve le détail des réponses de chaque participant (suivi individuel). À activer avant de présenter.",
     "publish": "Publier (prêt)",
     "presenting": "Lancement…",
@@ -37,7 +36,8 @@
     "restore": "Restaurer",
     "presentError": "Échec du lancement de la session.",
     "archiveTitle": "Archivage",
-    "archiveHelp": "Un quiz archivé disparaît de la liste principale ; il reste restaurable."
+    "archiveHelp": "Un quiz archivé disparaît de la liste principale ; il reste restaurable.",
+    "fullCaptureNext": "Capture intégrale des réponses pour la prochaine session"
   },
   "feedback": {
     "enableLabel": "Autoriser les avis des participants",
@@ -153,13 +153,6 @@
     "confirmLabel": "Supprimer",
     "zoneTitle": "Zone dangereuse"
   },
-  "gameAccess": {
-    "label": "Session en cours — PIN",
-    "controlScreen": "Écran de contrôle",
-    "projectionScreen": "Écran de projection",
-    "invitationScreen": "Écran d’invitation",
-    "liveEditsHint": "Les modifications de forme (fonds, contraste, explications, slides) s’appliquent à la session en cours dès l’étape suivante ; questions et réponses restent telles que lancées."
-  },
   "questionForm": {
     "typeLabel": "Type",
     "promptLabel": "Énoncé",
@@ -220,6 +213,11 @@
       "ordering": "Crédit partiel : part des éléments à la bonne position.",
       "text_input": "Tolérant aux fautes : 1 lettre jusqu’à 5 lettres, 2 au-delà (après normalisation casse/accents).",
       "numeric": "Le plus proche gagne : noté à la révélation — exact (dans la tolérance) = points pleins, puis 75 / 50 / 30 %, 10 % au-delà ; sans bonus vitesse."
+    },
+    "removeOptionConfirm": {
+      "title": "Supprimer cette option ?",
+      "description": "« {{label}} » sera retirée de la question.",
+      "confirmLabel": "Supprimer"
     }
   },
   "preview": {
@@ -274,5 +272,12 @@
     "numeric": "Le participant saisit un nombre ; bon s’il est à ± tolérance de la valeur cible.",
     "ordering": "Le participant remet les options dans l’ordre défini par les positions (#). Tout ou rien.",
     "poll": "Recueil d’opinion : aucune bonne réponse, aucun point ; la répartition est affichée à la révélation."
+  },
+  "sessions": {
+    "running_one": "{{count}} session en cours",
+    "running_other": "{{count}} sessions en cours",
+    "players_one": "{{count}} joueur",
+    "players_other": "{{count}} joueurs",
+    "liveEditsHint": "Les modifications de forme (fonds, contraste, explications, slides) s’appliquent aux sessions en cours dès l’étape suivante ; questions et réponses restent telles que lancées."
   }
 }

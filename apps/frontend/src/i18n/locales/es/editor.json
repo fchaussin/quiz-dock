@@ -27,7 +27,6 @@
   },
   "broadcast": {
     "title": "Difusión",
-    "fullCaptureLabel": "Captura completa de respuestas",
     "fullCaptureHelp": "Conserva el detalle de las respuestas de cada jugador (seguimiento individual). Actívalo antes de presentar.",
     "publish": "Publicar (listo)",
     "presenting": "Iniciando…",
@@ -37,7 +36,8 @@
     "restore": "Restaurar",
     "presentError": "No se pudo iniciar la sesión.",
     "archiveTitle": "Archivo",
-    "archiveHelp": "Un cuestionario archivado sale de la lista principal; se puede restaurar."
+    "archiveHelp": "Un cuestionario archivado sale de la lista principal; se puede restaurar.",
+    "fullCaptureNext": "Captura completa de respuestas para la próxima sesión"
   },
   "feedback": {
     "enableLabel": "Permitir opiniones de los participantes",
@@ -153,13 +153,6 @@
     "confirmLabel": "Eliminar",
     "zoneTitle": "Zona peligrosa"
   },
-  "gameAccess": {
-    "label": "Sesión en curso — PIN",
-    "controlScreen": "Pantalla de control",
-    "projectionScreen": "Pantalla de proyección",
-    "invitationScreen": "Pantalla de invitación",
-    "liveEditsHint": "Los cambios de forma (fondos, contraste, explicaciones, diapositivas) llegan a la sesión en curso en su siguiente paso; preguntas y respuestas quedan como se lanzaron."
-  },
   "questionForm": {
     "typeLabel": "Tipo",
     "promptLabel": "Enunciado",
@@ -220,6 +213,11 @@
       "ordering": "Crédito parcial: parte de los elementos en la posición correcta.",
       "text_input": "Tolerar erratas: una letra hasta 5 letras, dos más allá (tras normalizar mayúsculas/acentos).",
       "numeric": "Gana la más cercana: se puntúa al revelar — exacta (dentro de la tolerancia) = puntos completos, luego 75 / 50 / 30 %, 10 % después; sin bonus de velocidad."
+    },
+    "removeOptionConfirm": {
+      "title": "¿Eliminar esta opción?",
+      "description": "«{{label}}» se quitará de la pregunta.",
+      "confirmLabel": "Eliminar"
     }
   },
   "preview": {
@@ -274,5 +272,12 @@
     "numeric": "El participante introduce un número; correcto si está a ± tolerancia del valor objetivo.",
     "ordering": "El participante ordena las opciones según las posiciones (#). Todo o nada.",
     "poll": "Sondeo de opinión: sin respuesta correcta ni puntos; la distribución se muestra al revelar."
+  },
+  "sessions": {
+    "running_one": "{{count}} sesión en curso",
+    "running_other": "{{count}} sesiones en curso",
+    "players_one": "{{count}} jugador",
+    "players_other": "{{count}} jugadores",
+    "liveEditsHint": "Los cambios de forma (fondos, contraste, explicaciones, diapositivas) llegan a las sesiones en curso en su siguiente paso; preguntas y respuestas quedan como se lanzaron."
   }
 }

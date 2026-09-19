@@ -1144,6 +1144,32 @@
         ]
       }
     },
+    "/api/v1/games/join-addresses": {
+      "get": {
+        "operationId": "GameController_joinAddresses",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinAddressesDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "games"
+        ]
+      }
+    },
     "/api/v1/games/{pin}/end": {
       "post": {
         "operationId": "GameController_end",
@@ -4460,6 +4486,37 @@
           "title",
           "state",
           "playerCount"
+        ]
+      },
+      "JoinAddressesDto": {
+        "type": "object",
+        "properties": {
+          "publicUrl": {
+            "type": "string",
+            "description": "APP_PUBLIC_URL when configured — the address of a real deployment.",
+            "nullable": true
+          },
+          "lanIps": {
+            "description": "LAN IPv4 addresses of the machine (bare IPs; the browser adds its own scheme and port). From HOST_LAN_IPS when set, else detected.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lanSource": {
+            "type": "string",
+            "description": "How the LAN addresses were obtained: \"configured\" (HOST_LAN_IPS), \"detected\" (host interfaces), or \"hidden\" (the process only sees a container bridge — Docker Desktop, bridge network).",
+            "enum": [
+              "configured",
+              "detected",
+              "hidden"
+            ]
+          }
+        },
+        "required": [
+          "publicUrl",
+          "lanIps",
+          "lanSource"
         ]
       }
     }

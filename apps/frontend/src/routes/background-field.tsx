@@ -3,6 +3,7 @@ import { ChevronRight, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Select } from '@/components/ui/select';
 import { gradientCss } from '../game/surface';
 import { MediaUpload } from './media-upload';
@@ -171,10 +172,10 @@ export function BackgroundField({
               <option value="dark">{t('slideForm.tone.dark')}</option>
             </Select>
             <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
+              <Switch
                 checked={value.textOutline}
-                onChange={(e) => onChange({ ...value, textOutline: e.target.checked })}
+                onCheckedChange={(checked) => onChange({ ...value, textOutline: checked })}
+                aria-label={t('slideForm.outline')}
               />
               {t('slideForm.outline')}
             </label>

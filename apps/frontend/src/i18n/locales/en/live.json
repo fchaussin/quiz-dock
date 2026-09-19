@@ -58,7 +58,7 @@
     "endConfirmDescription": "The session will be permanently ended: the PIN is invalidated and players are disconnected. This action cannot be undone.",
     "archiveLabel": "Archive this session's results",
     "archiveHint": "Leaderboard and statistics will remain available after the session.",
-    "resume": "Back to live",
+    "resume": "Resume",
     "pause": "Pause",
     "timeRemaining": "Time remaining",
     "podium": "🏆 Podium",
@@ -83,7 +83,28 @@
       "screen": "Projection",
       "player": "Participant"
     },
-    "openInWindow": "Open in a window"
+    "openInWindow": "Open in a window",
+    "joinAddress": "Invitation address",
+    "joinAddressPublic": "public address",
+    "joinAddressThisPage": "this page",
+    "joinAddressCustom": "Other address…",
+    "joinAddressApply": "Apply",
+    "joinAddressHelpToggle": "Why this address?",
+    "joinAddressHelp": {
+      "why": "Participants’ phones open this address to join. “localhost” or “127.0.0.1” only work on this computer: a phone cannot reach them, so the QR code and the link would lead nowhere.",
+      "whereTitle": "On a local instance, use this computer’s network address",
+      "where": "(an IP like 192.168.x.x), keeping the port of this page{{port}}:",
+      "mac": "Mac: System Settings › Wi‑Fi › Details… next to your network › IP address (or Network › your connection).",
+      "windows": "Windows: Settings › Network & internet › Wi‑Fi (or Ethernet) › your network › IPv4 address.",
+      "linux": "Linux: the network indicator › connection details, or “ip a” in a terminal.",
+      "sameNetwork": "Phones must be on the same Wi‑Fi / network as this computer, and its firewall must let the port through.",
+      "deployed": "On a server with a domain name, set APP_PUBLIC_URL in the configuration: it is then offered first.",
+      "publicConfigured": "This instance is configured with a public address ({{url}}): use it, it is the one participants can reach from anywhere.",
+      "lanKnown": "The addresses listed are this machine’s on the local network: pick the one of the network the participants are on (Wi‑Fi, wired).",
+      "lanHidden": "This instance runs in Docker Desktop (or a container on a bridge network), which hides the computer’s network: no local address could be detected. Type it below — or add HOST_LAN_IPS=<your IP> to the .env file (or “-e HOST_LAN_IPS=…” on docker run) so it is listed here next time.",
+      "https": "This page is served over HTTPS: an http:// local address will show a warning on phones — a public address with a certificate is the clean way."
+    },
+    "backToLive": "Back to live"
   },
   "screen": {
     "sessionUnavailable": "Session unavailable.",
@@ -148,7 +169,8 @@
     "joinAnother": "Join another game",
     "yourClosest": "{{rank}}. closest — ±{{distance}}",
     "yourCredit": "{{percent}} % of the points",
-    "dragToReorder": "Drag to reorder"
+    "dragToReorder": "Drag to reorder",
+    "pollThanks": "Thanks for your opinion!"
   },
   "reveal": {
     "explanation": "Explanation",

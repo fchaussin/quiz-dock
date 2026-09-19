@@ -41,7 +41,7 @@
   <img alt="Self-hosted" src="https://img.shields.io/badge/self--hosted-✓-success" />
   <img alt="No tracking" src="https://img.shields.io/badge/tracking-none-success" />
   <a href="docs/security/"><img alt="Scanned by Trivy" src="https://img.shields.io/badge/scanned%20by-Trivy-1904DA?logo=aqua&logoColor=white" /></a>
-  <img alt="i18n" src="https://img.shields.io/badge/i18n-en%20·%20fr%20·%20es%20·%20zh-6f42c1" />
+  <img alt="i18n" src="https://img.shields.io/badge/i18n-en%20·%20fr%20·%20es%20·%20zh%20·%20zh--TW-6f42c1" />
   <a href="https://quizdock.github.io"><img alt="Website" src="https://img.shields.io/badge/website-quizdock.github.io-22d3ee" /></a>
   <img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen" />
 </p>
@@ -66,12 +66,15 @@ the results never leave your servers.
 - 💡 **Answer explanations** — an optional explanation shown at the reveal, with a per-question reveal delay in automatic mode.
 - 🎞️ **Content slides** — interleave slides (headings, text, images, 2–3 columns) between questions; backgrounds (image or gradient) for slides and questions, with a faithful 16:9 preview.
 - 🏆 **Live scoring & podium** — time-weighted points with streak bonuses, leaderboard between questions, final podium; manual or auto pacing.
+- 🎯 **Scoring rules per question** — *closest answer wins* for numeric questions, *partial credit* for multiple choice and ordering, *typo-tolerant* text answers, double or fixed points.
+- 🎛️ **Host in control** — one console with Console / Projection / Participant views, look back over played questions without replaying anything, layout edits reach a running session at its next step, sessions survive a server restart.
+- 📡 **Invitation address** — the QR code and join link point where participants can actually reach the instance (public URL, LAN IP, or any address), chosen from the console.
 - ⭐ **Player feedback** — players rate the quiz (stars + optional comment) at the end; hosts see the distribution and browse the reviews. Can be switched off per quiz.
 - 💾 **Answer capture** — optionally record every player's individual answers for audit, certification or individual follow-up.
 - 🔎 **History & exploration** — browse archived sessions: per-question success rates, average times, and per-player answer sheets.
 - 📤 **CSV export** — export overall results and per-player answer sheets.
 - 📦 **Quiz import / export** — a quiz travels as a [portable bundle](docs/quiz-bundle.md) (`quiz.json` + `media/`, zipped): back it up, move it between instances, share it.
-- 🌍 **Multilingual** — interface in English, French, Spanish, Simplified Chinese and Traditional Chinese (one language per instance).
+- 🌍 **Multilingual** — interface in English, French, Spanish, Simplified Chinese and Traditional Chinese (one language per instance); a [glossary](apps/frontend/src/i18n/GLOSSARY.md) keeps the wording consistent.
 - 🏠 **Self-hosted & private** — runs on your own infra with Docker; no SaaS, no tracking, no ads; players need no account, hosts can plug in any OpenID Connect provider.
 - 🎨 **White-label** — rebrand name, logo and CSS via env + a mounted folder, no rebuild.
 
@@ -79,28 +82,32 @@ the results never leave your servers.
 
 <table>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/live-projector.png" alt="Projector — live question" /><br /><sub><b>Projector</b> — live question, Kahoot-style</sub></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/live-player.png" alt="Player view" /><br /><sub><b>Player</b> — answer from any device</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/my-quizzes.png" alt="My quizzes" /><br /><sub><b>My quizzes</b> — your bank, import / export, one click to present</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/editor.png" alt="Quiz builder" /><br /><sub><b>Quiz builder</b> — 7 question types, slides, backgrounds, scoring rules</sub></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/host-control.png" alt="Host control" /><br /><sub><b>Host control</b> during a question</sub></td>
-    <td><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/leaderboard.png" alt="Leaderboard" /><br /><sub><b>Live leaderboard</b></sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/console-lobby.png" alt="Host console — lobby" /><br /><sub><b>Host console</b> — lobby: PIN, QR code, invitation address, players</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/projection-lobby.png" alt="Projection — lobby" /><br /><sub><b>Projection</b> — the big screen while players join</sub></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/editor.png" alt="Quiz editor" /><br /><sub><b>Quiz builder</b> — 7 question types</sub></td>
-    <td><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/dashboard.png" alt="Dashboard" /><br /><sub><b>Dashboard</b> — your quizzes</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/join.png" alt="Join by PIN, nickname and avatar" /><br /><sub><b>Join</b> — PIN or QR code, nickname &amp; Multiavatar avatar, no account</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/projection-slide.png" alt="Content slide" /><br /><sub><b>Content slide</b> — headings, text, images, backgrounds</sub></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/present-lobby.png" alt="Lobby" /><br /><sub><b>Lobby</b> — join by PIN / QR code</sub></td>
-    <td><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/preview.png" alt="Preview" /><br /><sub><b>Preview</b> — player view of a question</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/projection-question.png" alt="Projection — question" /><br /><sub><b>Projection</b> — live question, Kahoot-style</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/player-play.png" alt="Player — question and reveal" /><br /><sub><b>Player</b> — answers listed, colour tiles to tap, then own result</sub></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/join-avatar.png" alt="Join with avatar" /><br /><sub><b>Join</b> — nickname &amp; Multiavatar avatar</sub></td>
-    <td><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/player-review.png" alt="Player feedback" /><br /><sub><b>Player feedback</b> — rate the quiz at the end</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/console-question.png" alt="Host console — question" /><br /><sub><b>Host console</b> — chrono, answers received, reveal now</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/projection-reveal.png" alt="Projection — reveal" /><br /><sub><b>Reveal</b> — distribution, explanation, live leaderboard</sub></td>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/podium.png" alt="Podium" /><br /><sub><b>Podium</b> — final results on the big screen</sub></td>
-    <td><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/join.png" alt="Join by PIN" /><br /><sub><b>Join</b> — by PIN code or QR</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/console-reveal.png" alt="Host console — reveal" /><br /><sub><b>Host console</b> — look back over played questions, next</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/player-end.png" alt="Player — ordering and feedback" /><br /><sub><b>Player</b> — drag-and-drop ordering, rate the quiz at the end</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/projection-podium.png" alt="Podium" /><br /><sub><b>Podium</b> — final results on the big screen</sub></td>
+    <td width="50%"></td>
   </tr>
 </table>
 
@@ -179,6 +186,8 @@ Copy `.env.example` to `.env` and adjust. Common settings:
 | `APP_LANG` | `en` | Instance language: `en` · `fr` · `es` · `zh` · `zh-TW` |
 | `AUTH_MODE` | `none` | `none` (local mode: first host takes the seat, sample quizzes included) or `oidc` (any OpenID Connect provider) |
 | `HTTP_PORT` | `18080` | Host port for the app |
+| `APP_PUBLIC_URL` | — | Public address of the instance, offered first as the invitation address (QR code, join link) |
+| `HOST_LAN_IPS` | — | LAN IP of the machine when Docker hides it (Docker Desktop): offered as an invitation address for local play |
 
 Rebrand without rebuilding: set `APP_NAME` / `APP_LANG` and drop a `logo.svg` + `override.css`
 into the mounted `branding/` folder. The runtime is hardened (non-root, read-only root FS,

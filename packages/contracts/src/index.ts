@@ -87,6 +87,7 @@ export const ClientEvents = {
   HostStart: 'host:start',
   HostNext: 'host:next',
   HostReview: 'host:review',
+  HostJoinUrl: 'host:join-url',
   HostReveal: 'host:reveal',
   HostKick: 'host:kick',
   HostEnd: 'host:end',
@@ -359,6 +360,8 @@ export interface ClientToServerEvents {
   'host:next': (p: { pin: string }) => void;
   /** Show a played step again (no replay, no rescoring); `host:next` resumes. */
   'host:review': (p: { pin: string } & GameStep) => void;
+  /** Base URL the invitations (QR, link) point at; lobby only. */
+  'host:join-url': (p: { pin: string; baseUrl: string }) => void;
   'host:reveal': (p: { pin: string }) => void;
   'host:kick': (p: { pin: string; playerId: string }) => void;
   /**
@@ -430,6 +433,8 @@ export interface ServerToClientEvents {
   'game:ended': (p: { feedbackEnabled?: boolean }) => void;
   /** Mode/pause courants (à chaque changement et au (ré)attache). */
   'game:mode': (p: GameModePayload) => void;
+  /** Base URL of the invitations chosen by the host (null = the page's own origin). */
+  'game:join-url': (p: { baseUrl: string | null }) => void;
   /** Sommaire des questions — émis aux seules fenêtres de contrôle hôte. */
   'game:outline': (p: GameOutlinePayload) => void;
   /** Timing recalculé de la question courante (ajustement du chrono). */

@@ -396,7 +396,10 @@ export function PlayerPage() {
     // even spacing, centred in the remaining height so nothing floats in a blank.
     return wrap(
       <div className="flex w-full flex-col items-center gap-[1.5em]">
-        {r ? (
+        {question?.type === 'poll' ? (
+          // A poll has no right answer: no verdict, no points — just the picture.
+          <p className="text-[1.5em] font-semibold">{t('player.pollThanks')}</p>
+        ) : r ? (
           <div className="flex flex-col items-center gap-[0.5em]">
             <ResultMark correct={r.correct} />
             <p
