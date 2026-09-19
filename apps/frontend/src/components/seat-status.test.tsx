@@ -22,7 +22,7 @@ describe('SeatStatus (topbar, local mode)', () => {
       { method: 'GET', path: '/quizzes', body: [] },
     ]);
     renderApp('/dashboard');
-    expect(await screen.findByText(/Siège hôte · 1 h 30 min restantes/)).toBeInTheDocument();
+    expect(await screen.findByText(/1 h 30 min restantes/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /Renouveler/ }));
     await waitFor(() => {

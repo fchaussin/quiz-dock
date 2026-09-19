@@ -1,9 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { RefreshCw } from 'lucide-react';
+import { Armchair, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import {
   getHostSeatControllerStateQueryKey,
   useHostSeatControllerClaim,
@@ -38,7 +38,12 @@ export function SeatStatus({ user }: { user: string }) {
 
   if (holder !== user) return null;
   if (!expiresAt) {
-    return <span className="text-muted-foreground hidden sm:inline">{t('seat.noExpiry')}</span>;
+    return (
+      <Badge variant="muted" className="hidden gap-1 sm:inline-flex">
+        <Armchair className="size-3" />
+        {t('seat.noExpiry')}
+      </Badge>
+    );
   }
   const leftMs = Math.max(0, new Date(expiresAt).getTime() - now);
   const minutes = Math.ceil(leftMs / 60_000);
@@ -61,33 +66,27 @@ export function SeatStatus({ user }: { user: string }) {
           queryClient.invalidateQueries({ queryKey: getHostSeatControllerStateQueryKey() }),
       },
     );
+  // One tag: the seat, its time left (colour = urgency) and the renewal inside it.
   return (
-    <span className="flex items-center gap-2">
-      <span
-        className={cn(
-          'tabular-nums',
-          minutes <= 2
-            ? 'text-destructive font-semibold'
-            : minutes <= 10
-              ? 'text-amber-600'
-              : 'text-muted-foreground',
-        )}
-        title={t('seat.expiresTitle', { time: new Date(expiresAt).toLocaleTimeString() })}
-      >
-        {t('seat.label')} · {label}
-      </span>
+    <Badge
+      variant={minutes <= 2 ? 'destructive' : minutes <= 10 ? 'warning' : 'muted'}
+      className="gap-1.5 py-0.5 pr-0.5"
+      title={t('seat.expiresTitle', { time: new Date(expiresAt).toLocaleTimeString() })}
+    >
+      <Armchair className="size-3" />
+      <span className="tabular-nums">{label}</span>
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className="h-7 px-2"
+        className="h-5 gap-1 rounded-full px-1.5 text-[11px]"
         disabled={claim.isPending}
         onClick={renew}
         title={t('seat.renewHint', { count: durationMin })}
       >
-        <RefreshCw className="size-3.5" />
+        <RefreshCw className="size-3" />
         {t('seat.renew')}
       </Button>
-    </span>
+    </Badge>
   );
 }
