@@ -204,7 +204,7 @@ export function RevealAnswer({
 
   // Numérique / saisie texte : valeur(s) acceptée(s).
   const val = reveal.correctValue;
-  const text = Array.isArray(val) ? val.join(' ou ') : (val ?? '');
+  const text = Array.isArray(val) ? val.join(t('reveal.or')) : (val ?? '');
   return (
     <p className="text-[1.25em]">
       {t('reveal.goodAnswer')} <strong>{String(text)}</strong>

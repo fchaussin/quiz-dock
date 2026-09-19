@@ -143,7 +143,8 @@
   "reveal": {
     "explanation": "解析",
     "goodOrder": "正确顺序：",
-    "goodAnswer": "正确答案："
+    "goodAnswer": "正确答案：",
+    "or": " 或 "
   },
   "rating": {
     "thanks": "感谢你的评价 🙏",
