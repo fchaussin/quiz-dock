@@ -1,4 +1,5 @@
 import type {
+  ClosestRow,
   LeaderboardRow,
   PublicOption,
   QuestionRevealPayload,
@@ -206,9 +207,45 @@ export function RevealAnswer({
   const val = reveal.correctValue;
   const text = Array.isArray(val) ? val.join(t('reveal.or')) : (val ?? '');
   return (
-    <p className="text-[1.25em]">
-      {t('reveal.goodAnswer')} <strong>{String(text)}</strong>
-    </p>
+    <div className="flex w-full flex-col items-center gap-[0.75em]">
+      <p className="text-[1.25em]">
+        {t('reveal.goodAnswer')} <strong>{String(text)}</strong>
+      </p>
+      {reveal.closest ? <ClosestList rows={reveal.closest} /> : null}
+    </div>
+  );
+}
+
+/** Numeric `closest`: the answers from the closest to the farthest, with the points earned. */
+export function ClosestList({ rows }: { rows: ClosestRow[] }) {
+  const { t } = useTranslation('live');
+  if (rows.length === 0) return null;
+  return (
+    <div className="flex w-full max-w-[28em] flex-col gap-[0.4em]">
+      <h3 className="text-muted-foreground text-[0.9em] font-semibold">
+        {t('reveal.closestTitle')}
+      </h3>
+      <ol className="flex w-full flex-col gap-[0.3em]">
+        {rows.map((r) => (
+          <li
+            key={`${r.rank}-${r.nickname}`}
+            className={cn(
+              'flex items-center gap-[0.5em] rounded-[0.3em] px-[0.6em] py-[0.3em]',
+              r.rank === 1 ? 'bg-success/15 font-semibold' : 'bg-muted/60',
+            )}
+          >
+            <span className="text-muted-foreground w-[1.5em] tabular-nums">{r.rank}.</span>
+            <Avatar name={r.avatar || r.nickname} size="1.6em" />
+            <span className="min-w-0 flex-1 truncate text-left">{r.nickname}</span>
+            <span className="tabular-nums">{r.value}</span>
+            <span className="text-muted-foreground w-[4.5em] text-right text-[0.85em] tabular-nums">
+              {t('reveal.closestDistance', { distance: +r.distance.toFixed(2) })}
+            </span>
+            <span className="w-[3.5em] text-right tabular-nums">+{r.points}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }
 
@@ -227,6 +264,10 @@ export function AnswerRules({
   const { t } = useTranslation('live');
   const badge =
     question.type === 'poll' ? null : question.basePoints >= 2000 ? t('rules.double') : null;
+  // A scoring variant has its own wording (closest wins, partial credit, typos forgiven).
+  const scoring = question.scoring ?? 'standard';
+  const ruleKey =
+    scoring !== 'standard' ? `rules.${question.type}_${scoring}` : `rules.${question.type}`;
   return (
     <p
       className={cn(
@@ -234,7 +275,7 @@ export function AnswerRules({
         className,
       )}
     >
-      <span>{t(`rules.${question.type}`)}</span>
+      <span>{t(ruleKey, { defaultValue: t(`rules.${question.type}`) })}</span>
       {badge ? (
         <span className="rounded-full bg-amber-500/20 px-[0.6em] py-[0.1em] text-[0.85em] font-semibold text-amber-700">
           {badge}

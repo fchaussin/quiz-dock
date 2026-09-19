@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type QuestionDtoPointsMode = typeof QuestionDtoPointsMode[keyof typeof QuestionDtoPointsMode];
+export type QuestionDtoScoring = typeof QuestionDtoScoring[keyof typeof QuestionDtoScoring];
 
 
-export const QuestionDtoPointsMode = {
+export const QuestionDtoScoring = {
   standard: 'standard',
-  double: 'double',
-  none: 'none',
-  fixed: 'fixed',
+  closest: 'closest',
+  partial: 'partial',
+  lenient: 'lenient',
 } as const;

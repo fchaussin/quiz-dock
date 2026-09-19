@@ -143,13 +143,17 @@
     "leave": "Quitter",
     "leaveConfirmTitle": "Quitter la session ?",
     "leaveConfirmDescription": "Vous perdrez votre place et votre score. Pour revenir, il faudra rejoindre à nouveau avec le PIN.",
-    "joinAnother": "Rejoindre une autre partie"
+    "joinAnother": "Rejoindre une autre partie",
+    "yourClosest": "{{rank}}ᵉ plus proche — ±{{distance}}",
+    "yourCredit": "{{percent}} % des points"
   },
   "reveal": {
     "explanation": "Explication",
     "goodOrder": "Bon ordre :",
     "goodAnswer": "Bonne réponse :",
-    "or": " ou "
+    "or": " ou ",
+    "closestTitle": "Réponses les plus proches",
+    "closestDistance": "±{{distance}}"
   },
   "rating": {
     "thanks": "Merci pour ton avis 🙏",
@@ -177,6 +181,11 @@
     "ordering": "Remets les options dans le bon ordre, puis valide. Tout ou rien.",
     "poll": "Pas de bonne réponse, pas de points — juste ton avis.",
     "double": "Points doublés",
-    "nopoints": "Sans points"
+    "nopoints": "Sans points",
+    "numeric_closest": "Saisis un nombre — la réponse la plus proche gagne.",
+    "multiple_choice_partial": "Plusieurs bonnes réponses — chaque bonne case compte, chaque mauvaise en annule une.",
+    "ordering_partial": "Remets les options dans le bon ordre — chaque bonne position compte.",
+    "text_input_lenient": "Tape ta réponse — les petites fautes sont pardonnées.",
+    "fixed": "Points fixes"
   }
 }

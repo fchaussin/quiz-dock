@@ -143,13 +143,17 @@
     "leave": "Salir",
     "leaveConfirmTitle": "¿Salir de la sesión?",
     "leaveConfirmDescription": "Perderás tu sitio y tu puntuación. Para volver tendrás que unirte de nuevo con el PIN.",
-    "joinAnother": "Unirse a otra partida"
+    "joinAnother": "Unirse a otra partida",
+    "yourClosest": "{{rank}}.º más cercano — ±{{distance}}",
+    "yourCredit": "{{percent}} % de los puntos"
   },
   "reveal": {
     "explanation": "Explicación",
     "goodOrder": "Orden correcto:",
     "goodAnswer": "Respuesta correcta:",
-    "or": " o "
+    "or": " o ",
+    "closestTitle": "Respuestas más cercanas",
+    "closestDistance": "±{{distance}}"
   },
   "rating": {
     "thanks": "Gracias por tu opinión 🙏",
@@ -177,6 +181,11 @@
     "ordering": "Pon las opciones en el orden correcto y envía. Todo o nada.",
     "poll": "Sin respuesta correcta ni puntos — solo tu opinión.",
     "double": "Puntos dobles",
-    "nopoints": "Sin puntos"
+    "nopoints": "Sin puntos",
+    "numeric_closest": "Introduce un número — gana la respuesta más cercana.",
+    "multiple_choice_partial": "Varias respuestas correctas — cada acierto cuenta, cada fallo resta uno.",
+    "ordering_partial": "Pon las opciones en orden — cada posición correcta cuenta.",
+    "text_input_lenient": "Escribe tu respuesta — las pequeñas erratas se perdonan.",
+    "fixed": "Puntos fijos"
   }
 }

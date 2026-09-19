@@ -173,7 +173,8 @@
     "pointsLabel": "Puntos",
     "pointsMode": {
       "standard": "Estándar",
-      "double": "Doble"
+      "double": "Doble",
+      "fixed": "Fijo (sin bonus de velocidad)"
     },
     "optionsLegend": "Opciones",
     "optionAriaLabel": "opción {{index}}",
@@ -194,7 +195,32 @@
     "submitUpdate": "Guardar",
     "submitAdd": "Añadir",
     "cancel": "Cancelar",
-    "invalidError": "Pregunta no válida."
+    "invalidError": "Pregunta no válida.",
+    "scoringLabel": "Puntuación",
+    "scoring": {
+      "multiple_choice": {
+        "standard": "Todo o nada",
+        "partial": "Crédito parcial"
+      },
+      "ordering": {
+        "standard": "Todo o nada",
+        "partial": "Crédito parcial"
+      },
+      "text_input": {
+        "standard": "Exacto",
+        "lenient": "Tolerar erratas"
+      },
+      "numeric": {
+        "standard": "Dentro de la tolerancia",
+        "closest": "Gana la más cercana"
+      }
+    },
+    "scoringHelp": {
+      "multiple_choice": "Crédito parcial: cada acierto suma su parte, cada fallo resta uno.",
+      "ordering": "Crédito parcial: parte de los elementos en la posición correcta.",
+      "text_input": "Tolerar erratas: una letra hasta 5 letras, dos más allá (tras normalizar mayúsculas/acentos).",
+      "numeric": "Gana la más cercana: se puntúa al revelar — exacta (dentro de la tolerancia) = puntos completos, luego 75 / 50 / 30 %, 10 % después; sin bonus de velocidad."
+    }
   },
   "preview": {
     "view": "Vista previa (vista del jugador)",

@@ -173,7 +173,8 @@
     "pointsLabel": "Points",
     "pointsMode": {
       "standard": "Standard",
-      "double": "Double"
+      "double": "Double",
+      "fixed": "Fixed (no speed bonus)"
     },
     "optionsLegend": "Options",
     "optionAriaLabel": "option {{index}}",
@@ -194,7 +195,32 @@
     "submitUpdate": "Save",
     "submitAdd": "Add",
     "cancel": "Cancel",
-    "invalidError": "Invalid question."
+    "invalidError": "Invalid question.",
+    "scoringLabel": "Scoring",
+    "scoring": {
+      "multiple_choice": {
+        "standard": "All or nothing",
+        "partial": "Partial credit"
+      },
+      "ordering": {
+        "standard": "All or nothing",
+        "partial": "Partial credit"
+      },
+      "text_input": {
+        "standard": "Exact match",
+        "lenient": "Tolerate typos"
+      },
+      "numeric": {
+        "standard": "Within tolerance",
+        "closest": "Closest answer wins"
+      }
+    },
+    "scoringHelp": {
+      "multiple_choice": "Partial credit: each right tick earns its share, each wrong tick cancels one.",
+      "ordering": "Partial credit: share of the elements at the right position.",
+      "text_input": "Tolerate typos: one edit up to 5 letters, two beyond (after case/accent normalisation).",
+      "numeric": "Closest answer wins: scored at the reveal — exact (within tolerance) = full points, then 75 / 50 / 30 %, 10 % beyond; no speed bonus."
+    }
   },
   "preview": {
     "view": "Preview (player view)",

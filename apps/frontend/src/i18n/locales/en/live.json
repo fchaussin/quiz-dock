@@ -143,13 +143,17 @@
     "leave": "Leave",
     "leaveConfirmTitle": "Leave the session?",
     "leaveConfirmDescription": "You will lose your seat and your score. To come back you will have to join again with the PIN.",
-    "joinAnother": "Join another game"
+    "joinAnother": "Join another game",
+    "yourClosest": "{{rank}}. closest — ±{{distance}}",
+    "yourCredit": "{{percent}} % of the points"
   },
   "reveal": {
     "explanation": "Explanation",
     "goodOrder": "Correct order:",
     "goodAnswer": "Correct answer:",
-    "or": " or "
+    "or": " or ",
+    "closestTitle": "Closest answers",
+    "closestDistance": "±{{distance}}"
   },
   "rating": {
     "thanks": "Thanks for your feedback 🙏",
@@ -177,6 +181,11 @@
     "ordering": "Put the options in the right order, then submit. All or nothing.",
     "poll": "No right answer, no points — just your opinion.",
     "double": "Double points",
-    "nopoints": "No points"
+    "nopoints": "No points",
+    "numeric_closest": "Enter a number — the closest answer wins.",
+    "multiple_choice_partial": "Several correct answers — each right tick counts, each wrong one cancels one.",
+    "ordering_partial": "Put the options in the right order — every right position counts.",
+    "text_input_lenient": "Type your answer — small typos are forgiven.",
+    "fixed": "Fixed points"
   }
 }

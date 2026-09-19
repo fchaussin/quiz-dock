@@ -1559,7 +1559,17 @@
                   "enum": [
                     "standard",
                     "double",
-                    "none"
+                    "none",
+                    "fixed"
+                  ]
+                },
+                "scoring": {
+                  "type": "string",
+                  "enum": [
+                    "standard",
+                    "closest",
+                    "partial",
+                    "lenient"
                   ]
                 },
                 "numericValue": {
@@ -1677,6 +1687,7 @@
                 "timeLimitS",
                 "revealDelayS",
                 "pointsMode",
+                "scoring",
                 "numericValue",
                 "numericTolerance",
                 "options",
@@ -2663,7 +2674,18 @@
             "enum": [
               "standard",
               "double",
-              "none"
+              "none",
+              "fixed"
+            ]
+          },
+          "scoring": {
+            "default": "standard",
+            "type": "string",
+            "enum": [
+              "standard",
+              "closest",
+              "partial",
+              "lenient"
             ]
           },
           "numericValue": {
@@ -2846,7 +2868,17 @@
             "enum": [
               "standard",
               "double",
-              "none"
+              "none",
+              "fixed"
+            ]
+          },
+          "scoring": {
+            "type": "string",
+            "enum": [
+              "standard",
+              "closest",
+              "partial",
+              "lenient"
             ]
           },
           "numericValue": {
@@ -2964,6 +2996,7 @@
           "timeLimitS",
           "revealDelayS",
           "pointsMode",
+          "scoring",
           "numericValue",
           "numericTolerance",
           "options",
@@ -3091,7 +3124,18 @@
             "enum": [
               "standard",
               "double",
-              "none"
+              "none",
+              "fixed"
+            ]
+          },
+          "scoring": {
+            "default": "standard",
+            "type": "string",
+            "enum": [
+              "standard",
+              "closest",
+              "partial",
+              "lenient"
             ]
           },
           "numericValue": {

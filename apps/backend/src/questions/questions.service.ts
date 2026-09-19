@@ -130,6 +130,7 @@ export class QuestionsService {
       revealDelayS: dto.revealDelayS ?? null,
       // Un sondage ne rapporte aucun point (technique §4).
       pointsMode: dto.type === 'poll' ? 'none' : dto.pointsMode,
+      scoring: dto.scoring,
       numericValue: isNumeric ? dto.numericValue : null,
       numericTolerance: isNumeric ? dto.numericTolerance : null,
     };

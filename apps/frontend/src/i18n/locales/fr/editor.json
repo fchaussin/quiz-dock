@@ -173,7 +173,8 @@
     "pointsLabel": "Points",
     "pointsMode": {
       "standard": "Standard",
-      "double": "Double"
+      "double": "Double",
+      "fixed": "Fixe (sans bonus vitesse)"
     },
     "optionsLegend": "Options",
     "optionAriaLabel": "option {{index}}",
@@ -194,7 +195,32 @@
     "submitUpdate": "Enregistrer",
     "submitAdd": "Ajouter",
     "cancel": "Annuler",
-    "invalidError": "Question invalide."
+    "invalidError": "Question invalide.",
+    "scoringLabel": "Barème",
+    "scoring": {
+      "multiple_choice": {
+        "standard": "Tout ou rien",
+        "partial": "Crédit partiel"
+      },
+      "ordering": {
+        "standard": "Tout ou rien",
+        "partial": "Crédit partiel"
+      },
+      "text_input": {
+        "standard": "Exact",
+        "lenient": "Tolérant aux fautes"
+      },
+      "numeric": {
+        "standard": "Dans la tolérance",
+        "closest": "Le plus proche gagne"
+      }
+    },
+    "scoringHelp": {
+      "multiple_choice": "Crédit partiel : chaque bonne case rapporte sa part, chaque mauvaise en annule une.",
+      "ordering": "Crédit partiel : part des éléments à la bonne position.",
+      "text_input": "Tolérant aux fautes : 1 lettre jusqu’à 5 lettres, 2 au-delà (après normalisation casse/accents).",
+      "numeric": "Le plus proche gagne : noté à la révélation — exact (dans la tolérance) = points pleins, puis 75 / 50 / 30 %, 10 % au-delà ; sans bonus vitesse."
+    }
   },
   "preview": {
     "view": "Aperçu (vue participant)",

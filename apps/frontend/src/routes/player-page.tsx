@@ -425,6 +425,18 @@ export function PlayerPage() {
               {r.correct ? t('player.correct') : t('player.wrong')}
             </p>
             <p className="text-[1.25em]">{t('player.points', { points: r.points })}</p>
+            {r.closestRank ? (
+              <p className="text-muted-foreground text-[1em]">
+                {t('player.yourClosest', {
+                  rank: r.closestRank,
+                  distance: +(r.distance ?? 0).toFixed(2),
+                })}
+              </p>
+            ) : r.credit ? (
+              <p className="text-muted-foreground text-[1em]">
+                {t('player.yourCredit', { percent: Math.round(r.credit * 100) })}
+              </p>
+            ) : null}
           </div>
         ) : (
           <p className="text-muted-foreground">{t('player.answersRevealed')}</p>

@@ -26,7 +26,10 @@ const lastPost = (fetchMock: ReturnType<typeof mockApi>) => {
 };
 
 describe('QuestionForm', () => {
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    localStorage.clear(); // drafts must not leak from one test into the next
+  });
 
   it('affiche 2 options par défaut (single_choice) et soumet le payload', async () => {
     const fetchMock = mockApi([
@@ -86,6 +89,27 @@ describe('QuestionForm', () => {
     });
     expect(screen.getByLabelText('Valeur cible')).toBeInTheDocument();
     expect(screen.getByLabelText('Tolérance ±')).toBeInTheDocument();
+  });
+
+  it('offers a scoring variant per type and sends it (numeric → closest wins)', async () => {
+    const fetchMock = mockApi([
+      { method: 'POST', path: '/quizzes/q1/questions', status: 201, body: {} },
+    ]);
+    const { onClose } = renderForm();
+    // No variant for a single choice: the select is not there.
+    expect(screen.queryByLabelText('Barème')).toBeNull();
+    fireEvent.change(screen.getByLabelText('Type'), { target: { value: 'numeric' } });
+    const scoring = screen.getByLabelText('Barème') as HTMLSelectElement;
+    expect([...scoring.options].map((o) => o.textContent)).toEqual([
+      'Dans la tolérance',
+      'Le plus proche gagne',
+    ]);
+    fireEvent.change(scoring, { target: { value: 'closest' } });
+    setMarkdownField('Énoncé', 'Hauteur ?');
+    fireEvent.change(screen.getByLabelText('Valeur cible'), { target: { value: '330' } });
+    fireEvent.click(screen.getByText('Ajouter'));
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(lastPost(fetchMock)).toMatchObject({ type: 'numeric', scoring: 'closest' });
   });
 
   it('résout le code d’erreur tokenisé renvoyé par l’API (400) en texte i18n', async () => {

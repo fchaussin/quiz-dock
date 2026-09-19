@@ -18,6 +18,7 @@ const q = (input: Partial<QuestionContent> & Pick<QuestionContent, 'type' | 'pro
   ({
     timeLimitS: 20,
     pointsMode: 'standard',
+    scoring: 'standard',
     textTone: 'light',
     textOutline: true,
     options: [],
@@ -76,13 +77,15 @@ export const SAMPLE_QUIZZES: SampleQuiz[] = [
         type: 'multiple_choice',
         prompt: 'Which of these rivers flow through France?',
         options: [A('Loire', true), B('Danube'), C('Seine', true), D('Rhône', true)],
+        scoring: 'partial',
         answerExplanation: 'The Danube rises in Germany and never enters France.',
       }),
       q({
         type: 'numeric',
-        prompt: 'How tall is the Eiffel Tower, in metres (to the nearest 10)?',
+        prompt: 'How tall is the Eiffel Tower, in metres? Closest answer wins.',
         numericValue: 330,
-        numericTolerance: 10,
+        numericTolerance: 5,
+        scoring: 'closest',
         answerExplanation: 'It stands at about 330 m including its antennas.',
         timeLimitS: 30,
       }),
@@ -177,6 +180,7 @@ export const SAMPLE_QUIZZES: SampleQuiz[] = [
         type: 'text_input',
         prompt: 'Which marble-walled gorge is Taiwan’s most famous national park?',
         acceptedAnswers: [{ text: 'Taroko' }, { text: 'Taroko Gorge' }],
+        scoring: 'lenient',
         answerExplanation: 'Taroko National Park lies on the east coast, near Hualien.',
       }),
       q({
@@ -195,6 +199,7 @@ export const SAMPLE_QUIZZES: SampleQuiz[] = [
           opt('Tainan', 'yellow', 'circle', { correctOrderIndex: 2 }),
           opt('Taichung', 'green', 'square', { correctOrderIndex: 1 }),
         ],
+        scoring: 'partial',
         timeLimitS: 30,
       }),
       q({

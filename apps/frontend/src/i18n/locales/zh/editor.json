@@ -173,7 +173,8 @@
     "pointsLabel": "分数",
     "pointsMode": {
       "standard": "标准",
-      "double": "双倍"
+      "double": "双倍",
+      "fixed": "固定（无速度加分）"
     },
     "optionsLegend": "选项",
     "optionAriaLabel": "选项 {{index}}",
@@ -194,7 +195,32 @@
     "submitUpdate": "保存",
     "submitAdd": "添加",
     "cancel": "取消",
-    "invalidError": "题目无效。"
+    "invalidError": "题目无效。",
+    "scoringLabel": "计分规则",
+    "scoring": {
+      "multiple_choice": {
+        "standard": "全对才得分",
+        "partial": "部分得分"
+      },
+      "ordering": {
+        "standard": "全对才得分",
+        "partial": "部分得分"
+      },
+      "text_input": {
+        "standard": "完全匹配",
+        "lenient": "容忍拼写错误"
+      },
+      "numeric": {
+        "standard": "在误差范围内",
+        "closest": "最接近者胜"
+      }
+    },
+    "scoringHelp": {
+      "multiple_choice": "部分得分：每个正确勾选得其份额，每个错误勾选抵消一个。",
+      "ordering": "部分得分：位置正确的元素所占比例。",
+      "text_input": "容忍拼写错误：5 个字母内允许 1 处，之外允许 2 处（大小写/重音归一后）。",
+      "numeric": "最接近者胜：揭晓时计分——精确（在误差内）= 满分，其后 75 / 50 / 30 %，再往后 10 %；无速度加分。"
+    }
   },
   "preview": {
     "view": "预览（玩家视图）",

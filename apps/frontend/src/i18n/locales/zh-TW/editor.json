@@ -173,7 +173,8 @@
     "pointsLabel": "分數",
     "pointsMode": {
       "standard": "標準",
-      "double": "雙倍"
+      "double": "雙倍",
+      "fixed": "固定（無速度加分）"
     },
     "optionsLegend": "選項",
     "optionAriaLabel": "選項 {{index}}",
@@ -194,7 +195,32 @@
     "submitUpdate": "儲存",
     "submitAdd": "新增",
     "cancel": "取消",
-    "invalidError": "題目無效。"
+    "invalidError": "題目無效。",
+    "scoringLabel": "計分規則",
+    "scoring": {
+      "multiple_choice": {
+        "standard": "全對才得分",
+        "partial": "部分得分"
+      },
+      "ordering": {
+        "standard": "全對才得分",
+        "partial": "部分得分"
+      },
+      "text_input": {
+        "standard": "完全符合",
+        "lenient": "容忍拼字錯誤"
+      },
+      "numeric": {
+        "standard": "在誤差範圍內",
+        "closest": "最接近者勝"
+      }
+    },
+    "scoringHelp": {
+      "multiple_choice": "部分得分：每個正確勾選得其份額，每個錯誤勾選抵消一個。",
+      "ordering": "部分得分：位置正確的元素所占比例。",
+      "text_input": "容忍拼字錯誤：5 個字母內允許 1 處，之外允許 2 處（大小寫/重音正規化後）。",
+      "numeric": "最接近者勝：揭曉時計分——精確（在誤差內）= 滿分，其後 75 / 50 / 30 %，再往後 10 %；無速度加分。"
+    }
   },
   "preview": {
     "view": "預覽（玩家視角）",

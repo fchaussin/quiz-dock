@@ -1,6 +1,17 @@
 import { OptionColor, OptionShape, PointsMode, QuestionType } from '@quiz-dock/contracts';
 import type { SnapshotOption, SnapshotQuestion } from './game.types';
-import { basePointsFor, gradeAnswer, scoreAnswer, streakBonus, timePoints } from './scoring';
+import {
+  basePointsFor,
+  creditFor,
+  editDistance,
+  gradeAnswer,
+  isDeferred,
+  lenientMatch,
+  rankClosest,
+  scoreAnswer,
+  streakBonus,
+  timePoints,
+} from './scoring';
 
 // ─── Fabriques de snapshot ──────────────────────────────────────────────────
 
@@ -185,7 +196,7 @@ describe('scoreAnswer', () => {
 
   it('bonne réponse instantanée → P_max, série = 1, pas de bonus', () => {
     const { good, q } = single();
-    expect(scoreAnswer({ question: q, answer: good.id, tMs: 0, prevStreak: 0 })).toEqual({
+    expect(scoreAnswer({ question: q, answer: good.id, tMs: 0, prevStreak: 0 })).toMatchObject({
       correct: true,
       points: 1000,
       newStreak: 1,
@@ -200,7 +211,7 @@ describe('scoreAnswer', () => {
 
   it('mauvaise réponse → 0, série remise à 0', () => {
     const { q } = single();
-    expect(scoreAnswer({ question: q, answer: 'inconnu', tMs: 0, prevStreak: 4 })).toEqual({
+    expect(scoreAnswer({ question: q, answer: 'inconnu', tMs: 0, prevStreak: 4 })).toMatchObject({
       correct: false,
       points: 0,
       newStreak: 0,
@@ -211,13 +222,13 @@ describe('scoreAnswer', () => {
     const { good, q } = single();
     expect(
       scoreAnswer({ question: q, answer: good.id, tMs: 1000, prevStreak: 3, isLate: true }),
-    ).toEqual({ correct: false, points: 0, newStreak: 0 });
+    ).toMatchObject({ correct: false, points: 0, newStreak: 0 });
   });
 
   it('bonus de série cumulé : 2e bonne réponse consécutive → +100', () => {
     const { good, q } = single();
     const r = scoreAnswer({ question: q, answer: good.id, tMs: 0, prevStreak: 1 });
-    expect(r).toEqual({ correct: true, points: 1100, newStreak: 2 });
+    expect(r).toMatchObject({ correct: true, points: 1100, newStreak: 2 });
   });
 
   it('mode double : P_max = 2000', () => {
@@ -238,7 +249,7 @@ describe('scoreAnswer', () => {
       options: [good, opt()],
     });
     // Question sans enjeu : ni points, ni bonus, série conservée telle quelle.
-    expect(scoreAnswer({ question: q, answer: good.id, tMs: 0, prevStreak: 3 })).toEqual({
+    expect(scoreAnswer({ question: q, answer: good.id, tMs: 0, prevStreak: 3 })).toMatchObject({
       correct: true,
       points: 0,
       newStreak: 3,
@@ -247,7 +258,7 @@ describe('scoreAnswer', () => {
 
   it('mode none incorrect : série NEUTRE (ne casse pas la série)', () => {
     const q = question({ type: QuestionType.SingleChoice, basePoints: 0, options: [opt(), opt()] });
-    expect(scoreAnswer({ question: q, answer: 'inconnu', tMs: 0, prevStreak: 4 })).toEqual({
+    expect(scoreAnswer({ question: q, answer: 'inconnu', tMs: 0, prevStreak: 4 })).toMatchObject({
       correct: false,
       points: 0,
       newStreak: 4,
@@ -256,10 +267,116 @@ describe('scoreAnswer', () => {
 
   it('sondage (poll) : 0 point et série NEUTRE', () => {
     const q = question({ type: QuestionType.Poll, basePoints: 1000, options: [opt(), opt()] });
-    expect(scoreAnswer({ question: q, answer: q.options[0].id, tMs: 0, prevStreak: 2 })).toEqual({
+    expect(
+      scoreAnswer({ question: q, answer: q.options[0].id, tMs: 0, prevStreak: 2 }),
+    ).toMatchObject({
       correct: false,
       points: 0,
       newStreak: 2,
     });
+  });
+});
+
+// ─── Scoring variants (per-type `scoring`, `fixed` points mode) ──────────────
+describe('scoring variants', () => {
+  it('multiple_choice partial: credit per right tick, a wrong tick cancels one', () => {
+    const a = opt({ isCorrect: true });
+    const b = opt({ isCorrect: true });
+    const c = opt();
+    const d = opt();
+    const q = question({
+      type: QuestionType.MultipleChoice,
+      scoring: 'partial',
+      options: [a, b, c, d],
+    });
+    expect(creditFor(q, [a.id])).toBe(0.5);
+    expect(creditFor(q, [a.id, b.id])).toBe(1);
+    expect(creditFor(q, [a.id, b.id, c.id])).toBe(0.5);
+    expect(creditFor(q, [a.id, c.id, d.id])).toBe(0);
+    // Half credit = half of the timed points, streak neutral.
+    const r = scoreAnswer({ question: q, answer: [a.id], tMs: 0, prevStreak: 3 });
+    expect(r).toMatchObject({ correct: false, points: 500, newStreak: 3, credit: 0.5 });
+    // Full credit behaves like a right answer.
+    expect(scoreAnswer({ question: q, answer: [a.id, b.id], tMs: 0, prevStreak: 0 })).toMatchObject(
+      {
+        correct: true,
+        points: 1000,
+        newStreak: 1,
+      },
+    );
+  });
+
+  it('ordering partial: share of elements at the right position', () => {
+    const o = [0, 1, 2, 3].map((i) => opt({ correctOrderIndex: i }));
+    const q = question({ type: QuestionType.Ordering, scoring: 'partial', options: o });
+    expect(creditFor(q, [o[0].id, o[1].id, o[3].id, o[2].id])).toBe(0.5);
+    expect(
+      creditFor(
+        q,
+        o.map((x) => x.id),
+      ),
+    ).toBe(1);
+    // Standard stays all or nothing.
+    const strict = question({ type: QuestionType.Ordering, options: o });
+    expect(creditFor(strict, [o[0].id, o[1].id, o[3].id, o[2].id])).toBe(0);
+  });
+
+  it('text_input lenient: one typo up to 5 letters, two beyond; standard stays exact', () => {
+    expect(editDistance('paris', 'pariss')).toBe(1);
+    expect(lenientMatch('pari', 'paris')).toBe(true);
+    expect(lenientMatch('pris', 'paris')).toBe(true);
+    expect(lenientMatch('lyon', 'paris')).toBe(false);
+    expect(lenientMatch('marseile', 'marseille')).toBe(true);
+    expect(lenientMatch('marsaile', 'marseille')).toBe(true);
+    expect(lenientMatch('marsal', 'marseille')).toBe(false);
+    const lenient = question({
+      type: QuestionType.TextInput,
+      scoring: 'lenient',
+      acceptedAnswersNormalized: ['paris'],
+    });
+    const strict = question({ type: QuestionType.TextInput, acceptedAnswersNormalized: ['paris'] });
+    expect(creditFor(lenient, 'Pariss')).toBe(1);
+    expect(creditFor(strict, 'Pariss')).toBe(0);
+  });
+
+  it('fixed points mode: full base points whatever the speed', () => {
+    const a = opt({ isCorrect: true });
+    const q = question({ pointsMode: PointsMode.Fixed, options: [a, opt()], timeLimitS: 20 });
+    expect(scoreAnswer({ question: q, answer: a.id, tMs: 20_000, prevStreak: 0 }).points).toBe(
+      1000,
+    );
+    expect(basePointsFor(PointsMode.Fixed)).toBe(1000);
+  });
+
+  it('numeric closest: settled at submit as deferred, ranked at reveal', () => {
+    const q = question({
+      type: QuestionType.Numeric,
+      scoring: 'closest',
+      numericValue: 100,
+      numericTolerance: 1,
+    });
+    expect(isDeferred(q)).toBe(true);
+    expect(scoreAnswer({ question: q, answer: 130, tMs: 0, prevStreak: 2 })).toMatchObject({
+      deferred: true,
+      points: 0,
+      newStreak: 2,
+    });
+    const rows = rankClosest(q, [
+      { key: 'far', answer: 300 },
+      { key: 'exact', answer: 100.5 },
+      { key: 'near', answer: 110 },
+      { key: 'near2', answer: 90 },
+      { key: 'text', answer: 'abc' },
+      { key: 'tail1', answer: 150 },
+      { key: 'tail2', answer: 160 },
+    ]);
+    expect(rows.map((r) => [r.key, r.rank, r.points, r.exact])).toEqual([
+      ['exact', 1, 1000, true],
+      ['near', 2, 750, false],
+      ['near2', 2, 750, false], // tie on distance 10 shares the rank
+      ['tail1', 4, 300, false],
+      ['tail2', 5, 100, false],
+      ['far', 6, 100, false],
+    ]);
   });
 });

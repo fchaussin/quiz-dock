@@ -139,6 +139,7 @@ export class QuizPortableService {
                 timeLimitS: dto.timeLimitS,
                 revealDelayS: dto.revealDelayS ?? null,
                 pointsMode: dto.type === 'poll' ? 'none' : dto.pointsMode,
+                scoring: dto.scoring,
                 numericValue: isNumeric ? dto.numericValue : null,
                 numericTolerance: isNumeric ? dto.numericTolerance : null,
                 options: {

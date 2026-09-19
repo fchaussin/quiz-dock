@@ -24,10 +24,16 @@ import {
   READ_DELAY_MS,
   gameKeys,
 } from './game.keys';
-import type { AnswerRecord, GameMeta, PlayerRecord, QuizSnapshot } from './game.types';
+import type {
+  AnswerRecord,
+  GameMeta,
+  PlayerRecord,
+  QuizSnapshot,
+  SnapshotQuestion,
+} from './game.types';
 import { RedisService } from '../redis/redis.service';
 import { buildRevealCommon } from './reveal';
-import { scoreAnswer } from './scoring';
+import { isDeferred, rankClosest, scoreAnswer } from './scoring';
 import { SessionArchiveService } from './session-archive.service';
 import { buildQuestionStart, buildSlideShow } from './snapshot';
 
@@ -238,6 +244,10 @@ export class GameEngine {
     this.log.debug(`REVEAL ${pin} q${index} (${trigger})`);
 
     const snapshot = await this.game.getSnapshot(pin);
+    // Numeric `closest`: the points wait for every answer — settle them now.
+    if (snapshot && isDeferred(snapshot.questions[index])) {
+      await this.settleClosest(pin, snapshot.questions[index], index);
+    }
     this.server.to(pin).emit('game:state', {
       state: GameState.Reveal,
       questionIndex: index,
@@ -261,7 +271,7 @@ export class GameEngine {
   private async emitReveal(pin: string, snapshot: QuizSnapshot, index: number): Promise<void> {
     const question = snapshot.questions[index];
     const records = await this.readAnswers(pin, index);
-    const common = buildRevealCommon(question, [...records.values()]);
+    const common = await this.revealCommon(pin, question, records);
 
     const ranked = await this.rankedPlayers(pin);
     const rankOf = new Map(ranked.map((p, i) => [p.id, i + 1]));
@@ -275,6 +285,67 @@ export class GameEngine {
         this.personalReveal(common, records, ranked, rankOf, playerId),
       );
       socket.emit('leaderboard', this.personalLeaderboard(top, ranked, rankOf, playerId));
+    }
+  }
+
+  /** Common reveal + the proximity ranking of a numeric `closest` question (with nicknames). */
+  private async revealCommon(
+    pin: string,
+    question: SnapshotQuestion,
+    records: Map<string, AnswerRecord>,
+  ): Promise<QuestionRevealPayload> {
+    const common: QuestionRevealPayload = buildRevealCommon(question, [...records.values()]);
+    if (!isDeferred(question)) return common;
+    const players = await this.redis.hgetall(gameKeys.players(pin));
+    const rows = rankClosest(
+      question,
+      [...records.entries()].map(([key, r]) => ({ key, answer: r.answer })),
+    );
+    common.closest = rows.slice(0, 10).map((row) => {
+      const p = players[row.key] ? (JSON.parse(players[row.key]) as PlayerRecord) : null;
+      return {
+        nickname: p?.nickname ?? '?',
+        avatar: p?.avatar,
+        value: row.value,
+        distance: row.distance,
+        rank: row.rank,
+        points: row.points,
+      };
+    });
+    return common;
+  }
+
+  /**
+   * Numeric `closest`: once the answering window is closed, rank the answers
+   * by distance and award the points (exact = full, then by rank). Records,
+   * player scores and the leaderboard are updated here, once.
+   */
+  private async settleClosest(
+    pin: string,
+    question: SnapshotQuestion,
+    index: number,
+  ): Promise<void> {
+    const records = await this.readAnswers(pin, index);
+    if (records.size === 0) return;
+    const rows = rankClosest(
+      question,
+      [...records.entries()].map(([key, r]) => ({ key, answer: r.answer })),
+    );
+    for (const row of rows) {
+      const rec = records.get(row.key);
+      const player = await this.getPlayer(pin, row.key);
+      if (!rec || !player) continue;
+      rec.pointsAwarded = row.points;
+      rec.isCorrect = row.exact;
+      rec.credit = row.points / (question.basePoints || 1);
+      rec.closestRank = row.rank;
+      rec.distance = row.distance;
+      await this.redis.hset(gameKeys.answers(pin, index), row.key, JSON.stringify(rec));
+      player.score += row.points;
+      // Exact = a right answer for the streak; a near miss neither grows nor breaks it.
+      if (row.exact) player.streak += 1;
+      await this.redis.hset(gameKeys.players(pin), row.key, JSON.stringify(player));
+      await this.redis.zadd(gameKeys.leaderboard(pin), player.score, row.key);
     }
   }
 
@@ -303,6 +374,12 @@ export class GameEngine {
         points: rec?.pointsAwarded ?? 0,
         totalScore: me.score,
         rank: rankOf.get(playerId!) ?? ranked.length,
+        ...(rec?.credit !== undefined && rec.credit > 0 && rec.credit < 1
+          ? { credit: rec.credit }
+          : {}),
+        ...(rec?.closestRank !== undefined
+          ? { closestRank: rec.closestRank, distance: rec.distance }
+          : {}),
       },
     };
   }
@@ -447,7 +524,7 @@ export class GameEngine {
       nav,
     });
     const records = await this.readAnswers(pin, index);
-    const common = buildRevealCommon(question, [...records.values()]);
+    const common = await this.revealCommon(pin, question, records);
     const ranked = await this.rankedPlayers(pin);
     const rankOf = new Map(ranked.map((p, i) => [p.id, i + 1]));
     const playerId = socket.data.playerId;
@@ -609,7 +686,7 @@ export class GameEngine {
     } else if (meta.state === GameState.Reveal) {
       const index = meta.currentIndex;
       const records = await this.readAnswers(pin, index);
-      const common = buildRevealCommon(snapshot.questions[index], [...records.values()]);
+      const common = await this.revealCommon(pin, snapshot.questions[index], records);
       const ranked = await this.rankedPlayers(pin);
       const rankOf = new Map(ranked.map((p, i) => [p.id, i + 1]));
       socket.emit(
@@ -1194,6 +1271,7 @@ export class GameEngine {
       answer,
       isCorrect: score.correct,
       pointsAwarded: score.points,
+      credit: score.credit,
       tMs,
       receivedAt,
     };

@@ -9,6 +9,7 @@ import type { QuizDetailDtoQuestionsItemAcceptedAnswersItem } from './quizDetail
 import type { QuizDetailDtoQuestionsItemBackgroundGradient } from './quizDetailDtoQuestionsItemBackgroundGradient';
 import type { QuizDetailDtoQuestionsItemOptionsItem } from './quizDetailDtoQuestionsItemOptionsItem';
 import type { QuizDetailDtoQuestionsItemPointsMode } from './quizDetailDtoQuestionsItemPointsMode';
+import type { QuizDetailDtoQuestionsItemScoring } from './quizDetailDtoQuestionsItemScoring';
 import type { QuizDetailDtoQuestionsItemTextTone } from './quizDetailDtoQuestionsItemTextTone';
 import type { QuizDetailDtoQuestionsItemType } from './quizDetailDtoQuestionsItemType';
 
@@ -44,6 +45,7 @@ export type QuizDetailDtoQuestionsItem = {
      */
   revealDelayS: number | null;
   pointsMode: QuizDetailDtoQuestionsItemPointsMode;
+  scoring: QuizDetailDtoQuestionsItemScoring;
   /** @nullable */
   numericValue: string | null;
   /** @nullable */
