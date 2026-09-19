@@ -17,6 +17,7 @@ import {
   loadPlayerSession,
   saveAvatarSeed,
 } from '../game/game-client';
+import { ResultMark } from '../game/result-mark';
 import {
   AnswerExplanation,
   AnswerRules,
@@ -413,12 +414,7 @@ export function PlayerPage() {
       <div className="flex w-full flex-col items-center gap-[1.5em]">
         {r ? (
           <div className="flex flex-col items-center gap-[0.5em]">
-            <span
-              className={`text-[4.5em] leading-none ${r.correct ? 'text-success' : 'text-destructive'}`}
-              aria-hidden
-            >
-              {r.correct ? '✓' : '✗'}
-            </span>
+            <ResultMark correct={r.correct} />
             <p
               className={`text-[2em] font-bold ${r.correct ? 'text-success' : 'text-destructive'}`}
             >
