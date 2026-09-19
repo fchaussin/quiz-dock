@@ -2630,7 +2630,7 @@
             ]
           },
           "textOutline": {
-            "default": false,
+            "default": true,
             "type": "boolean"
           },
           "mediaId": {
@@ -3058,7 +3058,7 @@
             ]
           },
           "textOutline": {
-            "default": false,
+            "default": true,
             "type": "boolean"
           },
           "mediaId": {
@@ -3549,7 +3549,7 @@
             ]
           },
           "textOutline": {
-            "default": false,
+            "default": true,
             "type": "boolean"
           },
           "displayDelayS": {
@@ -4371,7 +4371,7 @@
             ]
           },
           "textOutline": {
-            "default": false,
+            "default": true,
             "type": "boolean"
           },
           "displayDelayS": {
