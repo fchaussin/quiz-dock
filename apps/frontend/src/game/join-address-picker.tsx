@@ -1,4 +1,4 @@
-import { Globe } from 'lucide-react';
+import { CircleHelp, Globe } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,8 @@ export function JoinAddressPicker({
     return [...new Set(list)];
   }, [data, origin]);
   const [custom, setCustom] = useState('');
+  const [help, setHelp] = useState(false);
+  const port = window.location.port ? `:${window.location.port}` : '';
   const isCustom = !candidates.includes(current);
 
   // First time on this session: apply the remembered choice, else the best candidate
@@ -65,48 +67,79 @@ export function JoinAddressPicker({
   }, [current, initialised]);
 
   return (
-    <div className="flex flex-wrap items-center gap-2 text-sm">
-      <Globe className="text-muted-foreground size-4" />
-      <label className="text-muted-foreground" htmlFor="join-address">
-        {t('control.joinAddress')}
-      </label>
-      <Select
-        id="join-address"
-        className="h-8 w-auto min-w-[14rem] text-sm"
-        value={isCustom ? CUSTOM : current}
-        onChange={(e) => {
-          if (e.target.value === CUSTOM) setCustom(current);
-          else choose(e.target.value);
-        }}
-      >
-        {candidates.map((c) => (
-          <option key={c} value={c}>
-            {c}
-            {c === data?.data.publicUrl ? ` — ${t('control.joinAddressPublic')}` : ''}
-            {c === origin ? ` — ${t('control.joinAddressThisPage')}` : ''}
-          </option>
-        ))}
-        <option value={CUSTOM}>{t('control.joinAddressCustom')}</option>
-      </Select>
-      {isCustom || custom ? (
-        <form
-          className="flex items-center gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (custom.trim()) choose(custom.trim());
+    <div className="flex flex-col gap-2 text-sm">
+      <div className="flex flex-wrap items-center gap-2">
+        <Globe className="text-muted-foreground size-4" />
+        <label className="text-muted-foreground" htmlFor="join-address">
+          {t('control.joinAddress')}
+        </label>
+        <Select
+          id="join-address"
+          className="h-8 w-auto min-w-[14rem] text-sm"
+          value={isCustom ? CUSTOM : current}
+          onChange={(e) => {
+            if (e.target.value === CUSTOM) setCustom(current);
+            else choose(e.target.value);
           }}
         >
-          <Input
-            className="h-8 w-56 text-sm"
-            placeholder="https://quiz.example.org"
-            value={custom || (isCustom ? current : '')}
-            onChange={(e) => setCustom(e.target.value)}
-            aria-label={t('control.joinAddressCustom')}
-          />
-          <Button type="submit" size="sm" variant="outline" className="h-8">
-            {t('control.joinAddressApply')}
-          </Button>
-        </form>
+          {candidates.map((c) => (
+            <option key={c} value={c}>
+              {c}
+              {c === data?.data.publicUrl ? ` — ${t('control.joinAddressPublic')}` : ''}
+              {c === origin ? ` — ${t('control.joinAddressThisPage')}` : ''}
+            </option>
+          ))}
+          <option value={CUSTOM}>{t('control.joinAddressCustom')}</option>
+        </Select>
+        {isCustom || custom ? (
+          <form
+            className="flex items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (custom.trim()) choose(custom.trim());
+            }}
+          >
+            <Input
+              className="h-8 w-56 text-sm"
+              placeholder="https://quiz.example.org"
+              value={custom || (isCustom ? current : '')}
+              onChange={(e) => setCustom(e.target.value)}
+              aria-label={t('control.joinAddressCustom')}
+            />
+            <Button type="submit" size="sm" variant="outline" className="h-8">
+              {t('control.joinAddressApply')}
+            </Button>
+          </form>
+        ) : null}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          aria-label={t('control.joinAddressHelpToggle')}
+          aria-expanded={help}
+          onClick={() => setHelp((v) => !v)}
+        >
+          <CircleHelp className="size-4" />
+        </Button>
+      </div>
+      {help ? (
+        // Why the address matters and where to find it: the one thing that goes wrong
+        // with a local instance is inviting phones to "localhost".
+        <div className="bg-muted/50 text-muted-foreground flex flex-col gap-2 rounded-md border px-3 py-2 text-xs leading-relaxed">
+          <p>{t('control.joinAddressHelp.why')}</p>
+          <p>
+            <strong className="text-foreground">{t('control.joinAddressHelp.whereTitle')}</strong>{' '}
+            {t('control.joinAddressHelp.where', { port })}
+          </p>
+          <ul className="list-disc pl-4">
+            <li>{t('control.joinAddressHelp.mac')}</li>
+            <li>{t('control.joinAddressHelp.windows')}</li>
+            <li>{t('control.joinAddressHelp.linux')}</li>
+          </ul>
+          <p>{t('control.joinAddressHelp.sameNetwork')}</p>
+          <p>{t('control.joinAddressHelp.deployed')}</p>
+        </div>
       ) : null}
     </div>
   );

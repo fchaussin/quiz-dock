@@ -88,7 +88,18 @@
     "joinAddressPublic": "adresse publique",
     "joinAddressThisPage": "cette page",
     "joinAddressCustom": "Autre adresse…",
-    "joinAddressApply": "Appliquer"
+    "joinAddressApply": "Appliquer",
+    "joinAddressHelpToggle": "Pourquoi cette adresse ?",
+    "joinAddressHelp": {
+      "why": "Les téléphones des participants ouvrent cette adresse pour rejoindre. « localhost » ou « 127.0.0.1 » ne fonctionnent que sur cet ordinateur : un téléphone ne peut pas les atteindre, le QR code et le lien ne mèneraient nulle part.",
+      "whereTitle": "Sur une instance locale, utilise l’adresse réseau de cet ordinateur",
+      "where": "(une IP du type 192.168.x.x), en gardant le port de cette page{{port}} :",
+      "mac": "macOS : Réglages Système › Wi‑Fi › Détails… › Adresse IP — ou « ipconfig getifaddr en0 » dans le Terminal.",
+      "windows": "Windows : « ipconfig » dans une invite de commandes — l’adresse IPv4 de la carte active.",
+      "linux": "Linux : « ip a » — l’adresse inet de l’interface active.",
+      "sameNetwork": "Les téléphones doivent être sur le même Wi‑Fi / réseau que cet ordinateur, et son pare-feu doit laisser passer le port.",
+      "deployed": "Sur un serveur avec un nom de domaine, renseigne APP_PUBLIC_URL dans la configuration : elle est alors proposée en premier."
+    }
   },
   "screen": {
     "sessionUnavailable": "Session indisponible.",

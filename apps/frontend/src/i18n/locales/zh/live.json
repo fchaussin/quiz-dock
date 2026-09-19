@@ -88,7 +88,18 @@
     "joinAddressPublic": "公开地址",
     "joinAddressThisPage": "本页",
     "joinAddressCustom": "其他地址…",
-    "joinAddressApply": "应用"
+    "joinAddressApply": "应用",
+    "joinAddressHelpToggle": "为什么是这个地址？",
+    "joinAddressHelp": {
+      "why": "参与者的手机通过打开此地址加入。“localhost”或“127.0.0.1”只在本机有效：手机无法访问，二维码和链接将无处可去。",
+      "whereTitle": "本地实例请使用这台电脑的网络地址",
+      "where": "（形如 192.168.x.x 的 IP），并保留本页的端口{{port}}：",
+      "mac": "macOS：系统设置 › Wi‑Fi › 详细信息… › IP 地址——或在终端运行“ipconfig getifaddr en0”。",
+      "windows": "Windows：在命令提示符运行“ipconfig”——当前网卡的 IPv4 地址。",
+      "linux": "Linux：“ip a”——当前接口的 inet 地址。",
+      "sameNetwork": "手机必须与这台电脑在同一 Wi‑Fi / 网络，且电脑防火墙需放行该端口。",
+      "deployed": "在有域名的服务器上，请在配置中设置 APP_PUBLIC_URL：它会被优先推荐。"
+    }
   },
   "screen": {
     "sessionUnavailable": "会话不可用。",

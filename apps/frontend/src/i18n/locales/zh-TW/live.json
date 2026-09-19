@@ -88,7 +88,18 @@
     "joinAddressPublic": "公開位址",
     "joinAddressThisPage": "本頁",
     "joinAddressCustom": "其他位址…",
-    "joinAddressApply": "套用"
+    "joinAddressApply": "套用",
+    "joinAddressHelpToggle": "為什麼是這個位址？",
+    "joinAddressHelp": {
+      "why": "參與者的手機透過開啟此位址加入。「localhost」或「127.0.0.1」只在本機有效：手機無法連上，QR code 和連結將無處可去。",
+      "whereTitle": "本機實例請使用這台電腦的網路位址",
+      "where": "（形如 192.168.x.x 的 IP），並保留本頁的連接埠{{port}}：",
+      "mac": "macOS：系統設定 › Wi‑Fi › 詳細資訊… › IP 位址——或在終端機執行「ipconfig getifaddr en0」。",
+      "windows": "Windows：在命令提示字元執行「ipconfig」——目前網卡的 IPv4 位址。",
+      "linux": "Linux：「ip a」——目前介面的 inet 位址。",
+      "sameNetwork": "手機必須與這台電腦在同一 Wi‑Fi / 網路，且電腦防火牆需放行該連接埠。",
+      "deployed": "在有網域名稱的伺服器上，請在設定中填入 APP_PUBLIC_URL：它會被優先建議。"
+    }
   },
   "screen": {
     "sessionUnavailable": "會話不可用。",

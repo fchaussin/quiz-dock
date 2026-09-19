@@ -88,7 +88,18 @@
     "joinAddressPublic": "public address",
     "joinAddressThisPage": "this page",
     "joinAddressCustom": "Other address…",
-    "joinAddressApply": "Apply"
+    "joinAddressApply": "Apply",
+    "joinAddressHelpToggle": "Why this address?",
+    "joinAddressHelp": {
+      "why": "Participants’ phones open this address to join. “localhost” or “127.0.0.1” only work on this computer: a phone cannot reach them, so the QR code and the link would lead nowhere.",
+      "whereTitle": "On a local instance, use this computer’s network address",
+      "where": "(an IP like 192.168.x.x), keeping the port of this page{{port}}:",
+      "mac": "macOS: System Settings › Wi‑Fi › Details… › IP address — or “ipconfig getifaddr en0” in Terminal.",
+      "windows": "Windows: “ipconfig” in a command prompt — the IPv4 address of the active adapter.",
+      "linux": "Linux: “ip a” — the inet address of the active interface.",
+      "sameNetwork": "Phones must be on the same Wi‑Fi / network as this computer, and its firewall must let the port through.",
+      "deployed": "On a server with a domain name, set APP_PUBLIC_URL in the configuration: it is then offered first."
+    }
   },
   "screen": {
     "sessionUnavailable": "Session unavailable.",
