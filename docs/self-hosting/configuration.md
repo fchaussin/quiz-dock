@@ -127,7 +127,8 @@ hosts identify with a name, and there is a single **host seat**:
   (checked lazily, no scheduler). The first claim also loads the two sample quizzes.
 - A name is the only key: entering the holder's name again (on any device) resumes
   the seat — handy across devices, and the reason this is *not* a security boundary.
-  Use it for demos and trusted networks; use OIDC otherwise.
+  Use it on trusted networks; use OIDC otherwise. (A public instance is a different
+  matter: see §4, `DEMO_MODE`.)
 
 `GET /auth/host-seat` (public) reports the holder and expiry; `POST /auth/host-seat/claim`
 and `POST /auth/host-seat/release` are what the SPA calls.
@@ -225,13 +226,14 @@ The dev compose file then defaults `OIDC_ISSUER` to `http://localhost:18080/real
 
 ## 4. Public demo instance
 
-`DEMO_MODE=true` turns an instance into an unattended public demo — anyone can take the
-host seat, write quizzes and run sessions. Meant for `:standalone` with no volume, in
-local mode (`AUTH_MODE=none`). It adds three guards:
+Not to be confused with local mode: `AUTH_MODE` says *who may host* (a name, or an
+OIDC account); `DEMO_MODE` says *the instance is open to strangers* and adds guards on
+top, whatever the auth mode. `DEMO_MODE=true` is meant for `:standalone` with no volume,
+where anyone can take the host seat, write quizzes and run sessions. The guards:
 
-- **Host seat: 5 minutes at a time.** The expiry choice disappears from the sign-in
-  dialog; the seat can be renewed for another 5 minutes from the user menu while held.
-  The server ignores any other duration.
+- **Host seat: 5 minutes at a time** (local mode only — OIDC has no seat). The expiry
+  choice disappears from the sign-in dialog; the seat can be renewed for another
+  5 minutes from the user menu while held. The server ignores any other duration.
 - **No media uploads** (`403 media.demo_disabled`, also for imported bundles that carry
   media). The upload buttons are hidden.
 - **Hourly reset** to a blank install: users, quizzes, media, session archives, the seat

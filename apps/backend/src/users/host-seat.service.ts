@@ -24,7 +24,8 @@ export interface HostSeatState {
  * freed on release (log out) or lazily once `expiresAt` is past — no scheduler.
  *
  * Not a security boundary: a local identity is a self-declared name, so whoever
- * types the holder's name shares their seat. Meant for demos and trusted networks.
+ * types the holder's name shares their seat. Meant for trusted networks; a public
+ * instance adds the `DEMO_MODE` guards on top (short seat, no uploads, reset).
  */
 @Injectable()
 export class HostSeatService {

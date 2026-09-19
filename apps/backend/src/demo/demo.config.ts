@@ -1,7 +1,8 @@
 /**
- * `DEMO_MODE=true` — a public, unattended instance (anyone can take the host
- * seat, write quizzes and run sessions). Three guards keep it usable and clean:
- * a short host seat, no media uploads, and a periodic reset to a blank state.
+ * `DEMO_MODE=true` — a public, unattended instance (strangers take the host
+ * seat, write quizzes, run sessions). Independent of `AUTH_MODE`: local mode says
+ * who may host, demo mode says the instance is open to all and adds guards on
+ * top — a short host seat, no media uploads, a periodic reset to a blank state.
  * Read lazily so tests can flip the variable.
  */
 export const isDemoMode = (): boolean => process.env.DEMO_MODE === 'true';
