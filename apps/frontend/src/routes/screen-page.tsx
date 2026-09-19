@@ -14,6 +14,7 @@ import {
   Podium,
   RevealAnswer,
   SlideView,
+  TYPE_BASE,
 } from '../game/live-components';
 import { Surface } from '../game/surface';
 import { useGameRemaining } from '../game/use-countdown';
@@ -38,15 +39,15 @@ export function ScreenPage() {
   // retardataires de rejoindre en cours de question (notamment quand l'énoncé n'a
   // pas d'options affichées à l'écran, cf. « Réponds sur ton téléphone »).
   const joinBar = (
-    <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-4 border-t bg-background/80 p-4 backdrop-blur">
+    <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-[1em] border-t bg-background/80 p-[1em] backdrop-blur">
       <div className="rounded-md bg-white p-1.5 shadow">
         <QRCodeSVG value={joinUrl} size={80} aria-label={t('screen.qrLabel')} />
       </div>
       <div className="flex flex-col items-start">
-        <span className="text-muted-foreground text-sm uppercase tracking-widest">
+        <span className="text-muted-foreground text-[0.8em] uppercase tracking-widest">
           {window.location.host}/join
         </span>
-        <span className="font-mono text-4xl font-bold tracking-[0.2em]">{pin}</span>
+        <span className="font-mono text-[2.25em] font-bold tracking-[0.2em]">{pin}</span>
       </div>
     </div>
   );
@@ -66,7 +67,7 @@ export function ScreenPage() {
 
   const counter =
     view.answerCount && view.state === 'ANSWERING' ? (
-      <p className="text-muted-foreground text-xl">
+      <p className="text-muted-foreground text-[1.25em]">
         {t('screen.answersReceived')}{' '}
         <span className="tabular-nums">
           {view.answerCount.answered} / {view.answerCount.total}
@@ -79,23 +80,23 @@ export function ScreenPage() {
   if (view.status === 'error') {
     body = <p className="text-muted-foreground">{view.error ?? t('screen.sessionUnavailable')}</p>;
   } else if (view.state === 'HOST_DISCONNECTED') {
-    body = <p className="text-3xl font-semibold">{t('screen.paused')}</p>;
+    body = <p className="text-[2em] font-semibold">{t('screen.paused')}</p>;
   } else if (view.state === 'ENDED') {
-    body = <p className="text-3xl font-semibold">{t('screen.thanks')}</p>;
+    body = <p className="text-[2em] font-semibold">{t('screen.thanks')}</p>;
   } else if (view.state === 'SLIDE_SHOW' && view.slide) {
     body = (
       <div className="flex min-h-[80vh] w-full flex-1 [&:fullscreen]:min-h-dvh">
-        <SlideView slide={view.slide} large />
+        <SlideView slide={view.slide} />
       </div>
     );
   } else if (view.state === 'PODIUM' && view.podium) {
     body = (
-      <div className="flex w-full max-w-md flex-col items-center gap-6">
-        <h2 className="text-3xl font-bold">{t('screen.podium')}</h2>
+      <div className="flex w-full max-w-[28em] flex-col items-center gap-[1.5em]">
+        <h2 className="text-[2em] font-bold">{t('screen.podium')}</h2>
         <Podium rows={view.podium.podium} />
         {view.leaderboard && view.leaderboard.top.length > 3 ? (
-          <div className="flex w-full flex-col gap-2">
-            <h3 className="text-muted-foreground text-xl font-semibold">
+          <div className="flex w-full flex-col gap-[0.5em]">
+            <h3 className="text-muted-foreground text-[1.25em] font-semibold">
               {t('screen.overallRanking')}
             </h3>
             <LeaderboardList rows={view.leaderboard.top} />
@@ -105,14 +106,14 @@ export function ScreenPage() {
     );
   } else if ((view.state === 'REVEAL' || view.state === 'LEADERBOARD') && view.question) {
     body = (
-      <div className="flex w-full max-w-3xl flex-col items-center gap-6">
-        <Markdown role="heading" aria-level={1} className="text-center text-3xl font-semibold">
+      <div className="flex w-full max-w-[40em] flex-col items-center gap-[1.5em]">
+        <Markdown role="heading" aria-level={1} className="text-center text-[2em] font-semibold">
           {view.question.prompt}
         </Markdown>
         {view.reveal ? <RevealAnswer question={view.question} reveal={view.reveal} /> : null}
-        {view.reveal ? <AnswerExplanation reveal={view.reveal} className="text-lg" /> : null}
+        {view.reveal ? <AnswerExplanation reveal={view.reveal} /> : null}
         {view.leaderboard ? (
-          <div className="flex w-full max-w-md flex-col gap-2 text-lg">
+          <div className="flex w-full max-w-[28em] flex-col gap-[0.5em]">
             <h3 className="text-muted-foreground font-semibold">{t('screen.leaderboard')}</h3>
             <LeaderboardList rows={view.leaderboard.top} />
           </div>
@@ -121,14 +122,14 @@ export function ScreenPage() {
     );
   } else if ((view.state === 'ANSWERING' || view.state === 'QUESTION_SHOW') && view.question) {
     body = (
-      <div className="flex w-full max-w-3xl flex-col items-center gap-6">
-        <div className="flex w-full items-start justify-between gap-4">
-          <Markdown role="heading" aria-level={1} className="text-3xl font-semibold">
+      <div className="flex w-full max-w-[40em] flex-col items-center gap-[1.5em]">
+        <div className="flex w-full items-start justify-between gap-[1em]">
+          <Markdown role="heading" aria-level={1} className="text-[2em] font-semibold">
             {view.question.prompt}
           </Markdown>
           {remaining !== null ? (
             <span
-              className={cn('text-4xl font-bold tabular-nums', view.paused && 'opacity-50')}
+              className={cn('text-[2.5em] font-bold tabular-nums', view.paused && 'opacity-50')}
               aria-label={t('screen.timeRemaining')}
             >
               {view.paused ? '⏸' : '⏱'} {remaining}
@@ -136,10 +137,10 @@ export function ScreenPage() {
           ) : null}
         </div>
         {view.question.options?.length ? (
-          <OptionGrid options={view.question.options} size="lg" />
+          <OptionGrid options={view.question.options} />
         ) : (
           <>
-            <p className="text-muted-foreground text-2xl">{t('screen.answerOnPhone')}</p>
+            <p className="text-muted-foreground text-[1.5em]">{t('screen.answerOnPhone')}</p>
             {joinBar}
           </>
         )}
@@ -149,26 +150,26 @@ export function ScreenPage() {
   } else {
     // LOBBY (et état initial) : invitation à rejoindre + liste des joueurs (§4.1).
     body = (
-      <div className="flex flex-col items-center gap-6">
-        <p className="text-2xl">
+      <div className="flex flex-col items-center gap-[1.5em]">
+        <p className="text-[1.5em]">
           {t('screen.joinAt')} <span className="font-semibold">{window.location.host}/join</span>
         </p>
-        <p className="font-mono text-7xl font-bold tracking-[0.3em]">{pin}</p>
+        <p className="font-mono text-[4em] font-bold tracking-[0.3em]">{pin}</p>
         <div className="rounded-xl bg-white p-4 shadow">
           <QRCodeSVG value={joinUrl} size={200} aria-label={t('screen.qrLabel')} />
         </div>
-        <div className="text-muted-foreground flex items-center gap-2 text-xl">
-          <Users className="size-5" />
+        <div className="text-muted-foreground flex items-center gap-[0.5em] text-[1.25em]">
+          <Users className="size-[1em]" />
           <span data-testid="player-count">{view.players.length}</span>
           <span>{t('screen.participants', { count: view.players.length })}</span>
         </div>
-        <ul className="flex max-w-3xl flex-wrap justify-center gap-2">
+        <ul className="flex max-w-[40em] flex-wrap justify-center gap-[0.5em]">
           {view.players.map((p) => (
             <li
               key={p.playerId}
-              className="flex items-center gap-2 rounded-full border py-1 pl-1 pr-3 text-lg"
+              className="flex items-center gap-[0.5em] rounded-full border py-[0.25em] pl-[0.25em] pr-[0.75em] text-[1.1em]"
             >
-              <Avatar name={p.avatar || p.nickname} size={32} />
+              <Avatar name={p.avatar || p.nickname} size="2em" />
               {p.nickname}
             </li>
           ))}
@@ -182,10 +183,12 @@ export function ScreenPage() {
       ref={ref}
       className={cn(
         'bg-background relative flex min-h-[80vh] flex-col [&:fullscreen]:min-h-dvh',
+        // One typographic base for the whole projected page; everything inside is in em.
+        TYPE_BASE.screen,
         // A slide owns the whole surface; everything else is centred with breathing room.
         view.state === 'SLIDE_SHOW'
           ? 'items-stretch justify-stretch p-0'
-          : 'items-center justify-center gap-6 p-8 text-center',
+          : 'items-center justify-center gap-[1.5em] p-[2em] text-center',
       )}
     >
       {fullscreenBtn}
@@ -195,9 +198,9 @@ export function ScreenPage() {
           background={view.question.background}
           textTone={view.question.textTone}
           textOutline={view.question.textOutline}
-          className="absolute inset-0 flex items-center justify-center p-8"
+          className="absolute inset-0 flex items-center justify-center p-[2em]"
         >
-          <div className="flex h-full w-full flex-col items-center justify-center gap-6">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-[1.5em]">
             {body}
           </div>
         </Surface>

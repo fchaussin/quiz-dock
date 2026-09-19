@@ -12,10 +12,28 @@ import type {
 } from '@quiz-dock/contracts';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
-import { COLOR_BG, OPTION_BG_FALLBACK, SHAPE_GLYPH } from '@/lib/option-style';
+import {
+  COLOR_BG,
+  COLOR_BG_SOFT,
+  COLOR_TEXT,
+  OPTION_BG_FALLBACK,
+  SHAPE_GLYPH,
+} from '@/lib/option-style';
 import { cn } from '@/lib/utils';
 import { Avatar } from './avatar';
 import { Surface } from './surface';
+
+/**
+ * Typography of the live screens is set **once per surface** and everything
+ * inside is sized in `em`: the same component scales from a phone to a
+ * projector by changing the base only. `stage` is the 1280×720 slide canvas
+ * (scaled by transform), `screen` the projected page, `phone` the participant.
+ */
+export const TYPE_BASE = {
+  stage: 'text-[20px]',
+  screen: 'text-[clamp(1rem,0.5rem_+_1vw,2.5rem)]',
+  phone: 'text-[clamp(0.875rem,0.5rem_+_0.6vw,1.5rem)]',
+} as const;
 
 /**
  * Grille d'options colorées + formes. `onPick` la rend interactive (joueur) ;
@@ -29,7 +47,6 @@ export function OptionGrid({
   correctIds,
   highlightIds,
   disabled,
-  size = 'md',
 }: {
   options: PublicOption[];
   onPick?: (optionId: string) => void;
@@ -43,10 +60,9 @@ export function OptionGrid({
    */
   highlightIds?: string[];
   disabled?: boolean;
-  size?: 'md' | 'lg';
 }) {
   return (
-    <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="grid w-full grid-cols-1 gap-[0.75em] sm:grid-cols-2">
       {options.map((o) => {
         const isCorrect = correctIds?.includes(o.id);
         const isPicked = selectedIds?.includes(o.id) ?? false;
@@ -60,8 +76,7 @@ export function OptionGrid({
             disabled={onPick ? disabled : undefined}
             onClick={onPick ? () => onPick(o.id) : undefined}
             className={cn(
-              'flex items-center gap-3 rounded-xl px-4 font-semibold text-white shadow transition',
-              size === 'lg' ? 'py-8 text-2xl' : 'py-5 text-lg',
+              'flex items-center gap-[0.75em] rounded-[0.75em] px-[1em] py-[1em] text-[1.125em] font-semibold text-white shadow transition',
               COLOR_BG[o.color] ?? OPTION_BG_FALLBACK,
               onPick && !disabled && 'hover:brightness-110 active:scale-[0.98] cursor-pointer',
               dimmed && 'opacity-40',
@@ -71,7 +86,7 @@ export function OptionGrid({
             )}
             aria-label={o.text ?? o.color}
           >
-            <span aria-hidden className="text-2xl">
+            <span aria-hidden className="text-[1.35em] leading-none">
               {SHAPE_GLYPH[o.shape] ?? '●'}
             </span>
             {o.text ? <Markdown profile="inline">{o.text}</Markdown> : null}
@@ -93,17 +108,38 @@ export function Distribution({
 }) {
   const total = Object.values(reveal.distribution).reduce((a, b) => a + b, 0) || 1;
   return (
-    <ul className="flex w-full flex-col gap-2">
+    <ul className="flex w-full flex-col gap-[0.5em]">
       {options.map((o) => {
         const n = reveal.distribution[o.id] ?? 0;
         const pct = Math.round((n / total) * 100);
         const isCorrect = reveal.correctOptionIds?.includes(o.id);
         return (
-          <li key={o.id} className="flex items-center gap-2">
-            <span aria-hidden className="w-6 text-center">
+          <li
+            key={o.id}
+            className={cn(
+              'flex items-center gap-[0.5em]',
+              // The right answer stands out: full colour and an outline; the others step back.
+              reveal.correctOptionIds && !isCorrect && 'opacity-50 grayscale-[0.4]',
+            )}
+          >
+            {/* Same colour + shape codes as the answer grid, so the reveal reads like the question. */}
+            <span
+              aria-hidden
+              className={cn(
+                'w-[1.5em] text-center text-[1.25em] leading-none',
+                COLOR_TEXT[o.color],
+              )}
+            >
               {SHAPE_GLYPH[o.shape] ?? '●'}
             </span>
-            <div className="bg-muted relative h-7 flex-1 overflow-hidden rounded">
+            <div
+              className={cn(
+                'relative h-[1.9em] flex-1 overflow-hidden rounded-[0.35em]',
+                COLOR_BG_SOFT[o.color] ?? 'bg-muted',
+                isCorrect && COLOR_TEXT[o.color],
+                isCorrect && 'outline outline-[0.15em] outline-offset-[0.15em] outline-current',
+              )}
+            >
               <div
                 className={cn('h-full', COLOR_BG[o.color] ?? OPTION_BG_FALLBACK)}
                 style={{ width: `${pct}%` }}
@@ -111,15 +147,23 @@ export function Distribution({
               {/* Intitulé de la réponse en surimpression de la barre. */}
               <span
                 className={cn(
-                  'absolute inset-0 flex items-center px-3 text-sm font-medium',
-                  isCorrect && 'font-semibold',
+                  'text-foreground absolute inset-0 flex items-center px-[0.75em] text-[0.95em] font-medium',
+                  isCorrect && 'font-bold',
                 )}
               >
                 {o.text ?? o.color}
               </span>
             </div>
-            <span className="w-16 text-right text-sm tabular-nums">
-              {n} {isCorrect ? '✓' : ''}
+            {/* Fixed slots (count, then the ✓ badge) so the column stays aligned across rows. */}
+            <span className="w-[2.5em] text-right text-[0.95em] tabular-nums">{n}</span>
+            <span
+              aria-label={isCorrect ? '✓' : undefined}
+              className={cn(
+                'inline-flex size-[1.4em] shrink-0 items-center justify-center rounded-full text-[0.95em]',
+                isCorrect && 'bg-success text-white',
+              )}
+            >
+              {isCorrect ? '✓' : ''}
             </span>
           </li>
         );
@@ -152,7 +196,7 @@ export function RevealAnswer({
     const ids = Array.isArray(reveal.correctValue) ? reveal.correctValue : [];
     const labels = ids.map((id) => opts.find((o) => o.id === id)?.text ?? id);
     return (
-      <p className="text-xl">
+      <p className="text-[1.25em]">
         {t('reveal.goodOrder')} <strong>{labels.join(' → ')}</strong>
       </p>
     );
@@ -162,7 +206,7 @@ export function RevealAnswer({
   const val = reveal.correctValue;
   const text = Array.isArray(val) ? val.join(' ou ') : (val ?? '');
   return (
-    <p className="text-xl">
+    <p className="text-[1.25em]">
       {t('reveal.goodAnswer')} <strong>{String(text)}</strong>
     </p>
   );
@@ -185,9 +229,12 @@ export function AnswerExplanation({
   return (
     <section
       aria-label={t('reveal.explanation')}
-      className={cn('w-full rounded-lg border bg-muted/40 px-4 py-3 text-left', className)}
+      className={cn(
+        'w-full rounded-[0.5em] border bg-muted/40 px-[1em] py-[0.75em] text-left',
+        className,
+      )}
     >
-      <h3 className="text-muted-foreground mb-1 text-sm font-semibold uppercase tracking-wide">
+      <h3 className="text-muted-foreground mb-[0.25em] text-[0.8em] font-semibold uppercase tracking-wide">
         {t('reveal.explanation')}
       </h3>
       <Markdown>{reveal.answerExplanation}</Markdown>
@@ -200,7 +247,7 @@ export function AnswerExplanation({
  * max-width, the projected screen is a slide, not a document. Optional
  * full-cover background with light/dark text and a subtitle-like outline.
  */
-export function SlideView({ slide, large }: { slide: SlideShowPayload; large?: boolean }) {
+export function SlideView({ slide }: { slide: SlideShowPayload }) {
   return (
     <Surface
       background={slide.background}
@@ -209,29 +256,24 @@ export function SlideView({ slide, large }: { slide: SlideShowPayload; large?: b
       // No explicit height: a flex parent stretches it (`h-full` would opt out of stretching).
       className="w-full flex-1"
     >
-      <article
-        className={cn(
-          'flex h-full min-h-full w-full flex-col justify-center',
-          large ? 'gap-8 p-12' : 'gap-4 p-4',
-        )}
-      >
+      <article className="flex h-full min-h-full w-full flex-col justify-center gap-[1.5em] p-[2em]">
         {slide.blocks.map((b) =>
           b.type === 'columns' ? (
             <div
               key={b.id}
-              className={cn('grid items-start', large ? 'gap-12' : 'gap-4')}
+              className="grid items-start gap-[2em]"
               style={{ gridTemplateColumns: columnsTemplate(b.columns.length, b.ratio) }}
             >
               {b.columns.map((col, i) => (
-                <div key={i} className={cn('flex min-w-0 flex-col', large ? 'gap-6' : 'gap-3')}>
+                <div key={i} className="flex min-w-0 flex-col gap-[1em]">
                   {col.map((leaf) => (
-                    <SlideBlockView key={leaf.id} block={leaf} large={large} />
+                    <SlideBlockView key={leaf.id} block={leaf} />
                   ))}
                 </div>
               ))}
             </div>
           ) : (
-            <SlideBlockView key={b.id} block={b} large={large} />
+            <SlideBlockView key={b.id} block={b} />
           ),
         )}
       </article>
@@ -253,16 +295,11 @@ const TEXT_ALIGN: Record<SlideTextAlign, string> = {
   right: 'text-right [&_ul]:text-left [&_ol]:text-left',
 };
 
-/** Text block sizes: 20 / 30 / 40 px on the 1280×720 stage, scaled down on a phone. */
-const TEXT_SIZE_STAGE: Record<SlideTextSize, string> = {
-  small: 'text-[20px]',
-  medium: 'text-[30px]',
-  large: 'text-[40px]',
-};
-const TEXT_SIZE_PHONE: Record<SlideTextSize, string> = {
-  small: 'text-base md:text-xl',
-  medium: 'text-xl md:text-2xl',
-  large: 'text-2xl md:text-4xl',
+/** Text block sizes, relative to the surface base (20 px base → 20 / 30 / 40 px on the stage). */
+const TEXT_SIZE: Record<SlideTextSize, string> = {
+  small: 'text-[1em]',
+  medium: 'text-[1.5em]',
+  large: 'text-[2em]',
 };
 
 const IMAGE_WIDTH: Record<SlideImageSize, string> = {
@@ -272,15 +309,14 @@ const IMAGE_WIDTH: Record<SlideImageSize, string> = {
   full: 'w-full',
 };
 
-function SlideBlockView({ block, large }: { block: SlideLeafBlock; large?: boolean }) {
+function SlideBlockView({ block }: { block: SlideLeafBlock }) {
   switch (block.type) {
     case 'heading':
       return block.level === 1 ? (
         <h1
           className={cn(
-            'font-bold text-balance',
+            'text-[3em] leading-tight font-bold text-balance',
             TEXT_ALIGN[block.align ?? 'center'],
-            large ? 'text-6xl leading-tight' : 'text-2xl md:text-4xl',
           )}
         >
           {block.text}
@@ -288,9 +324,8 @@ function SlideBlockView({ block, large }: { block: SlideLeafBlock; large?: boole
       ) : (
         <h2
           className={cn(
-            'font-semibold text-balance',
+            'text-[2em] leading-snug font-semibold text-balance',
             TEXT_ALIGN[block.align ?? 'center'],
-            large ? 'text-4xl' : 'text-xl md:text-2xl',
           )}
         >
           {block.text}
@@ -302,7 +337,7 @@ function SlideBlockView({ block, large }: { block: SlideLeafBlock; large?: boole
           className={cn(
             'w-full leading-relaxed',
             TEXT_ALIGN[block.align ?? 'center'],
-            (large ? TEXT_SIZE_STAGE : TEXT_SIZE_PHONE)[block.size ?? 'medium'],
+            TEXT_SIZE[block.size ?? 'medium'],
           )}
         >
           {block.md}
@@ -314,10 +349,9 @@ function SlideBlockView({ block, large }: { block: SlideLeafBlock; large?: boole
           src={block.url ?? `/api/v1/media/${block.mediaId}`}
           alt=""
           className={cn(
-            'rounded-lg object-contain',
+            'max-h-[18em] rounded-[0.5em] object-contain',
             IMAGE_WIDTH[block.size],
             block.align === 'center' ? 'mx-auto' : block.align === 'right' ? 'ml-auto' : 'mr-auto',
-            large ? 'max-h-[70vh]' : 'max-h-72',
           )}
         />
       );
@@ -341,7 +375,7 @@ export function LeaderboardList({
   const shown = rows.slice(0, max);
   const topScore = Math.max(0, ...shown.map((r) => r.score));
   return (
-    <ol className="flex w-full flex-col gap-1.5">
+    <ol className="flex w-full flex-col gap-[0.4em]">
       {shown.map((r) => {
         const pct = topScore > 0 ? Math.round((r.score / topScore) * 100) : 0;
         const me = r.rank === highlightRank;
@@ -349,7 +383,7 @@ export function LeaderboardList({
           <li
             key={`${r.rank}-${r.nickname}`}
             className={cn(
-              'relative flex items-center gap-2 overflow-hidden rounded px-3 py-1.5',
+              'relative flex items-center gap-[0.5em] overflow-hidden rounded-[0.3em] px-[0.75em] py-[0.4em]',
               me ? 'ring-primary font-semibold ring-2' : '',
             )}
           >
@@ -360,7 +394,7 @@ export function LeaderboardList({
               aria-hidden
             />
             <span className="text-muted-foreground relative tabular-nums">{r.rank}.</span>
-            <Avatar name={r.avatar || r.nickname} size={28} />
+            <Avatar name={r.avatar || r.nickname} size="1.75em" />
             <span className="relative min-w-0 flex-1 truncate text-left">{r.nickname}</span>
             <span className="relative tabular-nums">{r.score}</span>
           </li>
@@ -373,18 +407,18 @@ export function LeaderboardList({
 /** Podium top 3 (participant + projeté, §5.5). */
 export function Podium({ rows }: { rows: LeaderboardRow[] }) {
   const order = [rows[1], rows[0], rows[2]]; // 2 · 1 · 3
-  const heights = ['h-24', 'h-32', 'h-20'];
+  const heights = ['h-[6em]', 'h-[8em]', 'h-[5em]'];
   return (
-    <div className="flex items-end justify-center gap-3">
+    <div className="flex items-end justify-center gap-[0.75em]">
       {order.map((r, i) =>
         r ? (
-          <div key={r.rank} className="flex w-24 flex-col items-center gap-1">
-            <Avatar name={r.avatar || r.nickname} size={48} />
-            <span className="font-semibold">{r.nickname}</span>
-            <span className="text-muted-foreground text-sm tabular-nums">{r.score}</span>
+          <div key={r.rank} className="flex w-[6em] flex-col items-center gap-[0.25em]">
+            <Avatar name={r.avatar || r.nickname} size="3em" />
+            <span className="max-w-full truncate font-semibold">{r.nickname}</span>
+            <span className="text-muted-foreground text-[0.875em] tabular-nums">{r.score}</span>
             <div
               className={cn(
-                'flex w-full items-start justify-center rounded-t-lg pt-2 text-2xl font-bold text-white',
+                'flex w-full items-start justify-center rounded-t-[0.5em] pt-[0.5em] text-[1.5em] font-bold text-white',
                 heights[i],
                 r.rank === 1 ? 'bg-amber-500' : r.rank === 2 ? 'bg-slate-400' : 'bg-amber-800',
               )}
@@ -393,7 +427,7 @@ export function Podium({ rows }: { rows: LeaderboardRow[] }) {
             </div>
           </div>
         ) : (
-          <div key={`empty-${i}`} className="w-24" />
+          <div key={`empty-${i}`} className="w-[6em]" />
         ),
       )}
     </div>

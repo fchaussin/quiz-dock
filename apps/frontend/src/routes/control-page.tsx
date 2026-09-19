@@ -261,7 +261,8 @@ export function ControlPage() {
       <section className="mx-auto flex w-full max-w-4xl flex-col gap-5 py-6">
         {controlBar}
         <QuestionCarousel outline={view.outline} currentIndex={view.questionIndex} />
-        <div className="bg-card rounded-xl border p-5 sm:p-6">
+        {/* Reduced base: the slide is a preview in a card, not the projection. */}
+        <div className="bg-card flex rounded-xl border p-5 text-[0.8rem] sm:p-6">
           <SlideView slide={view.slide} />
         </div>
         <div className="sticky bottom-0 z-10 -mx-6 mt-2 border-t bg-background/95 px-6 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:-mx-10 lg:px-10 flex items-end justify-between gap-3">

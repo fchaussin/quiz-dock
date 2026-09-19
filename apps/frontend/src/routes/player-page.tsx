@@ -17,7 +17,7 @@ import {
   loadPlayerSession,
   saveAvatarSeed,
 } from '../game/game-client';
-import { AnswerExplanation, OptionGrid, SlideView } from '../game/live-components';
+import { AnswerExplanation, OptionGrid, SlideView, TYPE_BASE } from '../game/live-components';
 import { cn } from '@/lib/utils';
 import { Surface } from '../game/surface';
 import { RatingPanel } from '../game/rating-panel';
@@ -237,19 +237,20 @@ export function PlayerPage() {
       textOutline={view.question?.textOutline}
       className={cn(
         '-mx-4 -my-4 min-h-[calc(100dvh-4rem)] px-4 py-4',
+        TYPE_BASE.phone,
         !view.question?.background && 'bg-transparent',
       )}
     >
       <section
         className={cn(
-          'mx-auto flex w-full flex-1 flex-col items-center gap-6 py-6 text-center',
-          opts.wide ? 'max-w-sm md:max-w-xl' : 'max-w-sm',
+          'mx-auto flex w-full flex-1 flex-col items-center gap-[1.5em] py-[1.5em] text-center',
+          opts.wide ? 'max-w-[24em] md:max-w-[36em]' : 'max-w-[24em]',
           opts.center && 'min-h-[calc(100dvh-6rem)]',
         )}
       >
         {view.status === 'ready' && view.state !== 'ENDED' && !view.kicked ? (
-          <div className="flex w-full items-center gap-2 text-sm">
-            <Avatar name={avatarName} size={28} />
+          <div className="flex w-full items-center gap-[0.5em] text-[0.875em]">
+            <Avatar name={avatarName} size="2em" />
             <span className="min-w-0 flex-1 truncate text-left font-medium">{nickname}</span>
             <Button
               type="button"
@@ -264,7 +265,7 @@ export function PlayerPage() {
           </div>
         ) : null}
         {opts.center ? (
-          <div className="my-auto flex w-full flex-col items-center gap-6">{children}</div>
+          <div className="my-auto flex w-full flex-col items-center gap-[1.5em]">{children}</div>
         ) : (
           children
         )}
@@ -330,7 +331,7 @@ export function PlayerPage() {
   if (view.kicked) {
     return wrap(
       <>
-        <span className="text-7xl leading-none" aria-hidden>
+        <span className="text-[4.5em] leading-none" aria-hidden>
           🚫
         </span>
         <p className="text-xl font-semibold">{t('player.kickedTitle')}</p>
@@ -346,7 +347,9 @@ export function PlayerPage() {
   // viewport (width and height under the header), content centred.
   if (view.state === 'SLIDE_SHOW' && view.slide) {
     return (
-      <div className="-my-4 mx-[calc(50%-50vw)] flex min-h-[calc(100dvh-4rem)]">
+      <div
+        className={cn('-my-4 mx-[calc(50%-50vw)] flex min-h-[calc(100dvh-4rem)]', TYPE_BASE.phone)}
+      >
         <SlideView slide={view.slide} />
       </div>
     );
@@ -362,11 +365,11 @@ export function PlayerPage() {
       <>
         {view.state === 'PODIUM' ? (
           <>
-            <span className="text-7xl leading-none" aria-hidden>
+            <span className="text-[4.5em] leading-none" aria-hidden>
               🏆
             </span>
             <Avatar name={avatarName} size={72} />
-            <h2 className="text-2xl font-bold">{t('player.podium')}</h2>
+            <h2 className="text-[1.5em] font-bold">{t('player.podium')}</h2>
             {view.podium?.you ? (
               <p className="text-lg">
                 {t('player.yourRank')}{' '}
@@ -379,7 +382,7 @@ export function PlayerPage() {
           </>
         ) : (
           <>
-            <span className="text-7xl leading-none" aria-hidden>
+            <span className="text-[4.5em] leading-none" aria-hidden>
               🎉
             </span>
             <p className="text-xl font-semibold">{t('player.thanks')}</p>
@@ -401,26 +404,28 @@ export function PlayerPage() {
     // One column, in reading order: verdict, explanation, then the ranking — with
     // even spacing, centred in the remaining height so nothing floats in a blank.
     return wrap(
-      <div className="flex w-full flex-col items-center gap-6">
+      <div className="flex w-full flex-col items-center gap-[1.5em]">
         {r ? (
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-[0.5em]">
             <span
-              className={`text-7xl leading-none ${r.correct ? 'text-success' : 'text-destructive'}`}
+              className={`text-[4.5em] leading-none ${r.correct ? 'text-success' : 'text-destructive'}`}
               aria-hidden
             >
               {r.correct ? '✓' : '✗'}
             </span>
-            <p className={`text-3xl font-bold ${r.correct ? 'text-success' : 'text-destructive'}`}>
+            <p
+              className={`text-[2em] font-bold ${r.correct ? 'text-success' : 'text-destructive'}`}
+            >
               {r.correct ? t('player.correct') : t('player.wrong')}
             </p>
-            <p className="text-xl">{t('player.points', { points: r.points })}</p>
+            <p className="text-[1.25em]">{t('player.points', { points: r.points })}</p>
           </div>
         ) : (
           <p className="text-muted-foreground">{t('player.answersRevealed')}</p>
         )}
         {view.reveal?.answerExplanation ? <AnswerExplanation reveal={view.reveal} /> : null}
         {you ? (
-          <p className="w-full border-t pt-4 text-2xl">
+          <p className="w-full border-t pt-[1em] text-[1.5em]">
             {t('player.yourRankShort')}{' '}
             <span className="font-bold">{t('player.rankValue', { rank: you.rank })}</span>
             <span className="text-muted-foreground">
@@ -441,27 +446,36 @@ export function PlayerPage() {
     // reste en haut, l'énoncé occupe le centre et **défile** s'il est long, la zone
     // de réponse est ancrée en bas (position constante, jamais repoussée hors écran).
     return (
-      <section className="mx-auto flex h-full w-full max-w-sm flex-col gap-3 text-center">
+      <section
+        className={cn(
+          'mx-auto flex h-full w-full max-w-[24em] flex-col gap-[0.75em] text-center',
+          TYPE_BASE.phone,
+        )}
+      >
         {remaining !== null ? (
           <span
-            className="shrink-0 pt-2 text-4xl font-bold tabular-nums"
+            className="shrink-0 pt-[0.5em] text-[2.5em] font-bold tabular-nums"
             aria-label={t('player.timeRemaining')}
           >
             ⏱ {remaining}
           </span>
         ) : null}
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <Markdown role="heading" aria-level={1} className="text-xl font-semibold text-balance">
+          <Markdown
+            role="heading"
+            aria-level={1}
+            className="text-[1.25em] font-semibold text-balance"
+          >
             {question.prompt}
           </Markdown>
         </div>
-        <div className="flex w-full shrink-0 flex-col items-center gap-3 pb-2">
+        <div className="flex w-full shrink-0 flex-col items-center gap-[0.75em] pb-[0.5em]">
           {reading ? (
-            <p className="text-muted-foreground text-lg font-medium">
+            <p className="text-muted-foreground text-[1.1em] font-medium">
               {t('player.readQuestion')} <span className="tabular-nums">{readingLeft}</span>
             </p>
           ) : done ? (
-            <p className="text-xl font-semibold">{t('player.answerSaved')}</p>
+            <p className="text-[1.25em] font-semibold">{t('player.answerSaved')}</p>
           ) : (
             renderAnswerInput()
           )}

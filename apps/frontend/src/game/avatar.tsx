@@ -13,7 +13,8 @@ export function Avatar({
   className,
 }: {
   name: string;
-  size?: number;
+  /** Pixels, or any CSS length (`'1.75em'` to follow the surrounding text). */
+  size?: number | string;
   className?: string;
 }) {
   const svg = useMemo(() => multiavatar(name || '?'), [name]);
