@@ -45,6 +45,7 @@ import { MarkdownEditor } from '@/components/markdown-editor';
 import { Markdown } from '@/components/markdown';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -451,13 +452,13 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
       >
         <div className="flex flex-col gap-8 py-2">
           <Section title={t('feedback.title')}>
-            <label className="flex items-start gap-2 text-sm">
-              <input
-                type="checkbox"
+            <label className="flex items-start gap-3 text-sm">
+              <Switch
                 className="mt-0.5"
                 checked={quiz.feedbackEnabled}
                 disabled={update.isPending}
-                onChange={(e) => void setFeedbackEnabled(e.target.checked)}
+                onCheckedChange={(checked) => void setFeedbackEnabled(checked)}
+                aria-label={t('feedback.enableLabel')}
               />
               <span>
                 <span className="font-medium">{t('feedback.enableLabel')}</span>
@@ -1027,10 +1028,12 @@ function StatusBar({
       {quiz.status === 'ready' ? (
         <>
           <label className="flex items-center gap-2 text-sm" title={t('broadcast.fullCaptureHelp')}>
-            <input
-              type="checkbox"
+            <Switch
               checked={fullCapture}
-              onChange={(e) => (e.target.checked ? setConfirmCapture(true) : onFullCapture(false))}
+              onCheckedChange={(checked) =>
+                checked ? setConfirmCapture(true) : onFullCapture(false)
+              }
+              aria-label={t('broadcast.fullCaptureNext')}
             />
             {t('broadcast.fullCaptureNext')}
           </label>

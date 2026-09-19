@@ -24,6 +24,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Tooltip } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -263,12 +264,12 @@ export function ControlPage() {
             setCapture(true);
           }}
         />
-        <label className="flex items-start gap-2 rounded-lg border p-4 text-sm">
-          <input
-            type="checkbox"
+        <label className="flex items-start gap-3 rounded-lg border p-4 text-sm">
+          <Switch
             className="mt-0.5"
             checked={view.fullCapture}
-            onChange={(e) => (e.target.checked ? setConfirmCapture(true) : setCapture(false))}
+            onCheckedChange={(checked) => (checked ? setConfirmCapture(true) : setCapture(false))}
+            aria-label={t('control.captureLabel')}
           />
           <span>
             <span className="font-medium">{t('control.captureLabel')}</span>
