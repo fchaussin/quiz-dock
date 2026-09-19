@@ -17,6 +17,7 @@ describe('GameGateway (intégration socket)', () => {
   let url: string;
   let quizId: string;
   let hostUserId: string;
+  let previousSeat: { userId: string; expiresAt: Date | null } | null = null;
   const sockets: Socket[] = [];
 
   const connect = (auth?: Record<string, string>): Socket => {
@@ -45,6 +46,8 @@ describe('GameGateway (intégration socket)', () => {
       update: { role: 'host' },
     });
     hostUserId = host.id;
+    // The seat is shared state of the target database: remember whose it was, give it back at the end.
+    previousSeat = await prisma.hostSeat.findUnique({ where: { id: 1 } });
     await prisma.hostSeat.upsert({
       where: { id: 1 },
       create: { id: 1, userId: host.id, expiresAt: null },
@@ -84,6 +87,14 @@ describe('GameGateway (intégration socket)', () => {
   afterAll(async () => {
     for (const s of sockets) s.disconnect();
     if (quizId) await prisma.quiz.delete({ where: { id: quizId } }).catch(() => undefined);
+    if (previousSeat) {
+      await prisma.hostSeat
+        .update({
+          where: { id: 1 },
+          data: { userId: previousSeat.userId, expiresAt: previousSeat.expiresAt },
+        })
+        .catch(() => undefined);
+    }
     await app.close();
   });
 
