@@ -476,7 +476,7 @@ export function QuestionForm({
                       aria-label={t('questionForm.removeOption', { index: i + 1 })}
                       onClick={() =>
                         // An empty option goes without asking; a typed one is worth a confirmation.
-                        (opt.text ?? '').trim() || opt.mediaId
+                        (opt.text ?? '').trim()
                           ? setPendingRemoval(i)
                           : setOptions(options.filter((_, idx) => idx !== i))
                       }
