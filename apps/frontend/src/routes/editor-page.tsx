@@ -1016,12 +1016,16 @@ function StatusBar({
   if (livePin) {
     return (
       <div className="border-primary/30 bg-primary/5 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-xl border px-5 py-4">
-        <div className="flex items-center gap-3">
-          <Radio className="text-primary size-5" />
-          <span className="text-sm">
-            {t('gameAccess.label')}{' '}
-            <strong className="font-mono text-2xl tracking-widest">{livePin}</strong>
-          </span>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <Radio className="text-primary size-5" />
+            <span className="text-sm">
+              {t('gameAccess.label')}{' '}
+              <strong className="font-mono text-2xl tracking-widest">{livePin}</strong>
+            </span>
+          </div>
+          {/* Edits reach the running session at its next step — form only, the played content stays. */}
+          <p className="text-muted-foreground text-xs">{t('gameAccess.liveEditsHint')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link

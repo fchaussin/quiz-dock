@@ -157,7 +157,8 @@
     "label": "进行中的会话 — PIN",
     "controlScreen": "控制屏幕",
     "projectionScreen": "投影屏幕",
-    "invitationScreen": "邀请屏幕"
+    "invitationScreen": "邀请屏幕",
+    "liveEditsHint": "版式修改（背景、对比度、解析、幻灯片）会在进行中的场次下一步生效；题目和答案保持启动时的版本。"
   },
   "questionForm": {
     "typeLabel": "类型",

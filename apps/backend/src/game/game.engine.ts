@@ -88,7 +88,7 @@ export class GameEngine {
     if (meta.state !== GameState.Lobby) {
       throw new BadRequestException('session.already_started');
     }
-    const snapshot = await this.requireSnapshot(pin);
+    const snapshot = await this.requireSnapshot(pin, true);
     await this.enterStep(pin, snapshot, 0);
   }
 
@@ -355,7 +355,7 @@ export class GameEngine {
     if (won !== 'OK') {
       return; // suivant déjà déclenché (double-clic)
     }
-    const snapshot = await this.requireSnapshot(pin);
+    const snapshot = await this.requireSnapshot(pin, true);
     if (meta.state === GameState.SlideShow) {
       // Next slide sharing the anchor, else the anchored question (or the podium).
       const current = meta.slideIndex ?? 0;
@@ -388,7 +388,7 @@ export class GameEngine {
     ) {
       throw new BadRequestException('session.review_unavailable');
     }
-    const snapshot = await this.requireSnapshot(pin);
+    const snapshot = await this.requireSnapshot(pin, true);
     const played = this.playedSteps(meta, snapshot);
     const key = stepKey(step);
     if (!played.includes(key)) throw new BadRequestException('session.step_not_played');
@@ -1243,8 +1243,14 @@ export class GameEngine {
     return meta;
   }
 
-  private async requireSnapshot(pin: string): Promise<QuizSnapshot> {
-    const snapshot = await this.game.getSnapshot(pin);
+  /**
+   * The session's snapshot; `refresh` re-reads the quiz first so the form of
+   * the steps still to come follows the editor (substance stays frozen).
+   */
+  private async requireSnapshot(pin: string, refresh = false): Promise<QuizSnapshot> {
+    const snapshot = refresh
+      ? await this.game.refreshSnapshot(pin)
+      : await this.game.getSnapshot(pin);
     if (!snapshot) {
       throw new BadRequestException('session.snapshot_not_found');
     }

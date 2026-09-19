@@ -157,7 +157,8 @@
     "label": "Session en cours — PIN",
     "controlScreen": "Écran de contrôle",
     "projectionScreen": "Écran de projection",
-    "invitationScreen": "Écran d’invitation"
+    "invitationScreen": "Écran d’invitation",
+    "liveEditsHint": "Les modifications de forme (fonds, contraste, explications, slides) s’appliquent à la session en cours dès l’étape suivante ; questions et réponses restent telles que lancées."
   },
   "questionForm": {
     "typeLabel": "Type",

@@ -157,7 +157,8 @@
     "label": "Active session — PIN",
     "controlScreen": "Control screen",
     "projectionScreen": "Projection screen",
-    "invitationScreen": "Invitation screen"
+    "invitationScreen": "Invitation screen",
+    "liveEditsHint": "Layout and presentation edits (backgrounds, contrast, explanations, slides) reach the running session at its next step; questions and answers stay as launched."
   },
   "questionForm": {
     "typeLabel": "Type",

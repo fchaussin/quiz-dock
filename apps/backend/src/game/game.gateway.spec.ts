@@ -336,6 +336,49 @@ describe('GameGateway (intégration socket)', () => {
     expect(states.at(-1)).toMatchObject({ state: 'PODIUM', nav: { review: false } });
   }, 15_000);
 
+  it('live form refresh: an explanation edited during the session shows on the next step, the substance stays frozen', async () => {
+    const host = connect({ localUser: 'Animateur' });
+    const { pin } = await host.emitWithAck('host:create', { quizId });
+    const player = connect();
+    await player.emitWithAck('player:join', { pin, nickname: 'Max' });
+    const firstReveal = new Promise<void>((resolve) =>
+      player.once('question:reveal', () => resolve()),
+    );
+    const podiumP = new Promise<void>((resolve) => player.once('game:podium', () => resolve()));
+    host.emit('host:start', { pin });
+    await firstReveal;
+    host.emit('host:next', { pin });
+    await podiumP;
+
+    // The host edits the question while the session runs: form and substance alike.
+    const question = await prisma.question.findFirstOrThrow({ where: { quizId } });
+    await prisma.question.update({
+      where: { id: question.id },
+      data: { answerExplanation: 'Edited live.', prompt: 'Edited prompt?', timeLimitS: 60 },
+    });
+    try {
+      const reviewStart = new Promise<{ prompt: string; timeLimitS: number }>((resolve) =>
+        player.once('question:start', (p) => resolve(p as never)),
+      );
+      const reviewReveal = new Promise<{ answerExplanation?: string }>((resolve) =>
+        player.once('question:reveal', (r) => resolve(r as never)),
+      );
+      host.emit('host:review', { pin, questionIndex: 0 });
+      const start = await reviewStart;
+      expect(start).toMatchObject({ prompt: 'Capitale de la France ?', timeLimitS: 5 }); // frozen
+      expect((await reviewReveal).answerExplanation).toBe('Edited live.'); // followed
+    } finally {
+      await prisma.question.update({
+        where: { id: question.id },
+        data: {
+          answerExplanation: 'Paris est la **capitale**.',
+          prompt: 'Capitale de la France ?',
+          timeLimitS: 5,
+        },
+      });
+    }
+  }, 15_000);
+
   it('archivage (§2.7) : capture intégrale → host:end{archive} persiste les tables, idempotent', async () => {
     const host = connect({ localUser: 'Animateur' });
     const { pin } = await host.emitWithAck('host:create', { quizId, fullCapture: true });

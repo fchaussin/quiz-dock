@@ -14,7 +14,7 @@ import { normalizeAnswer } from '../questions/dto/question-content.schema';
 import { RedisService } from '../redis/redis.service';
 import { GAME_TTL_S, gameKeys } from './game.keys';
 import type { GameMeta, PlayerRecord, QuizSnapshot } from './game.types';
-import { QUIZ_SNAPSHOT_INCLUDE, buildSnapshot } from './snapshot';
+import { QUIZ_SNAPSHOT_INCLUDE, buildSnapshot, refreshSnapshotForm } from './snapshot';
 
 const PIN_ALLOC_ATTEMPTS = 10;
 const NICKNAME_MIN = 2;
@@ -208,6 +208,25 @@ export class GameService {
   async getSnapshot(pin: string): Promise<QuizSnapshot | null> {
     const raw = await this.redis.get(gameKeys.snapshot(pin));
     return raw ? (JSON.parse(raw) as QuizSnapshot) : null;
+  }
+
+  /**
+   * Re-reads the quiz and refreshes the **form** of the frozen snapshot (see
+   * `refreshSnapshotForm`) — called by the engine at each step change so the
+   * host's edits reach a running session without touching its substance.
+   * Returns the snapshot in use (unchanged when the quiz is gone).
+   */
+  async refreshSnapshot(pin: string): Promise<QuizSnapshot | null> {
+    const frozen = await this.getSnapshot(pin);
+    if (!frozen) return null;
+    const quiz = await this.prisma.quiz.findUnique({
+      where: { id: frozen.quizId },
+      include: QUIZ_SNAPSHOT_INCLUDE,
+    });
+    if (!quiz) return frozen;
+    const refreshed = refreshSnapshotForm(frozen, quiz);
+    await this.redis.set(gameKeys.snapshot(pin), JSON.stringify(refreshed), 'KEEPTTL');
+    return refreshed;
   }
 
   /** Nombre de joueurs **connectés** (§8 : base de la convergence et des compteurs). */
