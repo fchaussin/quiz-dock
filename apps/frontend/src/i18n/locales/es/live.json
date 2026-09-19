@@ -145,7 +145,8 @@
     "leaveConfirmDescription": "Perderás tu sitio y tu puntuación. Para volver tendrás que unirte de nuevo con el PIN.",
     "joinAnother": "Unirse a otra partida",
     "yourClosest": "{{rank}}.º más cercano — ±{{distance}}",
-    "yourCredit": "{{percent}} % de los puntos"
+    "yourCredit": "{{percent}} % de los puntos",
+    "dragToReorder": "Arrastra para reordenar"
   },
   "reveal": {
     "explanation": "Explicación",

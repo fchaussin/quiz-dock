@@ -145,7 +145,8 @@
     "leaveConfirmDescription": "You will lose your seat and your score. To come back you will have to join again with the PIN.",
     "joinAnother": "Join another game",
     "yourClosest": "{{rank}}. closest — ±{{distance}}",
-    "yourCredit": "{{percent}} % of the points"
+    "yourCredit": "{{percent}} % of the points",
+    "dragToReorder": "Drag to reorder"
   },
   "reveal": {
     "explanation": "Explanation",

@@ -145,7 +145,8 @@
     "leaveConfirmDescription": "你將失去你的位置和分數。要回來需要再次用 PIN 加入。",
     "joinAnother": "加入另一場遊戲",
     "yourClosest": "第 {{rank}} 接近——±{{distance}}",
-    "yourCredit": "{{percent}} % 的分數"
+    "yourCredit": "{{percent}} % 的分數",
+    "dragToReorder": "拖曳以重新排序"
   },
   "reveal": {
     "explanation": "解析",

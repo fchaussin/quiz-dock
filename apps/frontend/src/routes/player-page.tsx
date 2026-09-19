@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
-import { ArrowDown, ArrowUp, Check, LogIn, LogOut, Shuffle } from 'lucide-react';
+import { Check, LogIn, LogOut, Shuffle } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +19,7 @@ import {
   saveAvatarSeed,
 } from '../game/game-client';
 import { ResultMark } from '../game/result-mark';
+import { SortableAnswer } from '../game/sortable-answer';
 import {
   AnswerExplanation,
   AnswerRules,
@@ -129,15 +130,6 @@ export function PlayerPage() {
     }
   };
 
-  const moveOrder = (i: number, dir: -1 | 1) =>
-    setOrder((prev) => {
-      const next = [...prev];
-      const target = i + dir;
-      if (target < 0 || target >= next.length) return prev;
-      [next[i], next[target]] = [next[target], next[i]];
-      return next;
-    });
-
   /** Widget de réponse selon le type de question (§4/§5.3). */
   const renderAnswerInput = () => {
     if (!question) return <p className="text-muted-foreground">{t('player.waitingQuestion')}</p>;
@@ -179,39 +171,8 @@ export function PlayerPage() {
     if (question.type === 'ordering' && opts.length) {
       const ordered = order.length ? order : opts.map((o) => o.id);
       return (
-        <div className="flex w-full flex-col gap-3">
-          <ul className="flex flex-col gap-2">
-            {ordered.map((id, i) => {
-              const o = opts.find((x) => x.id === id);
-              if (!o) return null;
-              return (
-                <li key={id} className="flex items-center gap-2 rounded-lg border px-3 py-2">
-                  <span className="text-muted-foreground tabular-nums">{i + 1}.</span>
-                  <span className="flex-1 text-left">{o.text ?? o.color}</span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    aria-label={t('player.moveUp')}
-                    disabled={i === 0}
-                    onClick={() => moveOrder(i, -1)}
-                  >
-                    <ArrowUp className="size-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    aria-label={t('player.moveDown')}
-                    disabled={i === ordered.length - 1}
-                    onClick={() => moveOrder(i, 1)}
-                  >
-                    <ArrowDown className="size-4" />
-                  </Button>
-                </li>
-              );
-            })}
-          </ul>
+        <div className="flex w-full flex-col gap-[0.75em]">
+          <SortableAnswer options={opts} order={ordered} onChange={setOrder} />
           <Button type="button" onClick={() => submit(ordered)}>
             {t('player.submitAnswer')}
           </Button>
