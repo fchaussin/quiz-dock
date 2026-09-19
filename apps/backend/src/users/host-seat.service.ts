@@ -125,6 +125,21 @@ export class HostSeatService {
     return { holder: user.displayName, expiresAt, claimedAt };
   }
 
+  /**
+   * Shortens a live seat to at most `minutes` from now (demo instance starting
+   * over a seat taken before the guard existed). Returns whether a seat was cut.
+   */
+  async capExpiry(minutes: number): Promise<boolean> {
+    const now = new Date();
+    const cap = new Date(now.getTime() + minutes * 60_000);
+    const res = await this.prisma.hostSeat.updateMany({
+      where: { id: SEAT_ID, OR: [{ expiresAt: null }, { expiresAt: { gt: cap } }] },
+      data: { expiresAt: cap },
+    });
+    if (res.count > 0) this.log.log(`Host seat capped to ${minutes} min`);
+    return res.count > 0;
+  }
+
   /** Full seat row with its holder (operator tooling), or `null` when no row. */
   details(): Promise<(HostSeat & { user: Pick<User, 'displayName' | 'oidcSubject'> }) | null> {
     return this.prisma.hostSeat.findUnique({

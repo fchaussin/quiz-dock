@@ -35,6 +35,7 @@ function makeService(seat: Seat | null, knownUsers: User[] = [alice, bob]) {
     $transaction: jest.fn((fn: (t: typeof tx) => unknown) => fn(tx)),
     hostSeat: {
       findUnique: jest.fn().mockResolvedValue(seat),
+      updateMany: jest.fn().mockResolvedValue({ count: seat ? 1 : 0 }),
       deleteMany: jest.fn(async ({ where }: { where: { userId: string } }) => ({
         count: seat?.userId === where.userId ? 1 : 0,
       })),
@@ -78,6 +79,16 @@ describe('HostSeatService.provision', () => {
   it('demotes the holder once the seat has expired', async () => {
     const { service } = makeService({ id: 1, userId: alice.id, expiresAt: past });
     expect((await service.provision(principal(alice))).role).toBe('player');
+  });
+});
+
+describe('HostSeatService.capExpiry', () => {
+  it('cuts a seat without expiry (or a longer one) to N minutes from now', async () => {
+    const { service, prisma } = makeService({ id: 1, userId: alice.id, expiresAt: null });
+    expect(await service.capExpiry(5)).toBe(true);
+    const call = (prisma.hostSeat.updateMany as jest.Mock).mock.calls[0][0];
+    expect(call.where.OR).toEqual([{ expiresAt: null }, { expiresAt: { gt: expect.any(Date) } }]);
+    expect(call.data.expiresAt.getTime()).toBeLessThanOrEqual(Date.now() + 5 * 60_000);
   });
 });
 

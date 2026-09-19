@@ -1,6 +1,7 @@
 import type { MediaService } from '../media/media.service';
 import type { PrismaService } from '../prisma/prisma.service';
 import type { RedisService } from '../redis/redis.service';
+import type { HostSeatService } from '../users/host-seat.service';
 import { DEMO_RESET_MAX_DEFER_MS } from './demo.config';
 import { DemoResetService } from './demo-reset.service';
 
@@ -23,7 +24,14 @@ function makeService(games: Record<string, string>) {
   const media = {
     removeAllFiles: jest.fn().mockResolvedValue(undefined),
   } as unknown as MediaService;
-  return { service: new DemoResetService(prisma, redis, media), prisma, redis, media, deleteMany };
+  const seat = { capExpiry: jest.fn().mockResolvedValue(false) } as unknown as HostSeatService;
+  return {
+    service: new DemoResetService(prisma, redis, media, seat),
+    prisma,
+    redis,
+    media,
+    deleteMany,
+  };
 }
 
 describe('DemoResetService', () => {

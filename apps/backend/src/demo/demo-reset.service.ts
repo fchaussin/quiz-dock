@@ -3,7 +3,13 @@ import { GameState } from '@quiz-dock/contracts';
 import { MediaService } from '../media/media.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
-import { DEMO_RESET_INTERVAL_MS, DEMO_RESET_MAX_DEFER_MS, isDemoMode } from './demo.config';
+import { HostSeatService } from '../users/host-seat.service';
+import {
+  DEMO_RESET_INTERVAL_MS,
+  DEMO_RESET_MAX_DEFER_MS,
+  DEMO_SEAT_MINUTES,
+  isDemoMode,
+} from './demo.config';
 
 /** Live game hashes are `game:<pin>`; their satellites carry a third segment. */
 const GAME_HASH = /^game:\d+$/;
@@ -25,11 +31,14 @@ export class DemoResetService implements OnModuleInit, OnModuleDestroy {
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
     private readonly media: MediaService,
+    private readonly seat: HostSeatService,
   ) {}
 
-  onModuleInit(): void {
+  async onModuleInit(): Promise<void> {
     if (!isDemoMode()) return;
     this.log.warn('DEMO_MODE: short host seat, uploads disabled, hourly reset');
+    // A seat taken before the guard (persistent data, or a restart) gets the cap too.
+    await this.seat.capExpiry(DEMO_SEAT_MINUTES);
     this.timer = setInterval(() => void this.tick(), DEMO_RESET_INTERVAL_MS);
     this.timer.unref();
   }
