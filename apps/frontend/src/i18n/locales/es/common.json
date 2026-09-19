@@ -41,5 +41,8 @@
     "control": "Consola",
     "screen": "Proyección",
     "join": "Unirse"
+  },
+  "demo": {
+    "banner": "Demo pública — todo se borra cada hora; el asiento de anfitrión dura {{count}} min cada vez."
   }
 }

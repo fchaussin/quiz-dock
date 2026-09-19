@@ -41,5 +41,8 @@
     "control": "Console",
     "screen": "Projection",
     "join": "Join"
+  },
+  "demo": {
+    "banner": "Public demo — everything is wiped every hour; the host seat lasts {{count}} min at a time."
   }
 }

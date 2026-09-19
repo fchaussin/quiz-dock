@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { AppConfigController } from './app-config/app-config.controller';
 import { AuthModule } from './auth/auth.module';
+import { DemoModule } from './demo/demo.module';
 import { GameModule } from './game/game.module';
 import { HealthController } from './health/health.controller';
 import { MeController } from './me/me.controller';
@@ -49,6 +50,7 @@ const serveStatic = process.env.CLIENT_DIR
     SlidesModule,
     MediaModule,
     GameModule,
+    DemoModule,
   ],
   controllers: [HealthController, MeController, AppConfigController],
   providers: [],

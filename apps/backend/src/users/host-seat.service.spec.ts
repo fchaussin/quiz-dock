@@ -103,6 +103,21 @@ describe('HostSeatService.claim', () => {
     expect((await service.claim(alice, null)).expiresAt).toBeNull();
   });
 
+  it('on a demo instance the seat lasts DEMO_SEAT_MINUTES whatever was asked', async () => {
+    const env = process.env;
+    process.env = { ...env, DEMO_MODE: 'true' };
+    try {
+      const { service } = makeService(null);
+      const before = Date.now();
+      const state = await service.claim(alice, null);
+      const left = state.expiresAt!.getTime() - before;
+      expect(left).toBeGreaterThan(4 * 60_000);
+      expect(left).toBeLessThanOrEqual(5 * 60_000 + 1_000);
+    } finally {
+      process.env = env;
+    }
+  });
+
   it('refuses (409 host_seat.taken) while another user holds a live seat', async () => {
     const { service, tx } = makeService({ id: 1, userId: alice.id, expiresAt: future });
     await expect(service.claim(bob, null)).rejects.toThrow(ConflictException);

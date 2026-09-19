@@ -1,4 +1,9 @@
-import { BadRequestException, NotFoundException, PayloadTooLargeException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+  PayloadTooLargeException,
+} from '@nestjs/common';
 import type { PrismaService } from '../prisma/prisma.service';
 import { MediaService } from './media.service';
 
@@ -33,6 +38,17 @@ describe('MediaService', () => {
   it('refuse un upload sans fichier', async () => {
     await expect(service.upload('o1', undefined)).rejects.toThrow(BadRequestException);
     expect(prisma.mediaAsset.create).not.toHaveBeenCalled();
+  });
+
+  it('refuse tout upload en mode démo (avant tout écrit)', async () => {
+    const env = process.env;
+    process.env = { ...env, DEMO_MODE: 'true' };
+    try {
+      await expect(service.upload('o1', file())).rejects.toThrow(ForbiddenException);
+      expect(prisma.mediaAsset.create).not.toHaveBeenCalled();
+    } finally {
+      process.env = env;
+    }
   });
 
   it('refuse un mime non supporté (avant tout écrit)', async () => {

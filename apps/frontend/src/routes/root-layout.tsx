@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { SeatCountdown, SeatMenuRow } from '@/components/seat-status';
 import { UserMenu } from '@/components/user-menu';
 import { useAuth } from '../auth/auth-context';
-import { APP_NAME, appConfig } from '../config';
+import { APP_NAME, DEMO, appConfig } from '../config';
 
 /** Route id → `titles.*` key in `common`; the document title reads "<page> · <app>". */
 const TITLE_KEYS: Record<string, string> = {
@@ -92,6 +92,14 @@ export function RootLayout() {
           )}
         </nav>
       </header>
+      {DEMO ? (
+        <p
+          role="note"
+          className="border-b bg-amber-500/15 px-6 py-1.5 text-center text-xs text-amber-700 dark:text-amber-400"
+        >
+          {t('common:demo.banner', { count: DEMO.seatMinutes })}
+        </p>
+      ) : null}
       {/* Wide but bounded: ~1440px, the usual ceiling for app layouts; pages narrow themselves when reading matters. */}
       <main
         className={

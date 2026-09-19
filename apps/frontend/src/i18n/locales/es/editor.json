@@ -239,7 +239,8 @@
     "uploading": "Subiendo…",
     "add": "Añadir un medio (imagen/audio)",
     "fileInputLabel": "Archivo multimedia",
-    "uploadError": "Error al subir."
+    "uploadError": "Error al subir.",
+    "demoDisabled": "La subida de medios está desactivada en la instancia de demo."
   },
   "background": {
     "legend": "Fondo",

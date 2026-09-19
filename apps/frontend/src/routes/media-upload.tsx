@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { apiErrorText } from '../api/http';
 import { useMediaControllerUpload } from '../api/generated/media/media';
+import { DEMO } from '../config';
 
 /** Upload d'un média (image/audio) → renvoie le mediaId au parent. */
 export function MediaUpload({
@@ -28,6 +29,9 @@ export function MediaUpload({
     }
   };
 
+  if (DEMO) {
+    return <p className="text-muted-foreground text-sm">{t('media.demoDisabled')}</p>;
+  }
   return (
     <div className="flex flex-col gap-1.5">
       {value ? (

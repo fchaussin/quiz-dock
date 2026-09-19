@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { type HostSeat, type User, UserRole } from '@prisma/client';
 import { type AuthPrincipal, LOCAL_SUB_PREFIX } from '../auth/auth-provider';
+import { DEMO_SEAT_MINUTES, isDemoMode } from '../demo/demo.config';
 import { PrismaService } from '../prisma/prisma.service';
 import { SampleQuizzesService } from '../quizzes/samples/sample-quizzes.service';
 
@@ -89,9 +90,12 @@ export class HostSeatService {
   /**
    * Takes the seat for `user` (or renews its expiry when already held by them).
    * Serialised by a transaction-scoped advisory lock; refused (409) while another
-   * user holds a live seat. First-time claimers get the sample quizzes.
+   * user holds a live seat. First-time claimers get the sample quizzes. On a demo
+   * instance the requested expiry is ignored: the seat always lasts
+   * `DEMO_SEAT_MINUTES` from now, renewal included.
    */
-  async claim(user: User, expiresInMinutes: number | null): Promise<HostSeatState> {
+  async claim(user: User, requestedMinutes: number | null): Promise<HostSeatState> {
+    const expiresInMinutes = isDemoMode() ? DEMO_SEAT_MINUTES : requestedMinutes;
     const claimedAt = new Date();
     const expiresAt = expiresInMinutes
       ? new Date(claimedAt.getTime() + expiresInMinutes * 60_000)

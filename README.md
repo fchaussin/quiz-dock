@@ -185,6 +185,7 @@ Copy `.env.example` to `.env` and adjust. Common settings:
 | `APP_NAME` | `QuizDock` | App name shown in the UI (white-label) |
 | `APP_LANG` | `en` | Instance language: `en` · `fr` · `es` · `zh` · `zh-TW` |
 | `AUTH_MODE` | `none` | `none` (local mode: first host takes the seat, sample quizzes included) or `oidc` (any OpenID Connect provider) |
+| `DEMO_MODE` | `false` | Public demo guards: 5-minute host seat, no uploads, hourly wipe |
 | `HTTP_PORT` | `18080` | Host port for the app |
 | `APP_PUBLIC_URL` | — | Public address of the instance, offered first as the invitation address (QR code, join link) |
 | `HOST_LAN_IPS` | — | LAN IP of the machine when Docker hides it (Docker Desktop): offered as an invitation address for local play |

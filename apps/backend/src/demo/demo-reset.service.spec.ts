@@ -1,0 +1,69 @@
+import type { MediaService } from '../media/media.service';
+import type { PrismaService } from '../prisma/prisma.service';
+import type { RedisService } from '../redis/redis.service';
+import { DEMO_RESET_MAX_DEFER_MS } from './demo.config';
+import { DemoResetService } from './demo-reset.service';
+
+/** Redis with a few game hashes: `games` maps key → state. */
+function makeService(games: Record<string, string>) {
+  const deleteMany = jest.fn().mockReturnValue('op');
+  const prisma = {
+    $transaction: jest.fn().mockResolvedValue([]),
+    gameSessionLog: { deleteMany },
+    quiz: { deleteMany },
+    mediaAsset: { deleteMany },
+    hostSeat: { deleteMany },
+    user: { deleteMany },
+  } as unknown as PrismaService;
+  const redis = {
+    scan: jest.fn().mockResolvedValue(['0', Object.keys(games)]),
+    hget: jest.fn(async (key: string) => games[key] ?? null),
+    flushdb: jest.fn().mockResolvedValue('OK'),
+  } as unknown as RedisService;
+  const media = {
+    removeAllFiles: jest.fn().mockResolvedValue(undefined),
+  } as unknown as MediaService;
+  return { service: new DemoResetService(prisma, redis, media), prisma, redis, media, deleteMany };
+}
+
+describe('DemoResetService', () => {
+  it('reset: every table, the media files, then the live state', async () => {
+    const { service, prisma, redis, media, deleteMany } = makeService({});
+    await service.reset();
+    expect(deleteMany).toHaveBeenCalledTimes(5);
+    expect(prisma.$transaction).toHaveBeenCalledWith(['op', 'op', 'op', 'op', 'op']);
+    expect(media.removeAllFiles).toHaveBeenCalled();
+    expect(redis.flushdb).toHaveBeenCalled();
+  });
+
+  it('hasLiveGames: only game hashes count, and ended ones do not', async () => {
+    const { service } = makeService({
+      'game:123456': 'ENDED',
+      'game:123456:players': 'x',
+      'game:654321:snapshot': 'lobby',
+    });
+    expect(await service.hasLiveGames()).toBe(false);
+    expect(await makeService({ 'game:111111': 'question' }).service.hasLiveGames()).toBe(true);
+  });
+
+  it('tick: defers while a game is live, resets otherwise', async () => {
+    const live = makeService({ 'game:111111': 'lobby' });
+    expect(await live.service.tick()).toBe(false);
+    expect(live.redis.flushdb).not.toHaveBeenCalled();
+    const idle = makeService({});
+    expect(await idle.service.tick()).toBe(true);
+    expect(idle.redis.flushdb).toHaveBeenCalled();
+  });
+
+  it('tick: resets regardless once the deferral cap is past', async () => {
+    const { service, redis } = makeService({ 'game:111111': 'lobby' });
+    expect(await service.tick(Date.now() + DEMO_RESET_MAX_DEFER_MS + 1)).toBe(true);
+    expect(redis.flushdb).toHaveBeenCalled();
+  });
+
+  it('tick: a failure is logged, not thrown', async () => {
+    const { service, redis } = makeService({});
+    (redis.flushdb as jest.Mock).mockRejectedValue(new Error('down'));
+    await expect(service.tick()).resolves.toBe(false);
+  });
+});
