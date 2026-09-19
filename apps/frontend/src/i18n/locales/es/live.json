@@ -94,14 +94,14 @@
       "why": "Los teléfonos de los participantes abren esta dirección para unirse. «localhost» o «127.0.0.1» solo funcionan en este ordenador: un teléfono no puede alcanzarlos, el código QR y el enlace no llevarían a ningún sitio.",
       "whereTitle": "En una instancia local, usa la dirección de red de este ordenador",
       "where": "(una IP como 192.168.x.x), manteniendo el puerto de esta página{{port}}:",
-      "mac": "macOS: Ajustes del Sistema › Wi‑Fi › Detalles… › Dirección IP — o «ipconfig getifaddr en0» en el Terminal.",
-      "windows": "Windows: «ipconfig» en un símbolo del sistema — la dirección IPv4 del adaptador activo.",
-      "linux": "Linux: «ip a» — la dirección inet de la interfaz activa.",
+      "mac": "Mac: Ajustes del Sistema › Wi‑Fi › Detalles… junto a tu red › Dirección IP (o Red › tu conexión).",
+      "windows": "Windows: Configuración › Red e Internet › Wi‑Fi (o Ethernet) › tu red › Dirección IPv4.",
+      "linux": "Linux: el indicador de red › detalles de la conexión, o «ip a» en un terminal.",
       "sameNetwork": "Los teléfonos deben estar en la misma Wi‑Fi / red que este ordenador, y su cortafuegos debe dejar pasar el puerto.",
       "deployed": "En un servidor con nombre de dominio, define APP_PUBLIC_URL en la configuración: se ofrecerá primero.",
       "publicConfigured": "Esta instancia tiene una dirección pública configurada ({{url}}): úsala, es la que los participantes alcanzan desde cualquier sitio.",
       "lanKnown": "Las direcciones listadas son las de esta máquina en la red local: elige la de la red donde están los participantes (Wi‑Fi, cable).",
-      "lanHidden": "Esta instancia corre en un contenedor que no ve la red de la máquina (Docker Desktop, red bridge): no se pudo detectar ninguna dirección local. Escríbela, o define HOST_LAN_IPS en la configuración para que aparezca aquí.",
+      "lanHidden": "Esta instancia corre en Docker Desktop (o un contenedor en red bridge), que oculta la red del ordenador: no se pudo detectar ninguna dirección local. Escríbela abajo — o añade HOST_LAN_IPS=<tu IP> al archivo .env (o «-e HOST_LAN_IPS=…» en docker run) para que aparezca aquí la próxima vez.",
       "https": "Esta página se sirve por HTTPS: una dirección local en http:// mostrará un aviso en los teléfonos — una dirección pública con certificado es la vía limpia."
     }
   },

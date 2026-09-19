@@ -31,10 +31,10 @@ expect in each setup and what to configure so the right address is offered.
 
 | Setup | What the console offers | Configure |
 | --- | --- | --- |
+| **Docker Desktop on a Mac or PC** (the usual local setup) | Nothing detected — the VM hides the computer's network; the console explains where to read the IP (System Settings / Settings › Network) | `HOST_LAN_IPS=<your IP>` in `.env`, or `-e HOST_LAN_IPS=<your IP>` on `docker run` — or just type it in the console |
 | **Server with a domain** (reverse proxy, TLS) | The public address first | `APP_PUBLIC_URL=https://quiz.example.org` |
 | **Linux server on the LAN**, no domain (compose or standalone) | The machine's LAN IPs, detected (`network_mode: host` or the standalone image see the host's interfaces) | nothing — or `HOST_LAN_IPS` to pin one |
 | **Docker on Linux, bridge network** | Nothing detected (the container only sees `172.x`) | `HOST_LAN_IPS=192.168.1.20` |
-| **Docker Desktop (macOS / Windows)** | Nothing detected (the VM hides the host's interfaces) | `HOST_LAN_IPS=<your Mac/PC IP>` — the console explains where to find it |
 | **Dev stack** (`docker compose up`, Vite on :15173) | As above, with the port of the page you are on | `HOST_LAN_IPS` in `.env` |
 | **Console opened on `localhost`** | "This page" is useless for phones: the console opens the help by itself and pre-selects a LAN address when one is known | — |
 
