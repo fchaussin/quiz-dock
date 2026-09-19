@@ -148,7 +148,7 @@ export function DashboardPage() {
                 <span className="text-sm text-muted-foreground">
                   {t('playerCount', { count: game.playerCount })}
                 </span>
-                <Link to="/present/$pin/control" params={{ pin: game.pin }}>
+                <Link to="/session/$pin/console" params={{ pin: game.pin }}>
                   <Button type="button" size="sm" variant="outline">
                     {t('resume')}
                   </Button>

@@ -294,6 +294,7 @@ export function PlayerPage() {
             <Label>
               {t('player.nickname')}
               <Input
+                autoFocus
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 placeholder={t('player.nicknamePlaceholder')}

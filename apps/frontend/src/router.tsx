@@ -40,9 +40,12 @@ const callbackRoute = createRoute({
   component: CallbackPage,
 });
 
+// URLs read like the interface: /quizzes (My quizzes), /quizzes/:id (editor),
+// /quizzes/:id/reviews, /quizzes/:id/history, /session/:pin/console|projection,
+// /join. The former paths redirect (bookmarks, QR codes, open windows).
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/dashboard',
+  path: '/quizzes',
   beforeLoad: requireAuth,
   component: DashboardPage,
 });
@@ -64,7 +67,7 @@ export const previewRoute = createRoute({
 // Player reviews of a quiz (§2.11), paginated — owner only.
 export const feedbackRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/quizzes/$quizId/feedback',
+  path: '/quizzes/$quizId/reviews',
   beforeLoad: requireAuth,
   component: FeedbackPage,
 });
@@ -72,14 +75,14 @@ export const feedbackRoute = createRoute({
 // Historique des parties archivées d'un quiz (§2.7) — propriétaire uniquement.
 export const sessionsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/quizzes/$quizId/sessions',
+  path: '/quizzes/$quizId/history',
   beforeLoad: requireAuth,
   component: SessionsPage,
 });
 
 export const sessionDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/quizzes/$quizId/sessions/$sessionId',
+  path: '/quizzes/$quizId/history/$sessionId',
   beforeLoad: requireAuth,
   component: SessionDetailPage,
 });
@@ -87,7 +90,7 @@ export const sessionDetailRoute = createRoute({
 // « Le quiz vu par un participant » (§2.10) : réponses question par question.
 export const sessionPlayerRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/quizzes/$quizId/sessions/$sessionId/players/$playerResultId',
+  path: '/quizzes/$quizId/history/$sessionId/players/$playerResultId',
   beforeLoad: requireAuth,
   component: SessionPlayerPage,
 });
@@ -95,7 +98,7 @@ export const sessionPlayerRoute = createRoute({
 // Console d'animation (hôte, §3). Auth requise (propriétaire).
 export const controlRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/present/$pin/control',
+  path: '/session/$pin/console',
   beforeLoad: requireAuth,
   component: ControlPage,
 });
@@ -103,18 +106,70 @@ export const controlRoute = createRoute({
 // Écran de jeu projeté (grand écran, §4). Spectateur en lecture seule, aucune auth.
 export const screenRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/present/$pin/screen',
+  path: '/session/$pin/projection',
   component: ScreenPage,
 });
 
-// Ancienne salle d'attente mono-fenêtre → console de contrôle (§4.1 interim).
-export const presentRedirectRoute = createRoute({
+export const sessionRedirectRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/present/$pin',
+  path: '/session/$pin',
   beforeLoad: ({ params }) => {
-    throw redirect({ to: '/present/$pin/control', params });
+    throw redirect({ to: '/session/$pin/console', params });
   },
 });
+
+// Former paths (before the URLs were aligned with the interface) keep working.
+const legacyRedirects = [
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/dashboard',
+    beforeLoad: () => {
+      throw redirect({ to: '/quizzes' });
+    },
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/quizzes/$quizId/feedback',
+    beforeLoad: ({ params }) => {
+      throw redirect({ to: '/quizzes/$quizId/reviews', params });
+    },
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/quizzes/$quizId/sessions',
+    beforeLoad: ({ params }) => {
+      throw redirect({ to: '/quizzes/$quizId/history', params });
+    },
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/quizzes/$quizId/sessions/$sessionId',
+    beforeLoad: ({ params }) => {
+      throw redirect({ to: '/quizzes/$quizId/history/$sessionId', params });
+    },
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/present/$pin',
+    beforeLoad: ({ params }) => {
+      throw redirect({ to: '/session/$pin/console', params });
+    },
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/present/$pin/control',
+    beforeLoad: ({ params }) => {
+      throw redirect({ to: '/session/$pin/console', params });
+    },
+  }),
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: '/present/$pin/screen',
+    beforeLoad: ({ params }) => {
+      throw redirect({ to: '/session/$pin/projection', params });
+    },
+  }),
+];
 
 // Entrée joueur (publique). `/join` (saisie du PIN) et `/join/$pin` (machine à états).
 export const joinRoute = createRoute({
@@ -142,9 +197,10 @@ export const routeTree = rootRoute.addChildren([
   sessionPlayerRoute,
   controlRoute,
   screenRoute,
-  presentRedirectRoute,
+  sessionRedirectRoute,
   joinRoute,
   joinWithPinRoute,
+  ...legacyRedirects,
 ]);
 
 export const router = createRouter({ routeTree });

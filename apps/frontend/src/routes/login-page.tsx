@@ -45,7 +45,7 @@ export function LoginPage() {
     const role = await loginLocal(name);
     if (role === 'host' || role === 'admin' || role === null) {
       // Titulaire du siège (ou backend injoignable : on laisse l'API trancher).
-      void navigate({ to: '/dashboard' });
+      void navigate({ to: '/quizzes' });
       return;
     }
     // Pas titulaire : le siège est libre (→ prise intentionnelle, après
@@ -63,7 +63,7 @@ export function LoginPage() {
     try {
       await claimHostSeat(expiry === 0 ? null : expiry);
       setConfirming(false);
-      void navigate({ to: '/dashboard' });
+      void navigate({ to: '/quizzes' });
     } catch (err) {
       setConfirming(false);
       if (err instanceof ApiError && err.status === 409) refuse();

@@ -21,7 +21,7 @@ describe('SeatStatus (topbar, local mode)', () => {
       { method: 'GET', path: '/auth/host-seat', body: { holder: 'Marc', expiresAt, claimedAt } },
       { method: 'GET', path: '/quizzes', body: [] },
     ]);
-    renderApp('/dashboard');
+    renderApp('/quizzes');
     // The countdown is in the topbar; renewal sits in the user menu.
     expect(await screen.findByText(/1 h 30 min restantes/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Marc/ }));
@@ -46,7 +46,7 @@ describe('SeatStatus (topbar, local mode)', () => {
       },
       { method: 'GET', path: '/quizzes', body: [] },
     ]);
-    renderApp('/dashboard');
+    renderApp('/quizzes');
     fireEvent.click(await screen.findByRole('button', { name: /Marc/ }));
     expect(await screen.findByText(/Sans expiration/)).toBeInTheDocument();
     // Still extendable (to set an expiry) and releasable.

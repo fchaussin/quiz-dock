@@ -9,15 +9,15 @@ import { APP_NAME, appConfig } from '../config';
 /** Route id → `titles.*` key in `common`; the document title reads "<page> · <app>". */
 const TITLE_KEYS: Record<string, string> = {
   '/login': 'login',
-  '/dashboard': 'dashboard',
+  '/quizzes': 'dashboard',
   '/quizzes/$quizId': 'editor',
   '/quizzes/$quizId/preview': 'preview',
-  '/quizzes/$quizId/feedback': 'feedback',
-  '/quizzes/$quizId/sessions': 'sessions',
-  '/quizzes/$quizId/sessions/$sessionId': 'session',
-  '/quizzes/$quizId/sessions/$sessionId/players/$playerResultId': 'player',
-  '/present/$pin/control': 'control',
-  '/present/$pin/screen': 'screen',
+  '/quizzes/$quizId/reviews': 'feedback',
+  '/quizzes/$quizId/history': 'sessions',
+  '/quizzes/$quizId/history/$sessionId': 'session',
+  '/quizzes/$quizId/history/$sessionId/players/$playerResultId': 'player',
+  '/session/$pin/console': 'control',
+  '/session/$pin/projection': 'screen',
   '/join': 'join',
   '/join/$pin': 'join',
 };
@@ -37,7 +37,7 @@ export function RootLayout() {
   // Three shells: the projected screen has no chrome at all; participants (guests on a
   // phone) get the brand only; hosts and editors get the full app navigation.
   const routeId = matches[matches.length - 1]?.routeId ?? '';
-  const shell = routeId.startsWith('/present/$pin/screen')
+  const shell = routeId.startsWith('/session/$pin/projection')
     ? 'bare'
     : routeId.startsWith('/join')
       ? 'participant'
@@ -71,7 +71,7 @@ export function RootLayout() {
             <div id="participant-topbar" className="flex items-center gap-2" />
           ) : user ? (
             <>
-              <Link to="/dashboard" className="whitespace-nowrap hover:underline">
+              <Link to="/quizzes" className="whitespace-nowrap hover:underline">
                 {t('nav.myQuizzes')}
               </Link>
               {/* A seat countdown stays in plain sight; renewal and log out live in the user menu. */}

@@ -235,7 +235,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
   const onDeleteQuiz = async () => {
     await removeQuiz.mutateAsync({ id: quiz.id });
     await queryClient.invalidateQueries({ queryKey: getQuizzesControllerListQueryKey() });
-    void navigate({ to: '/dashboard' });
+    void navigate({ to: '/quizzes' });
   };
 
   const onDeleteQuestion = async (qid: string) => {
@@ -405,7 +405,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
               {t('header.preview')}
             </a>
             <Link
-              to="/quizzes/$quizId/sessions"
+              to="/quizzes/$quizId/history"
               params={{ quizId: quiz.id }}
               className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
             >
@@ -769,7 +769,7 @@ function FeedbackSection({ quizId, className }: { quizId: string; className?: st
         <>
           <FeedbackSummary summary={summary} compact />
           <Link
-            to="/quizzes/$quizId/feedback"
+            to="/quizzes/$quizId/reviews"
             params={{ quizId }}
             className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'self-start')}
           >
@@ -1029,7 +1029,7 @@ function StatusBar({
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
-            to="/present/$pin/control"
+            to="/session/$pin/console"
             params={{ pin: livePin }}
             className={cn(buttonVariants({ size: 'sm' }))}
           >
@@ -1040,7 +1040,7 @@ function StatusBar({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => open(`/present/${livePin}/screen`)}
+            onClick={() => open(`/session/${livePin}/projection`)}
           >
             <Eye className="size-4" />
             {t('gameAccess.projectionScreen')}

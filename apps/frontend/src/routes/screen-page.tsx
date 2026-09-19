@@ -28,7 +28,7 @@ import { useGameSession } from '../game/use-game-session';
  * vidéoprojection.
  */
 export function ScreenPage() {
-  const { pin } = useParams({ from: '/present/$pin/screen' });
+  const { pin } = useParams({ from: '/session/$pin/projection' });
   return <ScreenView pin={pin} />;
 }
 

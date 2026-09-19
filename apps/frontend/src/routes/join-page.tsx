@@ -34,6 +34,7 @@ export function JoinPage() {
             <Label>
               {t('pinLabel')}
               <Input
+                autoFocus
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 inputMode="numeric"

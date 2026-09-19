@@ -97,7 +97,7 @@ describe('EditorPage', () => {
     expect(await screen.findByText('4.5')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Voir les 2 avis/ })).toHaveAttribute(
       'href',
-      '/quizzes/q1/feedback',
+      '/quizzes/q1/reviews',
     );
   });
 

@@ -105,7 +105,7 @@ function SessionRow({
   return (
     <li>
       <Link
-        to="/quizzes/$quizId/sessions/$sessionId"
+        to="/quizzes/$quizId/history/$sessionId"
         params={{ quizId, sessionId: s.id }}
         className="bg-card hover:bg-accent/40 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border p-4 transition-colors"
       >
@@ -196,7 +196,7 @@ export function SessionDetailPage() {
           {t('detail.exportCsv')}
         </Button>
         <Link
-          to="/quizzes/$quizId/sessions"
+          to="/quizzes/$quizId/history"
           params={{ quizId }}
           className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
         >
@@ -269,7 +269,7 @@ export function SessionDetailPage() {
                   <td className="py-2 pr-2 tabular-nums">{p.finalRank}</td>
                   <td className="py-2 pr-2 font-medium">
                     <Link
-                      to="/quizzes/$quizId/sessions/$sessionId/players/$playerResultId"
+                      to="/quizzes/$quizId/history/$sessionId/players/$playerResultId"
                       params={{ quizId, sessionId, playerResultId: p.id }}
                       className="hover:underline"
                     >
@@ -284,7 +284,7 @@ export function SessionDetailPage() {
                   <td className="py-2 pr-2 text-right tabular-nums">{seconds(p.avgResponseMs)}</td>
                   <td className="py-2 text-right">
                     <Link
-                      to="/quizzes/$quizId/sessions/$sessionId/players/$playerResultId"
+                      to="/quizzes/$quizId/history/$sessionId/players/$playerResultId"
                       params={{ quizId, sessionId, playerResultId: p.id }}
                       aria-label={t('detail.participantDetailAria', { nickname: p.nickname })}
                       className="text-muted-foreground hover:text-foreground inline-flex"
@@ -366,7 +366,7 @@ export function SessionPlayerPage() {
           </Button>
         ) : null}
         <Link
-          to="/quizzes/$quizId/sessions/$sessionId"
+          to="/quizzes/$quizId/history/$sessionId"
           params={{ quizId, sessionId }}
           className={cn(
             buttonVariants({ variant: 'outline', size: 'sm' }),

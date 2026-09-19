@@ -10,7 +10,7 @@ describe('Garde de route', () => {
 
   it('redirige vers /login si non connecté', async () => {
     mockApi([]);
-    renderApp('/dashboard');
+    renderApp('/quizzes');
     // la garde renvoie vers la connexion (champ propre à la page de login)
     expect(await screen.findByLabelText('Votre nom')).toBeInTheDocument();
     expect(screen.queryByText('Mes quiz')).not.toBeInTheDocument();
@@ -21,7 +21,7 @@ describe('document title', () => {
   it('reads "<page> · <app>" from the matched route', async () => {
     localStorage.setItem('live.localUser', 'Marc');
     mockApi([{ method: 'GET', path: '/quizzes', body: [] }]);
-    renderApp('/dashboard');
+    renderApp('/quizzes');
     await waitFor(() => expect(document.title).toBe('Mes quiz · QuizDock'));
     localStorage.clear();
   });

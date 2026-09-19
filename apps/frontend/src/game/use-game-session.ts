@@ -264,14 +264,15 @@ export function useGameSession(pin: string, role: LiveRole) {
         }
       };
       kick();
-      sock.io.on('reconnect', kick);
+      // `io` is the socket.io manager (absent on the lighter fakes some tests use).
+      sock.io?.on('reconnect', kick);
       reconnectHandler = kick;
     });
 
     return () => {
       active = false;
       if (!s) return;
-      if (reconnectHandler) s.io.off('reconnect', reconnectHandler);
+      if (reconnectHandler) s.io?.off('reconnect', reconnectHandler);
       s.off('game:state', onState);
       s.off('game:roster', onRoster);
       s.off('player:joined', onJoined);

@@ -48,7 +48,7 @@ const CHRONO_STEPS = [-5, -1, 1, 5] as const;
 /**
  * Console d'animation (hôte, §3). Tableau de bord de **contrôle** privé : récap du
  * quiz, déroulé des questions, rythme (manuel/auto), pause et ajustement du chrono.
- * Volontairement distinct du grand écran à vidéoprojeter (`/present/$pin/screen`) —
+ * Volontairement distinct du grand écran à vidéoprojeter (`/session/$pin/projection`) —
  * le QR d'invitation y reste discret (simple info), pour ne pas confondre les deux.
  */
 /**
@@ -62,15 +62,35 @@ export function ControlPage() {
   const { t } = useTranslation(['live', 'common']);
   // Same explanation as in the editor before switching full capture on (GDPR, archive size).
   const [confirmCapture, setConfirmCapture] = useState(false);
-  const { pin } = useParams({ from: '/present/$pin/control' });
+  const { pin } = useParams({ from: '/session/$pin/console' });
   const { view, socket } = useGameSession(pin, 'host');
   const [shareNote, setShareNote] = useState<string | null>(null);
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const joinUrl = `${window.location.origin}/join/${pin}`;
-  const screenUrl = `${window.location.origin}/present/${pin}/screen`;
+  const screenUrl = `${window.location.origin}/session/${pin}/projection`;
   const emit = (event: 'host:start' | 'host:reveal' | 'host:next') => socket?.emit(event, { pin });
   const [tab, setTab] = useState<HostTab>('control');
+  // The Tab key cycles the three views (Shift+Tab backwards) unless the host is typing.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab' || e.ctrlKey || e.metaKey || e.altKey) return;
+      const el = e.target as HTMLElement | null;
+      if (
+        el &&
+        (el.closest('input, textarea, select, [contenteditable="true"]') || el.closest('dialog'))
+      ) {
+        return;
+      }
+      e.preventDefault();
+      setTab((current) => {
+        const i = HOST_TABS.indexOf(current);
+        return HOST_TABS[(i + (e.shiftKey ? -1 : 1) + HOST_TABS.length) % HOST_TABS.length];
+      });
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   // Looking back over played steps (no replay): the server tells what is reachable.
   const review = (step: GameStep) => socket?.emit('host:review', { pin, ...step });
   const navBar = view.nav ? (
@@ -141,7 +161,7 @@ export function ControlPage() {
     return (
       <section className="flex flex-col items-center gap-4 py-16 text-center">
         <p className="text-muted-foreground">{view.error ?? t('control.sessionUnavailable')}</p>
-        <Link to="/dashboard" className="underline">
+        <Link to="/quizzes" className="underline">
           {t('control.backToQuizzes')}
         </Link>
       </section>
@@ -284,7 +304,7 @@ export function ControlPage() {
     return (
       <section className="flex flex-col items-center gap-4 py-16 text-center">
         <p className="text-xl font-semibold">{t('control.sessionEnded')}</p>
-        <Link to="/dashboard" className="underline">
+        <Link to="/quizzes" className="underline">
           {t('control.backToQuizzes')}
         </Link>
       </section>
@@ -945,6 +965,7 @@ function QuestionCarousel({
 }
 
 type HostTab = 'control' | 'screen' | 'player';
+const HOST_TABS: HostTab[] = ['control', 'screen', 'player'];
 
 /** The three views of a running session; the projection can also open in its own window. */
 function HostTabs({
