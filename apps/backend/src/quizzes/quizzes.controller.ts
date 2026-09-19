@@ -96,7 +96,7 @@ export class QuizzesController {
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
-    const { filename, zip } = await this.portable.exportZip(user.id, id);
+    const { filename, zip } = await this.portable.exportZip(id, user.id);
     res.set({
       'Content-Type': 'application/zip',
       'Content-Disposition': `attachment; filename="${filename}"`,

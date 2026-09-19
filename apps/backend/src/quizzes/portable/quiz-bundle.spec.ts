@@ -28,6 +28,12 @@ function makeQuiz(): ExportableQuiz {
     language: 'fr',
     questionCount: 2,
     feedbackEnabled: false,
+    slug: 'geo-and-co',
+    namespace: null,
+    revision: 4,
+    domain: 'geography',
+    tags: ['capitals', 'europe'],
+    license: 'CC-BY-4.0',
     createdAt: now,
     updatedAt: now,
     archivedAt: null,
@@ -151,16 +157,26 @@ describe('quiz bundle', () => {
   });
 
   it('exports items in sequence order with media as relative paths', () => {
-    const bundle = toBundle(makeQuiz(), pathFor);
+    const src = makeQuiz();
+    const bundle = toBundle(src, pathFor);
     expect(quizBundleSchema.safeParse(bundle).success).toBe(true);
     expect(bundle.items.map((i) => i.kind)).toEqual(['slide', 'question', 'question', 'slide']);
     expect(bundle.quiz).toMatchObject({
       title: 'Géo & co',
       cover: pathFor(IMG),
       feedbackEnabled: false,
+      slug: 'geo-and-co',
+      namespace: null,
+      revision: 4,
+      updatedAt: src.updatedAt.toISOString(),
+      domain: 'geography',
+      tags: ['capitals', 'europe'],
+      license: 'CC-BY-4.0',
     });
     expect(bundle.quiz.description).toBe(`Intro ![map](${pathFor(INLINE)})`);
     expect(JSON.stringify(bundle)).not.toContain('/api/v1/media/');
+    // No internal identity travels: the slug is the only one.
+    expect(JSON.stringify(bundle)).not.toMatch(/quiz-1|ownerId/);
     expect([...collectMediaPaths(bundle)].sort()).toEqual(
       [IMG, BG, INLINE, BLOCK_IMG].map(pathFor).sort(),
     );
@@ -174,6 +190,12 @@ describe('quiz bundle', () => {
       language: 'fr',
       feedbackEnabled: false,
       coverMediaId: IMG,
+      slug: 'geo-and-co',
+      namespace: null,
+      revision: 4,
+      domain: 'geography',
+      tags: ['capitals', 'europe'],
+      license: 'CC-BY-4.0',
     });
     expect(imported.description).toBe(src.description);
     expect(imported.questions).toHaveLength(2);
@@ -228,6 +250,43 @@ describe('quiz bundle', () => {
       expect((err as BundleContentError).item).toBe(2);
       expect((err as BundleContentError).issues[0].field).toBe('options');
     }
+  });
+
+  it('defaults the Store fields of a bundle that predates them (version 0)', () => {
+    const bundle: Record<string, unknown> = { ...toBundle(makeQuiz(), pathFor) };
+    const old: Record<string, unknown> = { ...(bundle.quiz as object) };
+    delete bundle.version;
+    for (const k of ['slug', 'namespace', 'revision', 'updatedAt', 'domain', 'tags', 'license']) {
+      delete old[k];
+    }
+    const rest = { ...bundle, quiz: old };
+    const parsed = quizBundleSchema.safeParse(rest);
+    expect(parsed.success).toBe(true);
+    const imported = fromBundle(parsed.data!, idFor);
+    expect(imported).toMatchObject({
+      slug: 'geo-co', // derived from the title
+      namespace: null,
+      revision: 0,
+      domain: null,
+      tags: [],
+      license: null,
+    });
+    // But never a bundle from a schema newer than this build.
+    expect(quizBundleSchema.safeParse({ ...rest, version: 2 }).success).toBe(false);
+  });
+
+  it('validates the Store fields: kebab-case slug and tags, five tags at most, SPDX-like license', () => {
+    const bundle = toBundle(makeQuiz(), pathFor);
+    const withQuiz = (over: Record<string, unknown>) =>
+      quizBundleSchema.safeParse({ ...bundle, quiz: { ...bundle.quiz, ...over } }).success;
+    expect(withQuiz({ slug: 'Geo Co' })).toBe(false);
+    expect(withQuiz({ slug: '-geo' })).toBe(false);
+    expect(withQuiz({ tags: ['Capitals'] })).toBe(false);
+    expect(withQuiz({ tags: ['a', 'b', 'c', 'd', 'e', 'f'] })).toBe(false);
+    expect(withQuiz({ license: 'CC BY 4.0' })).toBe(false);
+    expect(withQuiz({ updatedAt: 'yesterday' })).toBe(false);
+    expect(withQuiz({ revision: -1 })).toBe(false);
+    expect(withQuiz({ license: null, domain: null, namespace: null, tags: [] })).toBe(true);
   });
 
   it('refuses paths outside media/ and unknown formats', () => {

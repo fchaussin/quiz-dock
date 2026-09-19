@@ -10,9 +10,13 @@ import {
   collectMediaPaths,
   EXPORT_INCLUDE,
   fromBundle,
+  slugify,
+  slugOf,
   toBundle,
 } from './quiz-bundle';
 import { type QuizBundle, quizBundleSchema } from './quiz-bundle.schema';
+
+export { slugify };
 
 const MANIFEST = 'quiz.json';
 
@@ -51,13 +55,24 @@ export class QuizPortableService {
     private readonly media: MediaService,
   ) {}
 
-  /** Zips an owned quiz; the filename is derived from its title. */
-  async exportZip(ownerId: string, id: string): Promise<{ filename: string; zip: Buffer }> {
-    const quiz = await this.prisma.quiz.findFirst({
+  /**
+   * Zips a quiz, scoped to `ownerId` from the API (any quiz when omitted: the
+   * operator CLI). Every export bumps the quiz `revision` and fixes its `slug`
+   * (derived from the title the first time), so the bundle and the row agree;
+   * the filename mirrors the slug.
+   */
+  async exportZip(id: string, ownerId?: string): Promise<{ filename: string; zip: Buffer }> {
+    const found = await this.prisma.quiz.findFirst({
       where: { id, ownerId },
       include: EXPORT_INCLUDE,
     });
-    if (!quiz) throw new NotFoundException('quiz.not_found');
+    if (!found) throw new NotFoundException('quiz.not_found');
+    const stamped = await this.prisma.quiz.update({
+      where: { id: found.id },
+      data: { slug: slugOf(found), revision: { increment: 1 } },
+      select: { slug: true, revision: true, updatedAt: true },
+    });
+    const quiz = { ...found, ...stamped };
 
     const files: Record<string, Uint8Array> = {};
     const pathById = new Map<string, string>();
@@ -72,7 +87,7 @@ export class QuizPortableService {
     const bundle = toBundle(quiz, (mediaId) => pathById.get(mediaId) ?? `/api/v1/media/${mediaId}`);
     files[MANIFEST] = strToU8(JSON.stringify(bundle, null, 2));
     const zip = Buffer.from(zipSync(files, { level: 6 }));
-    return { filename: `${slugify(quiz.title) || 'quiz'}.quizdock.zip`, zip };
+    return { filename: `${slugOf(quiz)}.quizdock.zip`, zip };
   }
 
   /** Imports a zip bundle or a bare `quiz.json`, as a new draft of `ownerId`. */
@@ -121,6 +136,12 @@ export class QuizPortableService {
           language: imported.language,
           feedbackEnabled: imported.feedbackEnabled,
           coverMediaId: imported.coverMediaId,
+          slug: imported.slug,
+          namespace: imported.namespace,
+          revision: imported.revision,
+          domain: imported.domain,
+          tags: imported.tags,
+          license: imported.license,
           status: QuizStatus.draft,
           questionCount: imported.questions.length,
           questions: {
@@ -223,15 +244,4 @@ export class QuizPortableService {
     }
     return parsed.data;
   }
-}
-
-/** ASCII, lowercase, dash-separated file stem. */
-export function slugify(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 60);
 }

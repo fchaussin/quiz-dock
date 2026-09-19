@@ -9,6 +9,6 @@ import { SampleQuizzesService } from './samples/sample-quizzes.service';
   imports: [MediaModule],
   controllers: [QuizzesController],
   providers: [QuizzesService, SampleQuizzesService, QuizPortableService],
-  exports: [SampleQuizzesService],
+  exports: [SampleQuizzesService, QuizPortableService],
 })
 export class QuizzesModule {}
