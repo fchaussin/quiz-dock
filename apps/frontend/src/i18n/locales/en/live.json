@@ -83,7 +83,12 @@
       "screen": "Projection",
       "player": "Participant"
     },
-    "openInWindow": "Open in a window"
+    "openInWindow": "Open in a window",
+    "joinAddress": "Invitation address",
+    "joinAddressPublic": "public address",
+    "joinAddressThisPage": "this page",
+    "joinAddressCustom": "Other address…",
+    "joinAddressApply": "Apply"
   },
   "screen": {
     "sessionUnavailable": "Session unavailable.",

@@ -23,7 +23,8 @@
     "reveal_required": "Action only possible after the reveal.",
     "timer_not_adjustable": "The timer can only be adjusted during a question.",
     "snapshot_not_found": "Session snapshot not found.",
-    "capture_locked": "Full capture can only be changed before the session starts."
+    "capture_locked": "Full capture can only be changed before the session starts.",
+    "join_url_invalid": "Invalid invitation address (expected http(s)://host[:port])."
   },
   "participant": {
     "not_found": "Player not found."

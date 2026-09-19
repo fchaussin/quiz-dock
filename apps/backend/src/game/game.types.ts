@@ -140,6 +140,8 @@ export interface GameMeta {
   pausedRemainingMs?: number;
   /** Step shown again by the host (`q<i>` / `s<i>`), '' when the screens follow the live position. */
   reviewStep?: string;
+  /** Base URL of the invitations (QR, link) chosen by the host; '' = each screen's own origin. */
+  joinBaseUrl?: string;
 }
 
 /** Réponse gradée stockée au submit (Redis hash `:answers:{idx}`) — REVEAL la relit. */

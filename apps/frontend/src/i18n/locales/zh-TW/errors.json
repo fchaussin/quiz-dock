@@ -23,7 +23,8 @@
     "reveal_required": "僅在揭曉答案後才能執行該操作。",
     "timer_not_adjustable": "僅在答題進行中才能調整計時器。",
     "snapshot_not_found": "未找到會話快照。",
-    "capture_locked": "完整記錄僅可在會話開始前更改。"
+    "capture_locked": "完整記錄僅可在會話開始前更改。",
+    "join_url_invalid": "加入位址無效（應為 http(s)://主機[:連接埠]）。"
   },
   "participant": {
     "not_found": "未找到玩家。"

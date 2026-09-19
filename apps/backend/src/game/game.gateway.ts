@@ -315,6 +315,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayDisconnect {
     await this.engine.review(payload.pin, this.requireHostId(socket), step);
   }
 
+  /** `host:join-url` : adresse des invitations (QR, lien), au lobby seulement. */
+  @SubscribeMessage('host:join-url')
+  async hostJoinUrl(
+    @ConnectedSocket() socket: GameSocket,
+    @MessageBody() payload: { pin: string; baseUrl: string },
+  ): Promise<void> {
+    await this.engine.setJoinUrl(
+      payload.pin,
+      this.requireHostId(socket),
+      String(payload.baseUrl ?? ''),
+    );
+  }
+
   /** `host:end` : termine la partie. */
   @SubscribeMessage('host:end')
   async hostEnd(

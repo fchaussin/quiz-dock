@@ -1144,6 +1144,32 @@
         ]
       }
     },
+    "/api/v1/games/join-addresses": {
+      "get": {
+        "operationId": "GameController_joinAddresses",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinAddressesDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "games"
+        ]
+      }
+    },
     "/api/v1/games/{pin}/end": {
       "post": {
         "operationId": "GameController_end",
@@ -4460,6 +4486,27 @@
           "title",
           "state",
           "playerCount"
+        ]
+      },
+      "JoinAddressesDto": {
+        "type": "object",
+        "properties": {
+          "publicUrl": {
+            "type": "string",
+            "description": "APP_PUBLIC_URL when configured — the address of a real deployment.",
+            "nullable": true
+          },
+          "lan": {
+            "description": "LAN addresses of this machine (scheme and port of the request), for local instances.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "publicUrl",
+          "lan"
         ]
       }
     }

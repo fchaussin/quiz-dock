@@ -433,5 +433,6 @@ function deserializeMeta(raw: Record<string, string>): GameMeta {
     prevState: raw.prevState,
     pausedRemainingMs: raw.pausedRemainingMs ? Number(raw.pausedRemainingMs) : undefined,
     reviewStep: raw.reviewStep ?? '',
+    joinBaseUrl: raw.joinBaseUrl ?? '',
   };
 }

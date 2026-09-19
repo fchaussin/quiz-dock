@@ -19,6 +19,7 @@ import {
 } from '../game/live-components';
 import { Surface } from '../game/surface';
 import { useGameRemaining } from '../game/use-countdown';
+import { joinHostLabel, joinUrlFor } from '../game/join-url';
 import { useGameSession } from '../game/use-game-session';
 
 /**
@@ -39,7 +40,8 @@ export function ScreenView({ pin }: { pin: string }) {
   const { ref, isFullscreen, toggle, supported } = useFullscreen<HTMLDivElement>();
   const remaining = useGameRemaining(view);
 
-  const joinUrl = `${window.location.origin}/join/${pin}`;
+  const joinUrl = joinUrlFor(view, pin);
+  const joinHost = joinHostLabel(view);
 
   // Rappel d'invitation (QR + PIN) ancré en bas de l'écran projeté : permet aux
   // retardataires de rejoindre en cours de question (notamment quand l'énoncé n'a
@@ -51,7 +53,7 @@ export function ScreenView({ pin }: { pin: string }) {
       </div>
       <div className="flex flex-col items-start">
         <span className="text-muted-foreground text-[0.8em] uppercase tracking-widest">
-          {window.location.host}/join
+          {joinHost}
         </span>
         <span className="font-mono text-[2.25em] font-bold tracking-[0.2em]">{pin}</span>
       </div>
@@ -159,7 +161,7 @@ export function ScreenView({ pin }: { pin: string }) {
     body = (
       <div className="flex flex-col items-center gap-[1.5em]">
         <p className="text-[1.5em]">
-          {t('screen.joinAt')} <span className="font-semibold">{window.location.host}/join</span>
+          {t('screen.joinAt')} <span className="font-semibold">{joinHost}</span>
         </p>
         <p className="font-mono text-[4em] font-bold tracking-[0.3em]">{pin}</p>
         <div className="rounded-xl bg-white p-4 shadow">

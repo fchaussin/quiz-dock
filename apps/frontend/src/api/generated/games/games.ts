@@ -25,7 +25,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  ActiveGameDto
+  ActiveGameDto,
+  JoinAddressesDto
 } from '../model';
 
 import { customFetch } from '../../http';
@@ -130,6 +131,112 @@ export function useGameControllerMine<TData = Awaited<ReturnType<typeof gameCont
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGameControllerMineQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type gameControllerJoinAddressesResponse200 = {
+  data: JoinAddressesDto
+  status: 200
+}
+
+export type gameControllerJoinAddressesResponseSuccess = (gameControllerJoinAddressesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type gameControllerJoinAddressesResponse = (gameControllerJoinAddressesResponseSuccess)
+
+export const getGameControllerJoinAddressesUrl = () => {
+
+
+
+
+  return `/api/v1/games/join-addresses`
+}
+
+export const gameControllerJoinAddresses = async ( options?: RequestInit): Promise<gameControllerJoinAddressesResponse> => {
+
+  return customFetch<gameControllerJoinAddressesResponse>(getGameControllerJoinAddressesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGameControllerJoinAddressesQueryKey = () => {
+    return [
+    `/api/v1/games/join-addresses`
+    ] as const;
+    }
+
+
+export const getGameControllerJoinAddressesQueryOptions = <TData = Awaited<ReturnType<typeof gameControllerJoinAddresses>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof gameControllerJoinAddresses>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGameControllerJoinAddressesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof gameControllerJoinAddresses>>> = ({ signal }) => gameControllerJoinAddresses({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof gameControllerJoinAddresses>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GameControllerJoinAddressesQueryResult = NonNullable<Awaited<ReturnType<typeof gameControllerJoinAddresses>>>
+export type GameControllerJoinAddressesQueryError = unknown
+
+
+export function useGameControllerJoinAddresses<TData = Awaited<ReturnType<typeof gameControllerJoinAddresses>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof gameControllerJoinAddresses>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof gameControllerJoinAddresses>>,
+          TError,
+          Awaited<ReturnType<typeof gameControllerJoinAddresses>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGameControllerJoinAddresses<TData = Awaited<ReturnType<typeof gameControllerJoinAddresses>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof gameControllerJoinAddresses>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof gameControllerJoinAddresses>>,
+          TError,
+          Awaited<ReturnType<typeof gameControllerJoinAddresses>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGameControllerJoinAddresses<TData = Awaited<ReturnType<typeof gameControllerJoinAddresses>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof gameControllerJoinAddresses>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGameControllerJoinAddresses<TData = Awaited<ReturnType<typeof gameControllerJoinAddresses>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof gameControllerJoinAddresses>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGameControllerJoinAddressesQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

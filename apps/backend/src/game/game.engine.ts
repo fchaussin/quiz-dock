@@ -682,6 +682,7 @@ export class GameEngine {
     socket.emit('game:roster', { players: await this.connectedRoster(pin) });
     // Mode/pause courants : un (ré)attache doit refléter auto/pause immédiatement.
     socket.emit('game:mode', this.buildModePayload(meta));
+    if (meta.joinBaseUrl) socket.emit('game:join-url', { baseUrl: meta.joinBaseUrl });
 
     const snapshot = await this.game.getSnapshot(pin);
     if (!snapshot || meta.currentIndex < 0) return;
@@ -1022,6 +1023,22 @@ export class GameEngine {
    * reprend la main). Passer en manuel annule un enchaînement auto en attente ;
    * passer en auto ré-arme l'enchaînement si l'on est déjà sur un reveal.
    */
+  /**
+   * `host:join-url`: the address the invitations point at (a console opened on
+   * localhost would otherwise print localhost on the QR code). Lobby only —
+   * once people are in, the address on the projection must not move.
+   */
+  async setJoinUrl(pin: string, hostUserId: string, baseUrl: string): Promise<void> {
+    const meta = await this.requireHost(pin, hostUserId);
+    if (meta.state !== GameState.Lobby) {
+      throw new BadRequestException('session.already_started');
+    }
+    const clean = normalizeBaseUrl(baseUrl);
+    if (baseUrl && !clean) throw new BadRequestException('session.join_url_invalid');
+    await this.redis.hset(gameKeys.game(pin), { joinBaseUrl: clean });
+    this.server.to(pin).emit('game:join-url', { baseUrl: clean || null });
+  }
+
   async setMode(pin: string, hostUserId: string, mode: GameMode): Promise<void> {
     const meta = await this.requireHost(pin, hostUserId);
     await this.redis.hset(gameKeys.game(pin), { mode });
@@ -1371,4 +1388,17 @@ function parseStepKey(key: string): GameStep | null {
   const m = /^([qs])(\d+)$/.exec(key);
   if (!m) return null;
   return m[1] === 's' ? { slideIndex: Number(m[2]) } : { questionIndex: Number(m[2]) };
+}
+
+/** `http(s)://host[:port]`, no path, no trailing slash; '' when not a URL. */
+export function normalizeBaseUrl(raw: string): string {
+  const text = raw.trim();
+  if (!text) return '';
+  try {
+    const u = new URL(/^https?:\/\//i.test(text) ? text : `http://${text}`);
+    if (u.username || u.password || u.search || u.hash) return '';
+    return `${u.protocol}//${u.host}`;
+  } catch {
+    return '';
+  }
 }

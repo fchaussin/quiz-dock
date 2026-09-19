@@ -38,4 +38,4 @@ export const appConfig: AppConfig = {
 export const APP_NAME = appConfig.appName;
 
 /** Version of this build, shown to people (the release tag, or "dev"). */
-export const APP_VERSION: string = __APP_VERSION__;
+export const APP_VERSION: string = typeof __APP_VERSION__ === 'undefined' ? 'dev' : __APP_VERSION__;

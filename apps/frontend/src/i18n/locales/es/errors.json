@@ -23,7 +23,8 @@
     "reveal_required": "Acción solo posible tras la revelación.",
     "timer_not_adjustable": "El temporizador solo se puede ajustar durante una pregunta.",
     "snapshot_not_found": "Instantánea de sesión no encontrada.",
-    "capture_locked": "La captura completa solo se puede cambiar antes de iniciar la sesión."
+    "capture_locked": "La captura completa solo se puede cambiar antes de iniciar la sesión.",
+    "join_url_invalid": "Dirección para unirse no válida (se espera http(s)://host[:puerto])."
   },
   "participant": {
     "not_found": "Jugador no encontrado."

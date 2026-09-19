@@ -23,7 +23,8 @@
     "reveal_required": "Action possible seulement après le reveal.",
     "timer_not_adjustable": "Le chrono ne peut être ajusté que pendant une question.",
     "snapshot_not_found": "Snapshot de session introuvable.",
-    "capture_locked": "La capture intégrale ne peut être modifiée qu’avant le démarrage."
+    "capture_locked": "La capture intégrale ne peut être modifiée qu’avant le démarrage.",
+    "join_url_invalid": "Adresse pour rejoindre invalide (attendu http(s)://hôte[:port])."
   },
   "participant": {
     "not_found": "Participant introuvable."

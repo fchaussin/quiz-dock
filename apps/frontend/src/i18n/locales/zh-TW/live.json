@@ -83,7 +83,12 @@
       "screen": "投影",
       "player": "參與者"
     },
-    "openInWindow": "在新視窗開啟"
+    "openInWindow": "在新視窗開啟",
+    "joinAddress": "加入位址",
+    "joinAddressPublic": "公開位址",
+    "joinAddressThisPage": "本頁",
+    "joinAddressCustom": "其他位址…",
+    "joinAddressApply": "套用"
   },
   "screen": {
     "sessionUnavailable": "會話不可用。",

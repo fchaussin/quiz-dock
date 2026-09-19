@@ -76,6 +76,8 @@ export interface GameView {
   quizId: string | null;
   /** Description du quiz (récap console hôte), `null` si absente. */
   quizDescription: string | null;
+  /** Base URL of the invitations chosen by the host; null = this page's own origin. */
+  joinBaseUrl: string | null;
   /** Sommaire des questions (console hôte uniquement). */
   outline: OutlineQuestion[];
   /** Host navigation over played steps (`game:state.nav`); `review` = a past step is on screen. */
@@ -108,6 +110,7 @@ const INITIAL: GameView = {
   quizTitle: null,
   quizId: null,
   quizDescription: null,
+  joinBaseUrl: null,
   outline: [],
   nav: null,
 };
@@ -163,6 +166,7 @@ export function useGameSession(pin: string, role: LiveRole) {
         players: prev.players.filter((x) => x.playerId !== p.playerId),
       }));
     const onQuestion = (p: QuestionStartPayload) => patch({ question: p });
+    const onJoinUrl = (p: { baseUrl: string | null }) => patch({ joinBaseUrl: p.baseUrl });
     const onMode = (p: GameModePayload) =>
       patch({
         mode: p.mode,
@@ -219,6 +223,7 @@ export function useGameSession(pin: string, role: LiveRole) {
       sock.on('player:left', onLeft);
       sock.on('question:start', onQuestion);
       sock.on('game:mode', onMode);
+      sock.on('game:join-url', onJoinUrl);
       sock.on('game:outline', onOutline);
       sock.on('question:time', onTime);
       sock.on('answer:count', onCount);
@@ -279,6 +284,7 @@ export function useGameSession(pin: string, role: LiveRole) {
       s.off('player:left', onLeft);
       s.off('question:start', onQuestion);
       s.off('game:mode', onMode);
+      s.off('game:join-url', onJoinUrl);
       s.off('game:outline', onOutline);
       s.off('question:time', onTime);
       s.off('answer:count', onCount);
