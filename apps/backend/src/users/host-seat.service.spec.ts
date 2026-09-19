@@ -134,14 +134,21 @@ describe('HostSeatService.state / release', () => {
       expiresAt: future,
       user: { displayName: 'Alice' },
     });
-    await expect(live.service.state()).resolves.toEqual({ holder: 'Alice', expiresAt: future });
+    await expect(live.service.state()).resolves.toMatchObject({
+      holder: 'Alice',
+      expiresAt: future,
+    });
     const expired = makeService({
       id: 1,
       userId: alice.id,
       expiresAt: past,
       user: { displayName: 'Alice' },
     });
-    await expect(expired.service.state()).resolves.toEqual({ holder: null, expiresAt: null });
+    await expect(expired.service.state()).resolves.toEqual({
+      holder: null,
+      expiresAt: null,
+      claimedAt: null,
+    });
   });
 
   it('release() frees the seat only for its holder, and only for local identities', async () => {

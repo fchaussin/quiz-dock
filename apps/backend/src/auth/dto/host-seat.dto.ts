@@ -19,6 +19,15 @@ export class HostSeatDto {
     format: 'date-time',
   })
   expiresAt!: string | null;
+
+  @ApiProperty({
+    description:
+      'When the holder took or renewed the seat (lets a client renew for the same duration); null when free.',
+    nullable: true,
+    type: String,
+    format: 'date-time',
+  })
+  claimedAt!: string | null;
 }
 
 /** Claim body: optional auto-expiry (5 min … 7 days), null/absent = no expiry. */

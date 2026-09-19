@@ -1269,11 +1269,18 @@
             "description": "When the seat frees itself automatically; null = no expiry (or free seat).",
             "nullable": true,
             "format": "date-time"
+          },
+          "claimedAt": {
+            "type": "string",
+            "description": "When the holder took or renewed the seat (lets a client renew for the same duration); null when free.",
+            "nullable": true,
+            "format": "date-time"
           }
         },
         "required": [
           "holder",
-          "expiresAt"
+          "expiresAt",
+          "claimedAt"
         ]
       },
       "ClaimHostSeatDto": {

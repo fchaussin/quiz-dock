@@ -2,6 +2,7 @@ import { Link, Outlet, useMatches, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { SeatStatus } from '@/components/seat-status';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '../auth/auth-context';
 import { APP_NAME, appConfig } from '../config';
@@ -32,7 +33,7 @@ export function RootLayout() {
       .find(Boolean);
     document.title = key ? `${t(`common:titles.${key}`)} · ${APP_NAME}` : APP_NAME;
   }, [matches, t]);
-  const { user, logout } = useAuth();
+  const { user, mode, logout } = useAuth();
   const navigate = useNavigate();
   // Three shells: the projected screen has no chrome at all; participants (guests on a
   // phone) get the brand only; hosts and editors get the full app navigation.
@@ -72,6 +73,7 @@ export function RootLayout() {
                 {t('nav.myQuizzes')}
               </Link>
               <span className="text-muted-foreground hidden sm:inline">{user}</span>
+              {mode === 'none' ? <SeatStatus user={user} /> : null}
               <Button
                 variant="outline"
                 size="sm"
