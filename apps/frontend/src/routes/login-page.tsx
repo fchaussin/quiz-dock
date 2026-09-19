@@ -81,7 +81,7 @@ export function LoginPage() {
   };
 
   return (
-    <Card className="mx-auto w-full max-w-sm">
+    <Card className="content-sm">
       <CardHeader>
         <CardTitle>{t('login.title')}</CardTitle>
       </CardHeader>

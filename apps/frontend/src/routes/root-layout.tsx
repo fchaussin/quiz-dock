@@ -96,8 +96,8 @@ export function RootLayout() {
       <main
         className={
           shell === 'participant'
-            ? 'mx-auto w-full max-w-lg flex-1 px-4 py-4'
-            : 'mx-auto w-full max-w-[90rem] flex-1 px-6 py-6 lg:px-10'
+            ? 'content-phone flex-1 px-4 py-4'
+            : 'content-shell flex-1 px-6 py-6 lg:px-10'
         }
       >
         <Outlet />

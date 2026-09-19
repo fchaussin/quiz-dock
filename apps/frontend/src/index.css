@@ -96,6 +96,45 @@
   }
 }
 
+/*
+ * Centred content widths — the one place the app's breakpoints live.
+ * `content-*` centres a block and caps its width; pages pick a tier, never a
+ * raw max-w. Shell: the app frame; lg: lists, dashboards, consoles; md:
+ * reading and forms; sm: a single card (sign in, join).
+ */
+@theme {
+  --container-shell: 90rem;
+  --container-content-lg: 72rem;
+  --container-content-md: 48rem;
+  --container-content-sm: 28rem;
+  --container-phone: 32rem;
+}
+@utility content-shell {
+  width: 100%;
+  max-width: var(--container-shell);
+  margin-inline: auto;
+}
+@utility content-lg {
+  width: 100%;
+  max-width: var(--container-content-lg);
+  margin-inline: auto;
+}
+@utility content-md {
+  width: 100%;
+  max-width: var(--container-content-md);
+  margin-inline: auto;
+}
+@utility content-sm {
+  width: 100%;
+  max-width: var(--container-content-sm);
+  margin-inline: auto;
+}
+@utility content-phone {
+  width: 100%;
+  max-width: var(--container-phone);
+  margin-inline: auto;
+}
+
 /* TipTap (MarkdownEditor): Tailwind's preflight strips list and code styling,
    so the WYSIWYG surface mirrors what the `Markdown` component renders. */
 @layer components {

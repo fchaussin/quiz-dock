@@ -56,7 +56,7 @@ const CHRONO_STEPS = [-5, -1, 1, 5] as const;
  * padding (2 × 1.5rem): its action bar (`mt-auto`, sticky) then sits at the
  * bottom of the screen whatever the height of the slide or question on screen.
  */
-const CONSOLE_SECTION = 'mx-auto flex min-h-[calc(100dvh-7rem)] w-full max-w-4xl flex-col py-6';
+const CONSOLE_SECTION = 'content-lg flex min-h-[calc(100dvh-7rem)] flex-col py-6';
 
 export function ControlPage() {
   const { t } = useTranslation(['live', 'common']);

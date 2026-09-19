@@ -20,7 +20,7 @@ export function LandingPage() {
   return (
     <section className="flex flex-col items-center gap-6 py-8 text-center">
       <h1 className="text-3xl font-bold">{t('landing.title')}</h1>
-      <Card className="w-full max-w-sm">
+      <Card className="content-sm">
         <CardHeader>
           <CardTitle>{t('landing.joinTitle')}</CardTitle>
         </CardHeader>

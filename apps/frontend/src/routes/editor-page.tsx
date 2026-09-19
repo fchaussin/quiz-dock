@@ -340,7 +340,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
                 {editingDescription || isDirty ? (
                   <MarkdownEditor
                     aria-label={t('settings.descriptionLabel')}
-                    className="max-w-3xl"
+                    className="max-w-(--container-content-md)"
                     placeholder={t('settings.descriptionPlaceholder')}
                     value={field.state.value}
                     onChange={field.handleChange}
@@ -348,7 +348,7 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
                 ) : (
                   <button
                     type="button"
-                    className="text-muted-foreground hover:bg-accent/60 -mx-2 max-w-3xl rounded-md px-2 py-1 text-left text-sm"
+                    className="text-muted-foreground hover:bg-accent/60 -mx-2 max-w-(--container-content-md) rounded-md px-2 py-1 text-left text-sm"
                     onClick={() => setEditingDescription(true)}
                   >
                     {field.state.value ? (
