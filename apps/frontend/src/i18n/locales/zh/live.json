@@ -162,5 +162,16 @@
     "launchFailed": "启动会话失败。",
     "noResponse": "服务器未响应，请重试。"
   },
-  "fallbackHost": "主持人"
+  "fallbackHost": "主持人",
+  "rules": {
+    "single_choice": "只有一个正确答案——选出来。",
+    "multiple_choice": "有多个正确答案——全部勾选后提交。全对才得分。",
+    "true_false": "对还是错？",
+    "text_input": "输入你的答案——不区分大小写、重音和多余空格。",
+    "numeric": "输入一个数字——允许一定误差。",
+    "ordering": "把选项按正确顺序排列后提交。全对才得分。",
+    "poll": "没有正确答案，不计分——只是你的看法。",
+    "double": "双倍积分",
+    "nopoints": "不计分"
+  }
 }

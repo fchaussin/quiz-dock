@@ -162,5 +162,16 @@
     "launchFailed": "啟動會話失敗。",
     "noResponse": "伺服器未回應，請重試。"
   },
-  "fallbackHost": "主持人"
+  "fallbackHost": "主持人",
+  "rules": {
+    "single_choice": "只有一個正確答案——選出來。",
+    "multiple_choice": "有多個正確答案——全部勾選後送出。全對才得分。",
+    "true_false": "對還是錯？",
+    "text_input": "輸入你的答案——不區分大小寫、重音和多餘空格。",
+    "numeric": "輸入一個數字——允許一定誤差。",
+    "ordering": "把選項按正確順序排列後送出。全對才得分。",
+    "poll": "沒有正確答案，不計分——只是你的看法。",
+    "double": "雙倍積分",
+    "nopoints": "不計分"
+  }
 }

@@ -162,5 +162,16 @@
     "launchFailed": "No se pudo iniciar la sesión.",
     "noResponse": "El servidor no respondió, inténtalo de nuevo."
   },
-  "fallbackHost": "Anfitrión"
+  "fallbackHost": "Anfitrión",
+  "rules": {
+    "single_choice": "Una sola respuesta correcta — elígela.",
+    "multiple_choice": "Varias respuestas correctas — márcalas todas y envía. Todo o nada.",
+    "true_false": "¿Verdadero o falso?",
+    "text_input": "Escribe tu respuesta — mayúsculas, acentos y espacios de más no cuentan.",
+    "numeric": "Introduce un número — se admite un margen.",
+    "ordering": "Pon las opciones en el orden correcto y envía. Todo o nada.",
+    "poll": "Sin respuesta correcta ni puntos — solo tu opinión.",
+    "double": "Puntos dobles",
+    "nopoints": "Sin puntos"
+  }
 }

@@ -213,6 +213,38 @@ export function RevealAnswer({
 }
 
 /**
+ * What kind of answer the question expects (several right answers, all or
+ * nothing, tolerance…) and how it scores — shown with the question on the
+ * projection and on the phone, so the rules never surprise anyone.
+ */
+export function AnswerRules({
+  question,
+  className,
+}: {
+  question: QuestionStartPayload;
+  className?: string;
+}) {
+  const { t } = useTranslation('live');
+  const badge =
+    question.type === 'poll' ? null : question.basePoints >= 2000 ? t('rules.double') : null;
+  return (
+    <p
+      className={cn(
+        'text-muted-foreground flex flex-wrap items-center justify-center gap-[0.5em] text-[0.9em]',
+        className,
+      )}
+    >
+      <span>{t(`rules.${question.type}`)}</span>
+      {badge ? (
+        <span className="rounded-full bg-amber-500/20 px-[0.6em] py-[0.1em] text-[0.85em] font-semibold text-amber-700">
+          {badge}
+        </span>
+      ) : null}
+    </p>
+  );
+}
+
+/**
  * Explanation of the answer (#5): Markdown, present in the reveal payload only
  * when the question has one. Same block on the projected screen, the host
  * console and the participant's phone.

@@ -17,7 +17,13 @@ import {
   loadPlayerSession,
   saveAvatarSeed,
 } from '../game/game-client';
-import { AnswerExplanation, OptionGrid, SlideView, TYPE_BASE } from '../game/live-components';
+import {
+  AnswerExplanation,
+  AnswerRules,
+  OptionGrid,
+  SlideView,
+  TYPE_BASE,
+} from '../game/live-components';
 import { cn } from '@/lib/utils';
 import { Surface } from '../game/surface';
 import { RatingPanel } from '../game/rating-panel';
@@ -470,6 +476,7 @@ export function PlayerPage() {
           </Markdown>
         </div>
         <div className="flex w-full shrink-0 flex-col items-center gap-[0.75em] pb-[0.5em]">
+          <AnswerRules question={question} />
           {reading ? (
             <p className="text-muted-foreground text-[1.1em] font-medium">
               {t('player.readQuestion')} <span className="tabular-nums">{readingLeft}</span>

@@ -162,5 +162,16 @@
     "launchFailed": "Failed to start the session.",
     "noResponse": "The server did not respond, please try again."
   },
-  "fallbackHost": "Host"
+  "fallbackHost": "Host",
+  "rules": {
+    "single_choice": "One correct answer — pick it.",
+    "multiple_choice": "Several correct answers — tick them all, then submit. All or nothing.",
+    "true_false": "True or false?",
+    "text_input": "Type your answer — case, accents and extra spaces are ignored.",
+    "numeric": "Enter a number — close enough counts.",
+    "ordering": "Put the options in the right order, then submit. All or nothing.",
+    "poll": "No right answer, no points — just your opinion.",
+    "double": "Double points",
+    "nopoints": "No points"
+  }
 }

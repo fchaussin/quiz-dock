@@ -9,6 +9,7 @@ import { useFullscreen } from '@/lib/use-fullscreen';
 import { Avatar } from '../game/avatar';
 import {
   AnswerExplanation,
+  AnswerRules,
   LeaderboardList,
   OptionGrid,
   Podium,
@@ -136,6 +137,7 @@ export function ScreenPage() {
             </span>
           ) : null}
         </div>
+        <AnswerRules question={view.question} />
         {view.question.options?.length ? (
           <OptionGrid options={view.question.options} />
         ) : (

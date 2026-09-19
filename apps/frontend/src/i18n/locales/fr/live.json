@@ -162,5 +162,16 @@
     "launchFailed": "Échec du lancement de la session.",
     "noResponse": "Le serveur n’a pas répondu, réessayez."
   },
-  "fallbackHost": "Animateur"
+  "fallbackHost": "Animateur",
+  "rules": {
+    "single_choice": "Une seule bonne réponse — choisis-la.",
+    "multiple_choice": "Plusieurs bonnes réponses — coche-les toutes, puis valide. Tout ou rien.",
+    "true_false": "Vrai ou faux ?",
+    "text_input": "Tape ta réponse — majuscules, accents et espaces en trop sont ignorés.",
+    "numeric": "Saisis un nombre — une marge est tolérée.",
+    "ordering": "Remets les options dans le bon ordre, puis valide. Tout ou rien.",
+    "poll": "Pas de bonne réponse, pas de points — juste ton avis.",
+    "double": "Points doublés",
+    "nopoints": "Sans points"
+  }
 }
