@@ -58,7 +58,7 @@
     "endConfirmDescription": "会话将被永久结束：PIN 失效，玩家被断开连接。此操作不可撤销。",
     "archiveLabel": "归档本次会话的结果",
     "archiveHint": "会话结束后仍可查看排行榜和统计数据。",
-    "resume": "回到当前",
+    "resume": "继续",
     "pause": "暂停",
     "timeRemaining": "剩余时间",
     "podium": "🏆 领奖台",
@@ -103,7 +103,8 @@
       "lanKnown": "列出的是这台电脑在局域网中的地址：选择参与者所在网络（Wi‑Fi、有线）的那个。",
       "lanHidden": "此实例运行在 Docker Desktop（或 bridge 网络的容器）中，看不到电脑的网络：无法检测本地地址。请在下方输入——或在 .env 文件中加入 HOST_LAN_IPS=<你的 IP>（或 docker run 时加“-e HOST_LAN_IPS=…”），下次即会列出。",
       "https": "本页通过 HTTPS 提供：http:// 的本地地址会在手机上显示警告——带证书的公开地址才是正解。"
-    }
+    },
+    "backToLive": "回到当前"
   },
   "screen": {
     "sessionUnavailable": "会话不可用。",

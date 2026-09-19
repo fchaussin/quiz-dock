@@ -89,49 +89,47 @@ export function OptionGrid({
   // many options) stack as full-width rows so the text keeps room to wrap.
   const long =
     options.length > 4 || options.some((o) => (o.text ?? '').length > OPTION_TILE_MAX_CHARS);
+  // The query reads the wrapper's width (a container query never targets its own element).
   return (
-    <div
-      className={cn(
-        '@container grid w-full grid-cols-1 gap-[0.75em]',
-        !long && '@[22em]:grid-cols-2',
-      )}
-    >
-      {options.map((o) => {
-        const isCorrect = correctIds?.includes(o.id);
-        const isPicked = selectedIds?.includes(o.id) ?? false;
-        const isHinted = highlightIds?.includes(o.id); // indice animateur (outline verte)
-        const dimmed = correctIds && !isCorrect; // au reveal, estompe les mauvaises
-        const Tag = onPick ? 'button' : 'div';
-        return (
-          <Tag
-            key={o.id}
-            type={onPick ? 'button' : undefined}
-            disabled={onPick ? disabled : undefined}
-            onClick={onPick ? () => onPick(o.id) : undefined}
-            className={cn(
-              'flex min-h-[3.25em] items-center gap-[0.75em] rounded-[0.75em] px-[1em] py-[0.75em] text-left leading-snug font-semibold text-white shadow transition',
-              long ? 'text-[1em]' : 'text-[1.125em]',
-              COLOR_BG[o.color] ?? OPTION_BG_FALLBACK,
-              onPick && !disabled && 'hover:brightness-110 active:scale-[0.98] cursor-pointer',
-              dimmed && 'opacity-40',
-              isCorrect && 'ring-4 ring-white',
-              isPicked && 'ring-4 ring-black/60',
-              isHinted && 'outline-success outline outline-2 outline-offset-2',
-            )}
-            aria-label={o.text ?? o.color}
-          >
-            <span aria-hidden className="shrink-0 text-[1.35em] leading-none">
-              {SHAPE_GLYPH[o.shape] ?? '●'}
-            </span>
-            {o.text ? (
-              <Markdown profile="inline" className="min-w-0 flex-1 [overflow-wrap:anywhere]">
-                {o.text}
-              </Markdown>
-            ) : null}
-            {isCorrect ? <span className="ml-auto">✓</span> : null}
-          </Tag>
-        );
-      })}
+    <div className="@container w-full">
+      <div className={cn('grid grid-cols-1 gap-[0.75em]', !long && '@[22em]:grid-cols-2')}>
+        {options.map((o) => {
+          const isCorrect = correctIds?.includes(o.id);
+          const isPicked = selectedIds?.includes(o.id) ?? false;
+          const isHinted = highlightIds?.includes(o.id); // indice animateur (outline verte)
+          const dimmed = correctIds && !isCorrect; // au reveal, estompe les mauvaises
+          const Tag = onPick ? 'button' : 'div';
+          return (
+            <Tag
+              key={o.id}
+              type={onPick ? 'button' : undefined}
+              disabled={onPick ? disabled : undefined}
+              onClick={onPick ? () => onPick(o.id) : undefined}
+              className={cn(
+                'flex min-h-[3.25em] items-center gap-[0.75em] rounded-[0.75em] px-[1em] py-[0.75em] text-left leading-snug font-semibold text-white shadow transition',
+                long ? 'text-[1em]' : 'text-[1.125em]',
+                COLOR_BG[o.color] ?? OPTION_BG_FALLBACK,
+                onPick && !disabled && 'hover:brightness-110 active:scale-[0.98] cursor-pointer',
+                dimmed && 'opacity-40',
+                isCorrect && 'ring-4 ring-white',
+                isPicked && 'ring-4 ring-black/60',
+                isHinted && 'outline-success outline outline-2 outline-offset-2',
+              )}
+              aria-label={o.text ?? o.color}
+            >
+              <span aria-hidden className="shrink-0 text-[1.35em] leading-none">
+                {SHAPE_GLYPH[o.shape] ?? '●'}
+              </span>
+              {o.text ? (
+                <Markdown profile="inline" className="min-w-0 flex-1 [overflow-wrap:anywhere]">
+                  {o.text}
+                </Markdown>
+              ) : null}
+              {isCorrect ? <span className="ml-auto">✓</span> : null}
+            </Tag>
+          );
+        })}
+      </div>
     </div>
   );
 }

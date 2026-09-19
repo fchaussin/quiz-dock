@@ -50,7 +50,7 @@ reference, the others follow its sense, not its words.
 | podium | Podium | Podium | Podio | 领奖台 | 領獎台 |
 | leave | Leave | Quitter | Salir | 退出 | 離開 |
 | looking back | Looking back | Retour en arrière | Mirando atrás | 回顾 | 回顧 |
-| back to live | Back to live | Reprendre | Volver al directo | 回到当前 | 回到目前 |
+| back to live | Back to live | Revenir au direct | Volver al directo | 回到当前 | 回到目前 |
 | full answer capture | Full answer capture | Capture intégrale des réponses | Captura completa de respuestas | 完整记录回答 | 完整記錄回答 |
 
 ## Scoring

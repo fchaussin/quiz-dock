@@ -58,7 +58,7 @@
     "endConfirmDescription": "La sesión finalizará definitivamente: el PIN se invalida y los jugadores se desconectan. Esta acción es irreversible.",
     "archiveLabel": "Archivar los resultados de esta sesión",
     "archiveHint": "La clasificación y las estadísticas seguirán disponibles tras la sesión.",
-    "resume": "Volver al directo",
+    "resume": "Reanudar",
     "pause": "Pausa",
     "timeRemaining": "Tiempo restante",
     "podium": "🏆 Podio",
@@ -103,7 +103,8 @@
       "lanKnown": "Las direcciones listadas son las de esta máquina en la red local: elige la de la red donde están los participantes (Wi‑Fi, cable).",
       "lanHidden": "Esta instancia corre en Docker Desktop (o un contenedor en red bridge), que oculta la red del ordenador: no se pudo detectar ninguna dirección local. Escríbela abajo — o añade HOST_LAN_IPS=<tu IP> al archivo .env (o «-e HOST_LAN_IPS=…» en docker run) para que aparezca aquí la próxima vez.",
       "https": "Esta página se sirve por HTTPS: una dirección local en http:// mostrará un aviso en los teléfonos — una dirección pública con certificado es la vía limpia."
-    }
+    },
+    "backToLive": "Volver al directo"
   },
   "screen": {
     "sessionUnavailable": "Sesión no disponible.",

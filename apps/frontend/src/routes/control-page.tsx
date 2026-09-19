@@ -1056,7 +1056,7 @@ function StepNav({
           <span className="text-muted-foreground text-sm">{t('control.reviewing')}</span>
           <Button type="button" size="sm" onClick={onResume}>
             <SkipForward className="size-4" />
-            {t('control.resume')}
+            {t('control.backToLive')}
           </Button>
         </>
       ) : null}

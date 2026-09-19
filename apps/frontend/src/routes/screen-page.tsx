@@ -93,7 +93,7 @@ export function ScreenView({ pin }: { pin: string }) {
     body = <p className="text-[2em] font-semibold">{t('screen.thanks')}</p>;
   } else if (view.state === 'SLIDE_SHOW' && view.slide) {
     body = (
-      <div className="flex min-h-[80vh] w-full flex-1 [&:fullscreen]:min-h-dvh">
+      <div className="flex min-h-dvh w-full flex-1">
         <SlideView slide={view.slide} />
       </div>
     );
@@ -137,7 +137,10 @@ export function ScreenView({ pin }: { pin: string }) {
           </Markdown>
           {remaining !== null ? (
             <span
-              className={cn('text-[2.5em] font-bold tabular-nums', view.paused && 'opacity-50')}
+              className={cn(
+                'shrink-0 text-[2.5em] font-bold whitespace-nowrap tabular-nums',
+                view.paused && 'opacity-50',
+              )}
               aria-label={t('screen.timeRemaining')}
             >
               {view.paused ? '⏸' : '⏱'} {remaining}
@@ -191,7 +194,7 @@ export function ScreenView({ pin }: { pin: string }) {
     <div
       ref={ref}
       className={cn(
-        'bg-background relative flex min-h-[80vh] flex-col [&:fullscreen]:min-h-dvh',
+        'bg-background relative flex min-h-dvh flex-col',
         // One typographic base for the whole projected page; everything inside is in em.
         TYPE_BASE.screen,
         // A slide owns the whole surface; everything else is centred with breathing room.

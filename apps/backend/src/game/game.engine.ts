@@ -713,6 +713,17 @@ export class GameEngine {
       socket.emit('answer:count', { answered, total });
     } else if (meta.state === GameState.Reveal) {
       const index = meta.currentIndex;
+      // The question itself first (prompt, options): a screen that (re)attaches at
+      // the reveal has nothing to show the answers against otherwise.
+      socket.emit(
+        'question:start',
+        buildQuestionStart(
+          snapshot.questions[index],
+          index,
+          meta.questionStartedAt,
+          meta.questionEndsAt,
+        ),
+      );
       const records = await this.readAnswers(pin, index);
       const common = await this.revealCommon(pin, snapshot.questions[index], records);
       const ranked = await this.rankedPlayers(pin);
