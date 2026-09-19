@@ -90,28 +90,24 @@ the results never leave your servers.
     <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/projection-lobby.png" alt="Projection — lobby" /><br /><sub><b>Projection</b> — the big screen while players join</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/join-pin.png" alt="Join by PIN" /><br /><sub><b>Join</b> — by PIN code or QR, no account</sub></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/join-nickname.png" alt="Nickname and avatar" /><br /><sub><b>Nickname</b> &amp; Multiavatar avatar</sub></td>
-  </tr>
-  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/join.png" alt="Join by PIN, nickname and avatar" /><br /><sub><b>Join</b> — PIN or QR code, nickname &amp; Multiavatar avatar, no account</sub></td>
     <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/projection-slide.png" alt="Content slide" /><br /><sub><b>Content slide</b> — headings, text, images, backgrounds</sub></td>
+  </tr>
+  <tr>
     <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/projection-question.png" alt="Projection — question" /><br /><sub><b>Projection</b> — live question, Kahoot-style</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/player-play.png" alt="Player — question and reveal" /><br /><sub><b>Player</b> — answers listed, colour tiles to tap, then own result</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/player-question.png" alt="Player — question" /><br /><sub><b>Player</b> — answers listed, colour tiles to tap</sub></td>
     <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/console-question.png" alt="Host console — question" /><br /><sub><b>Host console</b> — chrono, answers received, reveal now</sub></td>
-  </tr>
-  <tr>
     <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/projection-reveal.png" alt="Projection — reveal" /><br /><sub><b>Reveal</b> — distribution, explanation, live leaderboard</sub></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/player-reveal.png" alt="Player — reveal" /><br /><sub><b>Player</b> — own result, answer and ranking</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/player-ordering.png" alt="Player — ordering" /><br /><sub><b>Ordering</b> — drag and drop on the phone</sub></td>
     <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/console-reveal.png" alt="Host console — reveal" /><br /><sub><b>Host console</b> — look back over played questions, next</sub></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/player-end.png" alt="Player — ordering and feedback" /><br /><sub><b>Player</b> — drag-and-drop ordering, rate the quiz at the end</sub></td>
   </tr>
   <tr>
     <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/projection-podium.png" alt="Podium" /><br /><sub><b>Podium</b> — final results on the big screen</sub></td>
-    <td width="50%"><img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/player-review.png" alt="Player feedback" /><br /><sub><b>Player feedback</b> — rate the quiz at the end</sub></td>
+    <td width="50%"></td>
   </tr>
 </table>
 
