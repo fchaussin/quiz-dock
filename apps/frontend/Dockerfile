@@ -12,6 +12,8 @@ RUN pnpm install --filter @quiz-dock/frontend... --no-frozen-lockfile
 
 COPY packages/contracts packages/contracts
 COPY apps/frontend apps/frontend
+ARG APP_VERSION=dev
+ENV APP_VERSION=$APP_VERSION
 RUN pnpm --filter @quiz-dock/contracts build \
  && pnpm --filter @quiz-dock/frontend build
 

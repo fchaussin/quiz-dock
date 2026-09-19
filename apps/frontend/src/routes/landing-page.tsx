@@ -1,7 +1,7 @@
-import { CONTRACTS_VERSION } from '@quiz-dock/contracts';
 import { useNavigate } from '@tanstack/react-router';
 import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { APP_NAME, APP_VERSION } from '../config';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -42,7 +42,7 @@ export function LandingPage() {
         </CardContent>
       </Card>
       <small className="text-muted-foreground">
-        {t('landing.contractsVersion', { version: CONTRACTS_VERSION })}
+        {t('landing.version', { name: APP_NAME, version: APP_VERSION })}
       </small>
     </section>
   );

@@ -5,6 +5,8 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  // The release tag, passed as APP_VERSION at image build time; "dev" otherwise.
+  define: { __APP_VERSION__: JSON.stringify(process.env.APP_VERSION ?? 'dev') },
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

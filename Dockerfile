@@ -23,6 +23,8 @@ RUN pnpm install --filter @quiz-dock/backend... --filter @quiz-dock/frontend... 
 COPY packages/contracts packages/contracts
 COPY apps/backend apps/backend
 COPY apps/frontend apps/frontend
+ARG APP_VERSION=dev
+ENV APP_VERSION=$APP_VERSION
 RUN pnpm --filter @quiz-dock/contracts build \
  && pnpm --filter @quiz-dock/frontend build \
  && pnpm --filter @quiz-dock/backend build \
