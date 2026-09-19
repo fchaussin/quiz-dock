@@ -23,7 +23,6 @@ import {
   ArrowUp,
   Download,
   ExternalLink,
-  Eye,
   GripVertical,
   History,
   LayoutTemplate,
@@ -39,7 +38,6 @@ import {
   Sparkles,
   Star,
   Trash2,
-  Users,
 } from 'lucide-react';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -76,6 +74,7 @@ import {
   useQuizzesControllerTransition,
   useQuizzesControllerUpdate,
 } from '../api/generated/quizzes/quizzes';
+import { useGameControllerMine } from '../api/generated/games/games';
 import { useQuestionsControllerRemove } from '../api/generated/questions/questions';
 import { editorRoute } from '../router';
 
@@ -137,7 +136,6 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
       setEditing(next);
     }
   };
-  const [livePin, setLivePin] = useState<string | null>(null);
   const [presenting, setPresenting] = useState(false);
   const [presentError, setPresentError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -224,7 +222,8 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
     setPresenting(true);
     try {
       const { pin } = await createSession(quiz.id, fullCapture);
-      setLivePin(pin);
+      // The session lives in its console; the editor stays about the content.
+      await navigate({ to: '/session/$pin/console', params: { pin } });
     } catch (e) {
       setPresentError(e instanceof Error ? e.message : t('broadcast.presentError'));
     } finally {
@@ -433,7 +432,6 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
           shows here while a session runs — no folded box hiding dynamic state. */}
       <StatusBar
         quiz={quiz}
-        livePin={livePin}
         presenting={presenting}
         presentError={presentError}
         fullCapture={fullCapture}
@@ -984,7 +982,6 @@ function EmptyPane({
  */
 function StatusBar({
   quiz,
-  livePin,
   presenting,
   presentError,
   fullCapture,
@@ -996,7 +993,6 @@ function StatusBar({
   busy,
 }: {
   quiz: QuizDetailDto;
-  livePin: string | null;
   presenting: boolean;
   presentError: string | null;
   fullCapture: boolean;
@@ -1008,56 +1004,12 @@ function StatusBar({
   busy: boolean;
 }) {
   const { t } = useTranslation(['editor', 'common']);
-  const open = (path: string) => window.open(path, '_blank', 'noopener,noreferrer');
   // Full capture keeps every answer per participant: personal data (GDPR) and a
   // heavier archive — it is switched on knowingly, through an explanation.
   const [confirmCapture, setConfirmCapture] = useState(false);
-
-  if (livePin) {
-    return (
-      <div className="border-primary/30 bg-primary/5 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-xl border px-5 py-4">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-3">
-            <Radio className="text-primary size-5" />
-            <span className="text-sm">
-              {t('gameAccess.label')}{' '}
-              <strong className="font-mono text-2xl tracking-widest">{livePin}</strong>
-            </span>
-          </div>
-          {/* Edits reach the running session at its next step — form only, the played content stays. */}
-          <p className="text-muted-foreground text-xs">{t('gameAccess.liveEditsHint')}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            to="/session/$pin/console"
-            params={{ pin: livePin }}
-            className={cn(buttonVariants({ size: 'sm' }))}
-          >
-            <MonitorPlay className="size-4" />
-            {t('gameAccess.controlScreen')}
-          </Link>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => open(`/session/${livePin}/projection`)}
-          >
-            <Eye className="size-4" />
-            {t('gameAccess.projectionScreen')}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => open(`/join/${livePin}`)}
-          >
-            <Users className="size-4" />
-            {t('gameAccess.invitationScreen')}
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // Sessions of this quiz running right now (same source as the dashboard).
+  const { data: games } = useGameControllerMine({ query: { refetchInterval: 15_000 } });
+  const running = (games?.data ?? []).filter((g) => g.quizId === quiz.id);
 
   return (
     <div className="bg-muted/40 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-xl px-5 py-3">
@@ -1080,7 +1032,7 @@ function StatusBar({
               checked={fullCapture}
               onChange={(e) => (e.target.checked ? setConfirmCapture(true) : onFullCapture(false))}
             />
-            {t('broadcast.fullCaptureLabel')}
+            {t('broadcast.fullCaptureNext')}
           </label>
           <ConfirmDialog
             open={confirmCapture}
@@ -1114,6 +1066,32 @@ function StatusBar({
         </Button>
       ) : null}
       {presentError ? <p className="text-destructive w-full text-sm">{presentError}</p> : null}
+      {running.length > 0 ? (
+        // A quiz may be played in several sessions at once: list them, each with its console.
+        <div className="border-border/60 flex w-full flex-wrap items-center gap-x-4 gap-y-2 border-t pt-3 text-sm">
+          <span className="flex items-center gap-1.5">
+            <Radio className="text-primary size-4" />
+            {t('sessions.running', { count: running.length })}
+          </span>
+          {running.map((g) => (
+            <Link
+              key={g.pin}
+              to="/session/$pin/console"
+              params={{ pin: g.pin }}
+              className="hover:bg-accent flex items-center gap-2 rounded-md border px-2 py-1"
+            >
+              <span className="font-mono tracking-widest">{g.pin}</span>
+              <span className="text-muted-foreground">
+                {t('sessions.players', { count: g.playerCount })}
+              </span>
+              <MonitorPlay className="size-3.5" />
+            </Link>
+          ))}
+          <span className="text-muted-foreground w-full text-xs">
+            {t('sessions.liveEditsHint')}
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 }
