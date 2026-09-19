@@ -14,7 +14,9 @@
     "title": "Quiz editor",
     "history": "History",
     "deleteQuiz": "Delete quiz",
-    "preview": "Preview"
+    "preview": "Preview",
+    "export": "Export",
+    "exportError": "Could not export the quiz."
   },
   "settings": {
     "title": "Settings",

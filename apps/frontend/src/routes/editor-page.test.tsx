@@ -109,6 +109,39 @@ describe('EditorPage', () => {
     expect(link).toHaveAttribute('target', '_blank');
   });
 
+  it('exports the quiz as a bundle download (authenticated fetch, server filename)', async () => {
+    const fetchMock = mockApi([{ method: 'GET', path: '/quizzes/q1', body: detail() }]);
+    const json = fetchMock.getMockImplementation() as (
+      u: string,
+      o?: RequestInit,
+    ) => Promise<Response>;
+    let exportHeaders: Record<string, string> | undefined;
+    fetchMock.mockImplementation(async (url: string, opts?: RequestInit) => {
+      if (!String(url).includes('/quizzes/q1/export')) return json(url, opts);
+      exportHeaders = opts?.headers as Record<string, string>;
+      return new Response(new Blob(['PK']), {
+        status: 200,
+        headers: {
+          'content-type': 'application/zip',
+          'content-disposition': 'attachment; filename="histoire.quizdock.zip"',
+        },
+      });
+    });
+    // jsdom has no object URLs.
+    Object.assign(URL, { createObjectURL: vi.fn(() => 'blob:x'), revokeObjectURL: vi.fn() });
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+    renderApp('/quizzes/q1');
+    fireEvent.click(await screen.findByRole('button', { name: /Exporter/ }));
+    await waitFor(() => expect(click).toHaveBeenCalled());
+    expect(screen.queryByText(/Impossible d’exporter/)).toBeNull();
+    const anchor = click.mock.instances[0] as unknown as HTMLAnchorElement;
+    expect(anchor.download).toBe('histoire.quizdock.zip');
+    expect(exportHeaders?.['X-Local-User']).toBeDefined();
+    click.mockRestore();
+  });
+
   it('publie le quiz (PATCH status) au clic', async () => {
     const fetchMock = mockApi([
       { method: 'GET', path: '/quizzes/q1', body: detail() },

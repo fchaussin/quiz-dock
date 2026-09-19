@@ -14,7 +14,9 @@
     "title": "测验编辑器",
     "history": "历史",
     "deleteQuiz": "删除测验",
-    "preview": "预览"
+    "preview": "预览",
+    "export": "导出",
+    "exportError": "无法导出测验。"
   },
   "settings": {
     "title": "设置",

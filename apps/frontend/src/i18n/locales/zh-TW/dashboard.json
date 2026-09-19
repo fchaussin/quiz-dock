@@ -1,6 +1,9 @@
 {
   "title": "我的測驗",
   "newQuiz": "建立測驗",
+  "import": "匯入",
+  "importing": "匯入中…",
+  "importError": "無法匯入此檔案。",
   "activeSessions": "進行中的會話",
   "playerCount_one": "{{count}} 名玩家",
   "playerCount_other": "{{count}} 名玩家",

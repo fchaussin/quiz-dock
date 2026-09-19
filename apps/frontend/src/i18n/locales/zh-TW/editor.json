@@ -14,7 +14,9 @@
     "title": "測驗編輯器",
     "history": "歷史",
     "deleteQuiz": "刪除測驗",
-    "preview": "預覽"
+    "preview": "預覽",
+    "export": "匯出",
+    "exportError": "無法匯出測驗。"
   },
   "settings": {
     "title": "設定",

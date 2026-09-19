@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Link } from '@tanstack/react-router';
-import { Pencil, Play, Plus, Radio, Sparkles, Square } from 'lucide-react';
-import { useState } from 'react';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { Pencil, Play, Plus, Radio, Sparkles, Square, Upload } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,9 +16,10 @@ import {
   getQuizzesControllerListQueryKey,
   useQuizzesControllerCreate,
   useQuizzesControllerCreateSamples,
+  useQuizzesControllerImportQuiz,
   useQuizzesControllerList,
 } from '../api/generated/quizzes/quizzes';
-import { ApiError } from '../api/http';
+import { ApiError, apiErrorText } from '../api/http';
 
 const STATUS_VARIANT: Record<string, 'default' | 'success' | 'muted'> = {
   draft: 'default',
@@ -32,6 +33,9 @@ export function DashboardPage() {
   const { data, isLoading, error } = useQuizzesControllerList();
   const create = useQuizzesControllerCreate();
   const createSamples = useQuizzesControllerCreateSamples();
+  const importQuiz = useQuizzesControllerImportQuiz();
+  const navigate = useNavigate();
+  const fileInput = useRef<HTMLInputElement>(null);
   const { launch, isLaunching, error: launchError } = useLaunchSession();
   const { data: gamesData } = useGameControllerMine();
   const endGame = useGameControllerEnd();
@@ -64,6 +68,20 @@ export function DashboardPage() {
     createSamples.mutate(undefined, { onSuccess: invalidateList });
   };
 
+  // A bundle (zip, or a bare quiz.json) becomes a new draft: straight to its editor.
+  const onImportFile = (file: File | undefined) => {
+    if (!file) return;
+    importQuiz.mutate(
+      { data: { file } },
+      {
+        onSuccess: (res) => {
+          invalidateList();
+          void navigate({ to: '/quizzes/$quizId', params: { quizId: res.data.id } });
+        },
+      },
+    );
+  };
+
   const onCreate = () => {
     create.mutate(
       { data: { title: t('newQuiz'), language: 'fr' } },
@@ -80,11 +98,38 @@ export function DashboardPage() {
     <section className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
-        <Button type="button" onClick={onCreate} disabled={create.isPending}>
-          <Plus className="size-4" />
-          {t('newQuiz')}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            ref={fileInput}
+            type="file"
+            accept=".zip,.json,application/zip,application/json"
+            className="hidden"
+            aria-label={t('import')}
+            onChange={(e) => {
+              onImportFile(e.target.files?.[0]);
+              e.target.value = '';
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            disabled={importQuiz.isPending}
+            onClick={() => fileInput.current?.click()}
+          >
+            <Upload className="size-4" />
+            {importQuiz.isPending ? t('importing') : t('import')}
+          </Button>
+          <Button type="button" onClick={onCreate} disabled={create.isPending}>
+            <Plus className="size-4" />
+            {t('newQuiz')}
+          </Button>
+        </div>
       </div>
+      {importQuiz.error ? (
+        <p className="text-destructive text-sm" role="alert">
+          {apiErrorText(importQuiz.error, t('importError'))}
+        </p>
+      ) : null}
 
       {activeGames.length > 0 && (
         <div className="flex flex-col gap-2 rounded-lg border border-primary/30 bg-primary/5 p-4">

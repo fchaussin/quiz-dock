@@ -1,6 +1,9 @@
 {
   "title": "Mes quiz",
   "newQuiz": "Nouveau quiz",
+  "import": "Importer",
+  "importing": "Import…",
+  "importError": "Impossible d’importer ce fichier.",
   "activeSessions": "Sessions en cours",
   "playerCount_one": "{{count}} participant",
   "playerCount_other": "{{count}} participants",
