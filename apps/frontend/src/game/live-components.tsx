@@ -41,6 +41,9 @@ export const TYPE_BASE = {
  * `correctIds` met en évidence la bonne réponse au reveal ; jamais de flag correct
  * avant (anti-triche §7 — les options publiques n'en portent pas).
  */
+/** Beyond this label length the grid gives up tiles for full-width rows. */
+const OPTION_TILE_MAX_CHARS = 18;
+
 export function OptionGrid({
   options,
   onPick,
@@ -62,8 +65,17 @@ export function OptionGrid({
   highlightIds?: string[];
   disabled?: boolean;
 }) {
+  // Short labels tile two per row once the container allows it; long ones (or
+  // many options) stack as full-width rows so the text keeps room to wrap.
+  const long =
+    options.length > 4 || options.some((o) => (o.text ?? '').length > OPTION_TILE_MAX_CHARS);
   return (
-    <div className="grid w-full grid-cols-1 gap-[0.75em] sm:grid-cols-2">
+    <div
+      className={cn(
+        '@container grid w-full grid-cols-1 gap-[0.75em]',
+        !long && '@[22em]:grid-cols-2',
+      )}
+    >
       {options.map((o) => {
         const isCorrect = correctIds?.includes(o.id);
         const isPicked = selectedIds?.includes(o.id) ?? false;
@@ -77,7 +89,8 @@ export function OptionGrid({
             disabled={onPick ? disabled : undefined}
             onClick={onPick ? () => onPick(o.id) : undefined}
             className={cn(
-              'flex items-center gap-[0.75em] rounded-[0.75em] px-[1em] py-[1em] text-[1.125em] font-semibold text-white shadow transition',
+              'flex min-h-[3.25em] items-center gap-[0.75em] rounded-[0.75em] px-[1em] py-[0.75em] text-left leading-snug font-semibold text-white shadow transition',
+              long ? 'text-[1em]' : 'text-[1.125em]',
               COLOR_BG[o.color] ?? OPTION_BG_FALLBACK,
               onPick && !disabled && 'hover:brightness-110 active:scale-[0.98] cursor-pointer',
               dimmed && 'opacity-40',
@@ -87,10 +100,14 @@ export function OptionGrid({
             )}
             aria-label={o.text ?? o.color}
           >
-            <span aria-hidden className="text-[1.35em] leading-none">
+            <span aria-hidden className="shrink-0 text-[1.35em] leading-none">
               {SHAPE_GLYPH[o.shape] ?? '●'}
             </span>
-            {o.text ? <Markdown profile="inline">{o.text}</Markdown> : null}
+            {o.text ? (
+              <Markdown profile="inline" className="min-w-0 flex-1 [overflow-wrap:anywhere]">
+                {o.text}
+              </Markdown>
+            ) : null}
             {isCorrect ? <span className="ml-auto">✓</span> : null}
           </Tag>
         );
