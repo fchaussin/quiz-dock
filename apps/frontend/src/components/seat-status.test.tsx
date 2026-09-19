@@ -22,7 +22,9 @@ describe('SeatStatus (topbar, local mode)', () => {
       { method: 'GET', path: '/quizzes', body: [] },
     ]);
     renderApp('/dashboard');
+    // The countdown is in the topbar; renewal sits in the user menu.
     expect(await screen.findByText(/1 h 30 min restantes/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Marc/ }));
 
     fireEvent.click(screen.getByRole('button', { name: /Renouveler/ }));
     await waitFor(() => {
@@ -44,7 +46,8 @@ describe('SeatStatus (topbar, local mode)', () => {
       { method: 'GET', path: '/quizzes', body: [] },
     ]);
     renderApp('/dashboard');
-    expect(await screen.findByText(/sans expiration/)).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: /Marc/ }));
+    expect(await screen.findByText(/Sans expiration/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Renouveler/ })).toBeNull();
   });
 });

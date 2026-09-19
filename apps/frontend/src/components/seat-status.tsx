@@ -14,12 +14,11 @@ import {
 const REFRESH_MS = 60_000;
 
 /**
- * Local-mode topbar item for the seat holder: how long the seat still lasts,
- * counting down between two server reads, and a one-click renewal for the
- * same duration. Nothing is stored client-side — the seat belongs to the
- * identity, its expiry to the server.
+ * Local-mode host seat as seen by its holder. Nothing is stored client-side —
+ * the seat belongs to the identity, its expiry to the server: re-read every
+ * minute and on focus, counting down in between.
  */
-export function SeatStatus({ user }: { user: string }) {
+function useSeat(user: string) {
   const { t } = useTranslation('auth');
   const queryClient = useQueryClient();
   const seat = useHostSeatControllerState({
@@ -35,16 +34,8 @@ export function SeatStatus({ user }: { user: string }) {
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [expiresAt]);
-
   if (holder !== user) return null;
-  if (!expiresAt) {
-    return (
-      <Badge variant="muted" className="hidden gap-1 sm:inline-flex">
-        <Armchair className="size-3" />
-        {t('seat.noExpiry')}
-      </Badge>
-    );
-  }
+  if (!expiresAt) return { expires: false as const };
   const leftMs = Math.max(0, new Date(expiresAt).getTime() - now);
   const minutes = Math.ceil(leftMs / 60_000);
   const label =
@@ -66,27 +57,68 @@ export function SeatStatus({ user }: { user: string }) {
           queryClient.invalidateQueries({ queryKey: getHostSeatControllerStateQueryKey() }),
       },
     );
-  // One tag: the seat, its time left (colour = urgency) and the renewal inside it.
+  return {
+    expires: true as const,
+    minutes,
+    label,
+    durationMin,
+    renew,
+    pending: claim.isPending,
+    variant: (minutes <= 2 ? 'destructive' : minutes <= 10 ? 'warning' : 'muted') as
+      | 'destructive'
+      | 'warning'
+      | 'muted',
+    expiresAt,
+  };
+}
+
+/** Topbar tag: the countdown in plain sight (colour = urgency); nothing when the seat has no expiry. */
+export function SeatCountdown({ user }: { user: string }) {
+  const { t } = useTranslation('auth');
+  const seat = useSeat(user);
+  if (!seat?.expires) return null;
   return (
     <Badge
-      variant={minutes <= 2 ? 'destructive' : minutes <= 10 ? 'warning' : 'muted'}
-      className="gap-1.5 py-0.5 pr-0.5"
-      title={t('seat.expiresTitle', { time: new Date(expiresAt).toLocaleTimeString() })}
+      variant={seat.variant}
+      className="gap-1"
+      title={t('seat.expiresTitle', { time: new Date(seat.expiresAt).toLocaleTimeString() })}
     >
       <Armchair className="size-3" />
-      <span className="tabular-nums">{label}</span>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="h-5 gap-1 rounded-full px-1.5 text-[11px]"
-        disabled={claim.isPending}
-        onClick={renew}
-        title={t('seat.renewHint', { count: durationMin })}
-      >
-        <RefreshCw className="size-3" />
-        {t('seat.renew')}
-      </Button>
+      <span className="tabular-nums">{seat.label}</span>
     </Badge>
+  );
+}
+
+/** User-menu row: the seat's state and its renewal. */
+export function SeatMenuRow({ user }: { user: string }) {
+  const { t } = useTranslation('auth');
+  const seat = useSeat(user);
+  if (!seat) return null;
+  return (
+    <div className="flex items-center justify-between gap-3 text-sm">
+      <span className="flex items-center gap-1.5">
+        <Armchair className="text-muted-foreground size-4" />
+        <span className="flex flex-col leading-tight">
+          <span className="font-medium">{t('seat.label')}</span>
+          <span className="text-muted-foreground text-xs tabular-nums">
+            {seat.expires ? seat.label : t('seat.noExpiryShort')}
+          </span>
+        </span>
+      </span>
+      {seat.expires ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-7 gap-1 px-2 text-xs"
+          disabled={seat.pending}
+          onClick={seat.renew}
+          title={t('seat.renewHint', { count: seat.durationMin })}
+        >
+          <RefreshCw className="size-3" />
+          {t('seat.renew')}
+        </Button>
+      ) : null}
+    </div>
   );
 }

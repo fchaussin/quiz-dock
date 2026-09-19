@@ -1,9 +1,8 @@
 import { Link, Outlet, useMatches, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
-import { LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { SeatStatus } from '@/components/seat-status';
-import { Button } from '@/components/ui/button';
+import { SeatCountdown, SeatMenuRow } from '@/components/seat-status';
+import { UserMenu } from '@/components/user-menu';
 import { useAuth } from '../auth/auth-context';
 import { APP_NAME, appConfig } from '../config';
 
@@ -75,18 +74,16 @@ export function RootLayout() {
               <Link to="/dashboard" className="whitespace-nowrap hover:underline">
                 {t('nav.myQuizzes')}
               </Link>
-              <span className="text-muted-foreground hidden sm:inline">{user}</span>
-              {mode === 'none' ? <SeatStatus user={user} /> : null}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
+              {/* A seat countdown stays in plain sight; renewal and log out live in the user menu. */}
+              {mode === 'none' ? <SeatCountdown user={user} /> : null}
+              <UserMenu
+                user={user}
+                onLogout={() => {
                   void Promise.resolve(logout()).then(() => navigate({ to: '/login' }));
                 }}
               >
-                <LogOut className="size-4" />
-                {t('nav.logout')}
-              </Button>
+                {mode === 'none' ? <SeatMenuRow user={user} /> : null}
+              </UserMenu>
             </>
           ) : (
             <Link to="/login" className="hover:underline">
