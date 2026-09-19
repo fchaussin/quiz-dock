@@ -51,6 +51,7 @@ export function OptionGrid({
   correctIds,
   highlightIds,
   disabled,
+  layout = 'tiles',
 }: {
   options: PublicOption[];
   onPick?: (optionId: string) => void;
@@ -64,7 +65,25 @@ export function OptionGrid({
    */
   highlightIds?: string[];
   disabled?: boolean;
+  /**
+   * `tiles`: labels on the coloured tiles (projection, console). `split` (phone):
+   * the answers listed one under the other with their colour/shape code, and a
+   * grid of colour/shape tiles as the tap targets — long labels stay readable,
+   * targets stay big.
+   */
+  layout?: 'tiles' | 'split';
 }) {
+  if (layout === 'split') {
+    return (
+      <SplitOptions
+        options={options}
+        onPick={onPick}
+        selectedIds={selectedIds}
+        correctIds={correctIds}
+        disabled={disabled}
+      />
+    );
+  }
   // Short labels tile two per row once the container allows it; long ones (or
   // many options) stack as full-width rows so the text keeps room to wrap.
   const long =
@@ -112,6 +131,78 @@ export function OptionGrid({
           </Tag>
         );
       })}
+    </div>
+  );
+}
+
+function SplitOptions({
+  options,
+  onPick,
+  selectedIds,
+  correctIds,
+  disabled,
+}: {
+  options: PublicOption[];
+  onPick?: (optionId: string) => void;
+  selectedIds?: string[];
+  correctIds?: string[];
+  disabled?: boolean;
+}) {
+  const picked = (id: string) => selectedIds?.includes(id) ?? false;
+  return (
+    <div className="flex w-full flex-col gap-[1em]">
+      {/* The answers, in reading order, keyed by colour and shape. */}
+      <ol className="flex w-full flex-col gap-[0.4em] text-left">
+        {options.map((o) => (
+          <li
+            key={o.id}
+            className={cn(
+              'flex items-center gap-[0.6em] rounded-[0.5em] px-[0.6em] py-[0.4em] leading-snug',
+              picked(o.id) && 'bg-foreground/10 font-semibold',
+              correctIds && !correctIds.includes(o.id) && 'opacity-50',
+            )}
+          >
+            <span
+              aria-hidden
+              className={cn('shrink-0 text-[1.25em] leading-none', COLOR_TEXT[o.color])}
+            >
+              {SHAPE_GLYPH[o.shape] ?? '●'}
+            </span>
+            {o.text ? (
+              <Markdown profile="inline" className="min-w-0 flex-1 [overflow-wrap:anywhere]">
+                {o.text}
+              </Markdown>
+            ) : null}
+          </li>
+        ))}
+      </ol>
+      {/* The tap targets: colour + shape only, big and steady whatever the labels. */}
+      <div className="grid w-full grid-cols-2 gap-[0.6em]">
+        {options.map((o) => {
+          const isCorrect = correctIds?.includes(o.id);
+          const Tag = onPick ? 'button' : 'div';
+          return (
+            <Tag
+              key={o.id}
+              type={onPick ? 'button' : undefined}
+              disabled={onPick ? disabled : undefined}
+              onClick={onPick ? () => onPick(o.id) : undefined}
+              aria-label={o.text ?? o.color}
+              aria-pressed={onPick ? picked(o.id) : undefined}
+              className={cn(
+                'flex min-h-[3.5em] items-center justify-center rounded-[0.75em] text-[2em] leading-none text-white shadow transition',
+                COLOR_BG[o.color] ?? OPTION_BG_FALLBACK,
+                onPick && !disabled && 'hover:brightness-110 active:scale-[0.97] cursor-pointer',
+                correctIds && !isCorrect && 'opacity-40',
+                isCorrect && 'ring-4 ring-white',
+                picked(o.id) && 'ring-4 ring-black/60',
+              )}
+            >
+              <span aria-hidden>{SHAPE_GLYPH[o.shape] ?? '●'}</span>
+            </Tag>
+          );
+        })}
+      </div>
     </div>
   );
 }

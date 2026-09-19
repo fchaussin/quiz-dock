@@ -184,7 +184,7 @@ export function PlayerPage() {
     if (opts.length) {
       return (
         <>
-          <OptionGrid options={opts} onPick={onPick} selectedIds={selected} />
+          <OptionGrid options={opts} onPick={onPick} selectedIds={selected} layout="split" />
           {isMulti ? (
             <Button type="button" disabled={selected.length === 0} onClick={() => submit(selected)}>
               {t('player.submitAnswer')}

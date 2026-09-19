@@ -42,7 +42,7 @@ export function ParticipantPreview({ view }: { view: GameView }) {
         </div>
         <AnswerRules question={q} />
         {q.options?.length ? (
-          <OptionGrid options={q.options} disabled />
+          <OptionGrid options={q.options} disabled layout="split" />
         ) : (
           <Input disabled placeholder={t('player.answerPlaceholder')} className="text-center" />
         )}
