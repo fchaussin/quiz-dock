@@ -14,6 +14,11 @@ export function setAuthHeaders(headers: Record<string, string>): void {
   authHeaders = headers;
 }
 
+/** Pour les requêtes hors client généré (téléchargement binaire). */
+export function getAuthHeaders(): Record<string, string> {
+  return authHeaders;
+}
+
 /**
  * Réaction à un 401 sur une requête **authentifiée** (session expirée / jeton
  * rejeté) : posé par le contexte d'auth (mode OIDC → retour à la connexion).

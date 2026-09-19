@@ -330,11 +330,13 @@ export function PlayerPage() {
   }
 
   // ── États de jeu ───────────────────────────────────────────────────────────
+  // A slide is projected, not read: it breaks out of the phone column to the whole
+  // viewport (width and height under the header), content centred.
   if (view.state === 'SLIDE_SHOW' && view.slide) {
     return (
-      <section className="flex w-full flex-col py-4">
+      <div className="-my-4 mx-[calc(50%-50vw)] flex min-h-[calc(100dvh-4rem)]">
         <SlideView slide={view.slide} />
-      </section>
+      </div>
     );
   }
   if (view.state === 'HOST_DISCONNECTED') {

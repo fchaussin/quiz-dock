@@ -41,6 +41,13 @@
     "file_too_large": "File too large (max {{max}} bytes).",
     "not_found": "Media not found."
   },
+  "import": {
+    "file_missing": "Missing file (“file” field).",
+    "invalid_bundle": "Not a QuizDock bundle (quiz.json + media/, zipped).",
+    "media_missing": "Media “{{path}}” is referenced but missing from the bundle.",
+    "media_unsupported": "Unsupported media “{{path}}” (png, jpg, gif, webp, avif, mp3, ogg, wav, m4a).",
+    "invalid_item": "Item {{item}} of the bundle is invalid ({{field}})."
+  },
   "question": {
     "not_in_quiz": "Question not part of the quiz.",
     "invalid_permutation": "Positions must form a permutation 0..n-1.",

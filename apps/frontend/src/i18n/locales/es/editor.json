@@ -14,7 +14,9 @@
     "title": "Editor de quiz",
     "history": "Historial",
     "deleteQuiz": "Eliminar quiz",
-    "preview": "Vista previa"
+    "preview": "Vista previa",
+    "export": "Exportar",
+    "exportError": "No se pudo exportar el cuestionario."
   },
   "settings": {
     "title": "Ajustes",

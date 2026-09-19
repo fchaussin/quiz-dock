@@ -30,6 +30,7 @@ import type {
   QuizDto,
   QuizFeedbackSummaryDto,
   QuizzesControllerFeedbackParams,
+  QuizzesControllerImportQuizBody,
   SessionDetailDto,
   SessionListDto,
   SessionPlayerDetailDto,
@@ -300,7 +301,190 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getQuizzesControllerCreateSamplesMutationOptions(options), queryClient);
     }
-    export type quizzesControllerDuplicateResponse201 = {
+    export type quizzesControllerImportQuizResponse201 = {
+  data: QuizDto
+  status: 201
+}
+
+export type quizzesControllerImportQuizResponseSuccess = (quizzesControllerImportQuizResponse201) & {
+  headers: Headers;
+};
+;
+
+export type quizzesControllerImportQuizResponse = (quizzesControllerImportQuizResponseSuccess)
+
+export const getQuizzesControllerImportQuizUrl = () => {
+
+
+
+
+  return `/api/v1/quizzes/import`
+}
+
+export const quizzesControllerImportQuiz = async (quizzesControllerImportQuizBody: QuizzesControllerImportQuizBody, options?: RequestInit): Promise<quizzesControllerImportQuizResponse> => {
+    const formData = new FormData();
+formData.append(`file`, quizzesControllerImportQuizBody.file);
+
+  return customFetch<quizzesControllerImportQuizResponse>(getQuizzesControllerImportQuizUrl(),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body: formData
+  }
+);}
+
+
+
+
+export const getQuizzesControllerImportQuizMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof quizzesControllerImportQuiz>>, TError,{data: QuizzesControllerImportQuizBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof quizzesControllerImportQuiz>>, TError,{data: QuizzesControllerImportQuizBody}, TContext> => {
+
+const mutationKey = ['quizzesControllerImportQuiz'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof quizzesControllerImportQuiz>>, {data: QuizzesControllerImportQuizBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  quizzesControllerImportQuiz(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type QuizzesControllerImportQuizMutationResult = NonNullable<Awaited<ReturnType<typeof quizzesControllerImportQuiz>>>
+    export type QuizzesControllerImportQuizMutationBody = QuizzesControllerImportQuizBody
+    export type QuizzesControllerImportQuizMutationError = unknown
+
+    export const useQuizzesControllerImportQuiz = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof quizzesControllerImportQuiz>>, TError,{data: QuizzesControllerImportQuizBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof quizzesControllerImportQuiz>>,
+        TError,
+        {data: QuizzesControllerImportQuizBody},
+        TContext
+      > => {
+      return useMutation(getQuizzesControllerImportQuizMutationOptions(options), queryClient);
+    }
+    export type quizzesControllerExportQuizResponse200 = {
+  data: void
+  status: 200
+}
+
+export type quizzesControllerExportQuizResponseSuccess = (quizzesControllerExportQuizResponse200) & {
+  headers: Headers;
+};
+;
+
+export type quizzesControllerExportQuizResponse = (quizzesControllerExportQuizResponseSuccess)
+
+export const getQuizzesControllerExportQuizUrl = (id: string,) => {
+
+
+
+
+  return `/api/v1/quizzes/${id}/export`
+}
+
+export const quizzesControllerExportQuiz = async (id: string, options?: RequestInit): Promise<quizzesControllerExportQuizResponse> => {
+
+  return customFetch<quizzesControllerExportQuizResponse>(getQuizzesControllerExportQuizUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getQuizzesControllerExportQuizQueryKey = (id: string,) => {
+    return [
+    `/api/v1/quizzes/${id}/export`
+    ] as const;
+    }
+
+
+export const getQuizzesControllerExportQuizQueryOptions = <TData = Awaited<ReturnType<typeof quizzesControllerExportQuiz>>, TError = unknown>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof quizzesControllerExportQuiz>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getQuizzesControllerExportQuizQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof quizzesControllerExportQuiz>>> = ({ signal }) => quizzesControllerExportQuiz(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof quizzesControllerExportQuiz>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type QuizzesControllerExportQuizQueryResult = NonNullable<Awaited<ReturnType<typeof quizzesControllerExportQuiz>>>
+export type QuizzesControllerExportQuizQueryError = unknown
+
+
+export function useQuizzesControllerExportQuiz<TData = Awaited<ReturnType<typeof quizzesControllerExportQuiz>>, TError = unknown>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof quizzesControllerExportQuiz>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof quizzesControllerExportQuiz>>,
+          TError,
+          Awaited<ReturnType<typeof quizzesControllerExportQuiz>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useQuizzesControllerExportQuiz<TData = Awaited<ReturnType<typeof quizzesControllerExportQuiz>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof quizzesControllerExportQuiz>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof quizzesControllerExportQuiz>>,
+          TError,
+          Awaited<ReturnType<typeof quizzesControllerExportQuiz>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useQuizzesControllerExportQuiz<TData = Awaited<ReturnType<typeof quizzesControllerExportQuiz>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof quizzesControllerExportQuiz>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useQuizzesControllerExportQuiz<TData = Awaited<ReturnType<typeof quizzesControllerExportQuiz>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof quizzesControllerExportQuiz>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getQuizzesControllerExportQuizQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type quizzesControllerDuplicateResponse201 = {
   data: QuizDto
   status: 201
 }

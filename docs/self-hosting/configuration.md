@@ -32,6 +32,7 @@ needed. Where you set them depends on how you run it:
 | `REDIS_URL` | — | app | Redis connection string, e.g. `redis://host:6379`. Live-game state only. |
 | `MEDIA_DIR` | `/data/media` | app | Where uploaded images/audio are stored. Mount a volume here to persist. |
 | `MEDIA_MAX_BYTES` | `10485760` | app | Max upload size per file (bytes). Default 10 MiB. |
+| `IMPORT_MAX_BYTES` | `52428800` | app | Max size of an imported quiz bundle (zip). Default 50 MiB. |
 | `GAME_AUTO_ADVANCE_MS` | `5000` | app | Automatic mode: time spent on a reveal or a content slide before moving on, unless the question/slide sets its own. |
 | `GAME_READ_DELAY_MS` | `3000` | app | Reading window shown before a question's timer starts. |
 | `OIDC_ISSUER` | — | app | `iss` expected in tokens (your provider's issuer URL). Required when `AUTH_MODE=oidc`. |

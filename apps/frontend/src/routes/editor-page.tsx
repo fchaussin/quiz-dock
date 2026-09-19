@@ -21,13 +21,14 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import {
   ArrowDown,
   ArrowUp,
+  Download,
   ExternalLink,
   Eye,
   GripVertical,
   History,
   LayoutTemplate,
-  MousePointerClick,
   MonitorPlay,
+  MousePointerClick,
   PanelLeftClose,
   PanelLeftOpen,
   Play,
@@ -50,6 +51,8 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { createSession } from '../game/game-client';
+import { downloadFile } from '../api/download';
+import { apiErrorText } from '../api/http';
 import type { QuizDetailDto } from '../api/generated/model';
 import { quizItems, moveItem, slideLabel, type QuizItem } from '@/lib/quiz-items';
 import { useMediaQuery } from '@/lib/use-media-query';
@@ -141,6 +144,18 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
   // Deleting an item of the sequence asks first (a question takes its stats history with it).
   const [pendingDelete, setPendingDelete] = useState<QuizItem | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // Portable bundle (zip: quiz.json + media/) — the same file the Quiz Store shares.
+  const [exporting, setExporting] = useState(false);
+  const onExport = async () => {
+    setExporting(true);
+    try {
+      await downloadFile(`/api/v1/quizzes/${quiz.id}/export`, 'quiz.quizdock.zip');
+    } catch (e) {
+      setPresentError(apiErrorText(e, t('header.exportError')));
+    } finally {
+      setExporting(false);
+    }
+  };
   // The description reads as text until clicked (the title is always an inline input).
   const [editingDescription, setEditingDescription] = useState(false);
   // Capture intégrale (§2.10) : conserve le détail des réponses par participant.
@@ -397,6 +412,16 @@ function QuizEditor({ quiz }: { quiz: QuizDetailDto }) {
               <History className="size-4" />
               {t('header.history')}
             </Link>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={exporting}
+              onClick={() => void onExport()}
+            >
+              <Download className="size-4" />
+              {t('header.export')}
+            </Button>
           </div>
           <Button type="button" variant="ghost" size="sm" onClick={() => setSettingsOpen(true)}>
             <Settings2 className="size-4" />

@@ -9,15 +9,24 @@ import {
   Post,
   Put,
   Query,
+  Res,
+  StreamableFile,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiOkResponse,
+  ApiProduces,
   ApiTags,
 } from '@nestjs/swagger';
 import type { User } from '@prisma/client';
+import type { Response } from 'express';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { CreateQuizDto } from './dto/create-quiz.dto';
 import { QuizDetailDto } from './dto/quiz-detail.dto';
@@ -26,8 +35,12 @@ import { SessionDetailDto, SessionListDto, SessionPlayerDetailDto } from './dto/
 import { QuizDto } from './dto/quiz.dto';
 import { TransitionQuizDto } from './dto/transition-quiz.dto';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
+import { type BundleFile, QuizPortableService } from './portable/quiz-portable.service';
 import { QuizzesService } from './quizzes.service';
 import { SampleQuizzesService } from './samples/sample-quizzes.service';
+
+/** A bundle is a zip of media: sized like a handful of uploads. */
+const IMPORT_MAX_BYTES = Number(process.env.IMPORT_MAX_BYTES ?? 50 * 1024 * 1024);
 
 @ApiTags('quizzes')
 @ApiBearerAuth()
@@ -36,6 +49,7 @@ export class QuizzesController {
   constructor(
     private readonly quizzes: QuizzesService,
     private readonly samples: SampleQuizzesService,
+    private readonly portable: QuizPortableService,
   ) {}
 
   @Get()
@@ -55,6 +69,39 @@ export class QuizzesController {
   @ApiCreatedResponse({ type: QuizDto, isArray: true })
   createSamples(@CurrentUser() user: User) {
     return this.samples.createFor(user.id);
+  }
+
+  /** Imports a portable bundle (zip, or a bare `quiz.json`) as a new draft (#19). */
+  @Post('import')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+      required: ['file'],
+    },
+  })
+  @ApiCreatedResponse({ type: QuizDto })
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: IMPORT_MAX_BYTES } }))
+  importQuiz(@CurrentUser() user: User, @UploadedFile() file: BundleFile | undefined) {
+    return this.portable.importBundle(user.id, file);
+  }
+
+  /** The quiz as a portable bundle: `quiz.json` + `media/`, zipped (#19). */
+  @Get(':id/export')
+  @ApiProduces('application/zip')
+  @ApiOkResponse({ description: 'Zip bundle (quiz.json + media/).' })
+  async exportQuiz(
+    @CurrentUser() user: User,
+    @Param('id') id: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const { filename, zip } = await this.portable.exportZip(user.id, id);
+    res.set({
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+    });
+    return new StreamableFile(zip);
   }
 
   @Post(':id/duplicate')
