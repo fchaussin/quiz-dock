@@ -67,7 +67,10 @@ export function RootLayout() {
           </Link>
         )}
         <nav className="flex items-center gap-3 text-sm">
-          {shell === 'participant' ? null : user ? (
+          {shell === 'participant' ? (
+            // Filled by the player page (avatar, nickname, Leave) through a portal.
+            <div id="participant-topbar" className="flex items-center gap-2" />
+          ) : user ? (
             <>
               <Link to="/dashboard" className="whitespace-nowrap hover:underline">
                 {t('nav.myQuizzes')}

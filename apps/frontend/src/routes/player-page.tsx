@@ -1,6 +1,7 @@
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { ArrowDown, ArrowUp, Check, LogIn, LogOut, Shuffle } from 'lucide-react';
 import { type FormEvent, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Markdown } from '@/components/markdown';
 import { Button } from '@/components/ui/button';
@@ -237,6 +238,47 @@ export function PlayerPage() {
 
   // `wide` lets a screen use a laptop's width (the reveal lays out side by side);
   // `center` places the content in the middle of the remaining height.
+  // Identity and the way out live in the topbar (same place on every screen), not in the page.
+  // The slot exists once the layout is in the DOM (after the first commit), hence the effect.
+  const [topbarSlot, setTopbarSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => setTopbarSlot(document.getElementById('participant-topbar')), []);
+  const participantBar =
+    topbarSlot && view.status === 'ready' && view.state !== 'ENDED' && !view.kicked
+      ? createPortal(
+          <>
+            <span className="hidden max-w-[10rem] truncate text-sm font-medium sm:inline">
+              {nickname}
+            </span>
+            <Avatar name={avatarName} size={32} />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2"
+              onClick={() => setConfirmLeave(true)}
+            >
+              <LogOut className="size-4" />
+              {t('player.leave')}
+            </Button>
+            <ConfirmDialog
+              open={confirmLeave}
+              destructive
+              title={t('player.leaveConfirmTitle')}
+              description={t('player.leaveConfirmDescription')}
+              confirmLabel={t('player.leave')}
+              onCancel={() => setConfirmLeave(false)}
+              onConfirm={() => {
+                setConfirmLeave(false);
+                clearPlayerSession();
+                socket?.disconnect();
+                void navigate({ to: '/join' });
+              }}
+            />
+          </>,
+          topbarSlot,
+        )
+      : null;
+
   const wrap = (children: React.ReactNode, opts: { wide?: boolean; center?: boolean } = {}) => (
     <Surface
       background={view.question?.background}
@@ -248,6 +290,7 @@ export function PlayerPage() {
         !view.question?.background && 'bg-transparent',
       )}
     >
+      {participantBar}
       <section
         className={cn(
           'mx-auto flex w-full flex-1 flex-col items-center gap-[1.5em] py-[1.5em] text-center',
@@ -255,41 +298,11 @@ export function PlayerPage() {
           opts.center && 'min-h-[calc(100dvh-6rem)]',
         )}
       >
-        {view.status === 'ready' && view.state !== 'ENDED' && !view.kicked ? (
-          <div className="flex w-full items-center gap-[0.5em] text-[0.875em]">
-            <Avatar name={avatarName} size="2em" />
-            <span className="min-w-0 flex-1 truncate text-left font-medium">{nickname}</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-xs"
-              onClick={() => setConfirmLeave(true)}
-            >
-              <LogOut className="size-3.5" />
-              {t('player.leave')}
-            </Button>
-          </div>
-        ) : null}
         {opts.center ? (
           <div className="my-auto flex w-full flex-col items-center gap-[1.5em]">{children}</div>
         ) : (
           children
         )}
-        <ConfirmDialog
-          open={confirmLeave}
-          destructive
-          title={t('player.leaveConfirmTitle')}
-          description={t('player.leaveConfirmDescription')}
-          confirmLabel={t('player.leave')}
-          onCancel={() => setConfirmLeave(false)}
-          onConfirm={() => {
-            setConfirmLeave(false);
-            clearPlayerSession();
-            socket?.disconnect();
-            void navigate({ to: '/join' });
-          }}
-        />
       </section>
     </Surface>
   );
@@ -357,6 +370,7 @@ export function PlayerPage() {
       <div
         className={cn('-my-4 mx-[calc(50%-50vw)] flex min-h-[calc(100dvh-4rem)]', TYPE_BASE.phone)}
       >
+        {participantBar}
         <SlideView slide={view.slide} />
       </div>
     );
@@ -466,6 +480,7 @@ export function PlayerPage() {
           TYPE_BASE.phone,
         )}
       >
+        {participantBar}
         {remaining !== null ? (
           <span
             className="shrink-0 pt-[0.5em] text-[2.5em] font-bold tabular-nums"
