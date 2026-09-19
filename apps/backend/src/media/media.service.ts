@@ -1,5 +1,5 @@
 import { createReadStream, type ReadStream } from 'node:fs';
-import { mkdir, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
   BadRequestException,
@@ -89,6 +89,17 @@ export class MediaService implements OnModuleInit {
       mime: asset.mime,
       sizeBytes: Number(asset.sizeBytes),
     };
+  }
+
+  /** Bytes and mime of a stored media, for the quiz export (#19). */
+  async readAsset(id: string): Promise<{ buffer: Buffer; mime: string } | null> {
+    const asset = await this.prisma.mediaAsset.findUnique({ where: { id } });
+    if (!asset) return null;
+    try {
+      return { buffer: await readFile(join(this.dir, id)), mime: asset.mime };
+    } catch {
+      return null;
+    }
   }
 
   /** Supprime un média possédé (ligne + fichier). */

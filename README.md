@@ -70,6 +70,7 @@ the results never leave your servers.
 - 💾 **Answer capture** — optionally record every player's individual answers for audit, certification or individual follow-up.
 - 🔎 **History & exploration** — browse archived sessions: per-question success rates, average times, and per-player answer sheets.
 - 📤 **CSV export** — export overall results and per-player answer sheets.
+- 📦 **Quiz import / export** — a quiz travels as a [portable bundle](docs/quiz-bundle.md) (`quiz.json` + `media/`, zipped): back it up, move it between instances, share it.
 - 🌍 **Multilingual** — interface in English, French, Spanish, Simplified Chinese and Traditional Chinese (one language per instance).
 - 🏠 **Self-hosted & private** — runs on your own infra with Docker; no SaaS, no tracking, no ads; players need no account, hosts can plug in any OpenID Connect provider.
 - 🎨 **White-label** — rebrand name, logo and CSS via env + a mounted folder, no rebuild.

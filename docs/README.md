@@ -36,3 +36,7 @@ docs/
 ├── api/                 # compléments à l'OpenAPI / contrat WS
 └── ops/                 # runbook, déploiement, exploitation
 ```
+
+## Notes de fonctionnalité
+
+- [`quiz-bundle.md`](quiz-bundle.md) — format d'import / export d'un quiz (`quiz.json` + `media/`).
