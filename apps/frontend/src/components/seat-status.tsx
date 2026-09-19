@@ -13,7 +13,7 @@ import {
   useHostSeatControllerState,
 } from '../api/generated/auth/auth';
 import { SEAT_EXPIRY_OPTIONS } from '../auth/seat-options';
-import { DEMO } from '../config';
+import { getDemo } from '../config';
 
 /** Re-read the seat this often; the server is the truth (operator release, takeover…). */
 const REFRESH_MS = 60_000;
@@ -103,6 +103,7 @@ export function SeatMenuRow({ user }: { user: string }) {
   const seat = useSeat(user);
   const release = useHostSeatControllerRelease();
   const [forMinutes, setForMinutes] = useState<number>(SEAT_EXPIRY_OPTIONS[1]);
+  const demo = getDemo();
   if (!seat) return null;
   const onRelease = () =>
     release.mutate(undefined, {
@@ -125,7 +126,7 @@ export function SeatMenuRow({ user }: { user: string }) {
       {/* Extend from now, for one of the sign-in durations (or without expiry). On a
           demo the server fixes the length: a single renew button. */}
       <div className="flex items-center gap-1.5">
-        {DEMO ? null : (
+        {demo ? null : (
           <Select
             aria-label={t('seat.extendLabel')}
             className="h-7 flex-1 text-xs"
@@ -146,11 +147,11 @@ export function SeatMenuRow({ user }: { user: string }) {
           className="h-7 gap-1 px-2 text-xs"
           disabled={seat.pending}
           onClick={() =>
-            seat.extend(DEMO ? DEMO.seatMinutes : forMinutes === 0 ? null : forMinutes)
+            seat.extend(demo ? demo.seatMinutes : forMinutes === 0 ? null : forMinutes)
           }
         >
           <RefreshCw className="size-3" />
-          {DEMO ? t('seat.demoExtend', { count: DEMO.seatMinutes }) : t('seat.extend')}
+          {demo ? t('seat.demoExtend', { count: demo.seatMinutes }) : t('seat.extend')}
         </Button>
       </div>
       <Button

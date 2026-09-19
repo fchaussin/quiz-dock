@@ -9,7 +9,7 @@ import { useMediaControllerUpload } from '../api/generated/media/media';
 import { useTranslation } from 'react-i18next';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { DEMO } from '../config';
+import { getDemo } from '../config';
 import type { MarkdownProfile } from './markdown';
 
 /**
@@ -213,7 +213,7 @@ function Toolbar({ editor, profile }: { editor: Editor; profile: MarkdownProfile
             <SquareCode className="size-4" />
           </ToolButton>
           {/* No uploads on a demo instance. */}
-          {DEMO ? null : <ImageButton editor={editor} />}
+          {getDemo() ? null : <ImageButton editor={editor} />}
         </>
       ) : null}
     </>

@@ -14,8 +14,6 @@ export interface AppConfig {
   overrideCssUrl: string;
   /** Langue de l'UI pour cette instance (`APP_LANG`). Une seule par déploiement. */
   lang: string;
-  /** Instance de démo publique (`DEMO_MODE`) : siège court, pas d'upload, reset horaire. */
-  demo: { seatMinutes: number } | null;
 }
 
 const DEFAULTS: AppConfig = {
@@ -23,7 +21,6 @@ const DEFAULTS: AppConfig = {
   logoUrl: '/branding/logo.svg',
   overrideCssUrl: '/branding/override.css',
   lang: 'en',
-  demo: null,
 };
 
 declare global {
@@ -43,5 +40,19 @@ export const APP_NAME = appConfig.appName;
 /** Version of this build, shown to people (the release tag, or "dev"). */
 export const APP_VERSION: string = typeof __APP_VERSION__ === 'undefined' ? 'dev' : __APP_VERSION__;
 
-/** Démo publique : ce que la SPA doit montrer (le serveur impose le reste). */
-export const DEMO = appConfig.demo;
+/** Instance de démo publique (`DEMO_MODE`) : siège court, pas d'upload, reset horaire. */
+export interface DemoConfig {
+  seatMinutes: number;
+}
+
+let demo: DemoConfig | null = null;
+
+/** Reçu de `GET /auth/config` avant le rendu (main.tsx) — le serveur impose le reste. */
+export function configureDemo(value: DemoConfig | null): void {
+  demo = value;
+}
+
+/** Démo publique en cours, ou `null` : lu au rendu, jamais mis en cache par un module. */
+export function getDemo(): DemoConfig | null {
+  return demo;
+}

@@ -5,11 +5,14 @@
  * API REST du builder de quiz et des restitutions
  * OpenAPI spec version: 0.1.0
  */
+import type { AuthConfigDtoDemo } from './authConfigDtoDemo';
 import type { AuthConfigDtoMode } from './authConfigDtoMode';
 import type { AuthConfigDtoOidc } from './authConfigDtoOidc';
 
 export interface AuthConfigDto {
   mode: AuthConfigDtoMode;
+  /** @nullable */
+  demo: AuthConfigDtoDemo;
   /** @nullable */
   oidc: AuthConfigDtoOidc;
 }
