@@ -169,7 +169,8 @@
     "joinAnother": "Join another game",
     "yourClosest": "{{rank}}. closest — ±{{distance}}",
     "yourCredit": "{{percent}} % of the points",
-    "dragToReorder": "Drag to reorder"
+    "dragToReorder": "Drag to reorder",
+    "pollThanks": "Thanks for your opinion!"
   },
   "reveal": {
     "explanation": "Explanation",

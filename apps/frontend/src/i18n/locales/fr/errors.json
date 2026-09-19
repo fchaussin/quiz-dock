@@ -12,7 +12,8 @@
     "not_ready": "Le quiz doit être « prêt » pour lancer une session (RG-02).",
     "empty": "Le quiz ne comporte aucune question.",
     "requires_question": "Un quiz doit comporter au moins une question pour passer à « prêt » (RG-02).",
-    "transition_forbidden": "Transition d’état interdite : {{from}} → {{target}}."
+    "transition_forbidden": "Transition d’état interdite : {{from}} → {{target}}.",
+    "in_use": "Ce quiz est joué dans une session en cours : termine la session d’abord."
   },
   "session": {
     "not_found": "Session introuvable ou terminée.",
@@ -24,7 +25,8 @@
     "timer_not_adjustable": "Le chrono ne peut être ajusté que pendant une question.",
     "snapshot_not_found": "Snapshot de session introuvable.",
     "capture_locked": "La capture intégrale ne peut être modifiée qu’avant le démarrage.",
-    "join_url_invalid": "Adresse pour rejoindre invalide (attendu http(s)://hôte[:port])."
+    "join_url_invalid": "Adresse pour rejoindre invalide (attendu http(s)://hôte[:port]).",
+    "archive_quiz_gone": "Le quiz a été supprimé pendant la session : elle s’est terminée sans archive."
   },
   "participant": {
     "not_found": "Participant introuvable."

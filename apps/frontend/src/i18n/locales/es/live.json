@@ -169,7 +169,8 @@
     "joinAnother": "Unirse a otra partida",
     "yourClosest": "{{rank}}.º más cercano — ±{{distance}}",
     "yourCredit": "{{percent}} % de los puntos",
-    "dragToReorder": "Arrastra para reordenar"
+    "dragToReorder": "Arrastra para reordenar",
+    "pollThanks": "¡Gracias por tu opinión!"
   },
   "reveal": {
     "explanation": "Explicación",

@@ -169,7 +169,8 @@
     "joinAnother": "加入另一場遊戲",
     "yourClosest": "第 {{rank}} 接近——±{{distance}}",
     "yourCredit": "{{percent}} % 的分數",
-    "dragToReorder": "拖曳以重新排序"
+    "dragToReorder": "拖曳以重新排序",
+    "pollThanks": "感謝你的意見！"
   },
   "reveal": {
     "explanation": "解析",

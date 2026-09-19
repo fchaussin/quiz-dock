@@ -1013,7 +1013,19 @@ export class GameEngine {
     // Archivage explicite choisi par l'hôte (§2.7). Volontairement NON best-effort :
     // si la persistance échoue, on laisse remonter et on ne détruit PAS la partie
     // (le PIN reste valide, l'hôte peut réessayer) — pas de perte silencieuse.
-    if (archive) await this.archive.archive(pin, meta, { interrupted: false });
+    if (archive) {
+      try {
+        await this.archive.archive(pin, meta, { interrupted: false });
+      } catch (err) {
+        // The quiz is gone (deleted meanwhile): nothing will ever archive, end anyway
+        // and say so; any other failure keeps the session so the host can retry.
+        if (!isForeignKeyViolation(err)) throw err;
+        this.log.warn(
+          `Session ${pin}: quiz ${meta.quizId} no longer exists, ended without archive`,
+        );
+        this.server.to(pin).emit('error', { code: 'session.archive_quiz_gone' });
+      }
+    }
     this.clearTimer(pin);
     this.cancelTimer(this.graceTimers, pin);
     this.cancelTimer(this.endWindowTimers, pin);
@@ -1412,4 +1424,9 @@ export function normalizeBaseUrl(raw: string): string {
   } catch {
     return '';
   }
+}
+
+/** Prisma's foreign-key violation (P2003), e.g. archiving a session whose quiz was deleted. */
+function isForeignKeyViolation(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && (err as { code?: string }).code === 'P2003';
 }

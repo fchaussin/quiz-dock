@@ -1,6 +1,13 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma, type Quiz, QuizStatus } from '@prisma/client';
+import { gameKeys } from '../game/game.keys';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
 import type { CreateQuizDto } from './dto/create-quiz.dto';
 import type { QuizFeedbackQueryDto } from './dto/quiz-feedback.dto';
 import type { TransitionQuizDto } from './dto/transition-quiz.dto';
@@ -17,7 +24,10 @@ const ALLOWED_TRANSITIONS: Record<QuizStatus, QuizStatus[]> = {
 
 @Injectable()
 export class QuizzesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
+  ) {}
 
   /** Quiz du animateur (banque privée), les plus récents d'abord. */
   list(ownerId: string): Promise<Quiz[]> {
@@ -340,7 +350,21 @@ export class QuizzesService {
 
   async remove(ownerId: string, id: string): Promise<void> {
     await this.findOwnedOrThrow(ownerId, id);
+    // A quiz being played cannot go: its session would have nothing to archive.
+    if (await this.hasLiveSession(ownerId, id)) {
+      throw new ConflictException('quiz.in_use');
+    }
     await this.prisma.quiz.delete({ where: { id } });
+  }
+
+  /** Whether one of the owner's live sessions (Redis index) plays this quiz. */
+  private async hasLiveSession(ownerId: string, quizId: string): Promise<boolean> {
+    const pins = await this.redis.smembers(gameKeys.hostGames(ownerId));
+    for (const pin of pins) {
+      const [state, gameQuiz] = await this.redis.hmget(gameKeys.game(pin), 'state', 'quizId');
+      if (gameQuiz === quizId && state && state !== 'ENDED') return true;
+    }
+    return false;
   }
 
   /** Applique une transition d'état validée (RG-02). */

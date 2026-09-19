@@ -1,6 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { type Quiz, QuizStatus } from '@prisma/client';
 import type { PrismaService } from '../prisma/prisma.service';
+import type { RedisService } from '../redis/redis.service';
 import { QuizzesService } from './quizzes.service';
 
 const OWNER = 'owner-1';
@@ -47,11 +48,15 @@ function makePrisma() {
 
 describe('QuizzesService', () => {
   let prisma: ReturnType<typeof makePrisma>;
+  const redis = { smembers: jest.fn(async () => []), hmget: jest.fn(async () => [null, null]) };
   let service: QuizzesService;
 
   beforeEach(() => {
     prisma = makePrisma();
-    service = new QuizzesService(prisma as unknown as PrismaService);
+    service = new QuizzesService(
+      prisma as unknown as PrismaService,
+      redis as unknown as RedisService,
+    );
   });
 
   describe('isolation par propriétaire', () => {

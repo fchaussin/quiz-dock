@@ -182,7 +182,7 @@ function SplitOptions({
                 ✓
               </span>
             ) : null}
-            {correctIds && picked(o.id) ? (
+            {!onPick && picked(o.id) ? (
               <span className="text-muted-foreground shrink-0 text-[0.8em]">
                 {t('reveal.yourPick')}
               </span>

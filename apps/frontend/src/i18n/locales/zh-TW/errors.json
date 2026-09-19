@@ -12,7 +12,8 @@
     "not_ready": "測驗必須處於「就緒」狀態才能開始會話（RG-02）。",
     "empty": "測驗沒有任何題目。",
     "requires_question": "測驗至少需要一道題目才能變為「就緒」（RG-02）。",
-    "transition_forbidden": "禁止的狀態轉換：{{from}} → {{target}}。"
+    "transition_forbidden": "禁止的狀態轉換：{{from}} → {{target}}。",
+    "in_use": "該測驗正在某個場次中進行：請先結束該場次。"
   },
   "session": {
     "not_found": "未找到會話或會話已結束。",
@@ -24,7 +25,8 @@
     "timer_not_adjustable": "僅在答題進行中才能調整計時器。",
     "snapshot_not_found": "未找到會話快照。",
     "capture_locked": "完整記錄僅可在會話開始前更改。",
-    "join_url_invalid": "加入位址無效（應為 http(s)://主機[:連接埠]）。"
+    "join_url_invalid": "加入位址無效（應為 http(s)://主機[:連接埠]）。",
+    "archive_quiz_gone": "測驗在場次進行中被刪除：場次已結束但未歸檔。"
   },
   "participant": {
     "not_found": "未找到玩家。"

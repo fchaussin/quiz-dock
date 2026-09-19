@@ -12,7 +12,8 @@
     "not_ready": "测验必须处于“就绪”状态才能开始会话（RG-02）。",
     "empty": "测验没有任何题目。",
     "requires_question": "测验至少需要一道题目才能变为“就绪”（RG-02）。",
-    "transition_forbidden": "禁止的状态转换：{{from}} → {{target}}。"
+    "transition_forbidden": "禁止的状态转换：{{from}} → {{target}}。",
+    "in_use": "该测验正在某个场次中进行：请先结束该场次。"
   },
   "session": {
     "not_found": "未找到会话或会话已结束。",
@@ -24,7 +25,8 @@
     "timer_not_adjustable": "仅在答题进行中才能调整计时器。",
     "snapshot_not_found": "未找到会话快照。",
     "capture_locked": "完整记录仅可在会话开始前更改。",
-    "join_url_invalid": "加入地址无效（应为 http(s)://主机[:端口]）。"
+    "join_url_invalid": "加入地址无效（应为 http(s)://主机[:端口]）。",
+    "archive_quiz_gone": "测验在场次进行中被删除：场次已结束但未归档。"
   },
   "participant": {
     "not_found": "未找到玩家。"
