@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-/** Candidate base URLs for the invitations (QR code, link) of a session. */
+/** Candidate addresses for the invitations (QR code, link) of a session. */
 export class JoinAddressesDto {
   @ApiProperty({
     description: 'APP_PUBLIC_URL when configured — the address of a real deployment.',
@@ -11,8 +11,15 @@ export class JoinAddressesDto {
 
   @ApiProperty({
     description:
-      'LAN addresses of this machine (scheme and port of the request), for local instances.',
+      'LAN IPv4 addresses of the machine (bare IPs; the browser adds its own scheme and port). From HOST_LAN_IPS when set, else detected.',
     type: [String],
   })
-  lan!: string[];
+  lanIps!: string[];
+
+  @ApiProperty({
+    description:
+      'How the LAN addresses were obtained: "configured" (HOST_LAN_IPS), "detected" (host interfaces), or "hidden" (the process only sees a container bridge — Docker Desktop, bridge network).',
+    enum: ['configured', 'detected', 'hidden'],
+  })
+  lanSource!: 'configured' | 'detected' | 'hidden';
 }

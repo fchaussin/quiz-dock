@@ -98,7 +98,11 @@
       "windows": "Windows : « ipconfig » dans une invite de commandes — l’adresse IPv4 de la carte active.",
       "linux": "Linux : « ip a » — l’adresse inet de l’interface active.",
       "sameNetwork": "Les téléphones doivent être sur le même Wi‑Fi / réseau que cet ordinateur, et son pare-feu doit laisser passer le port.",
-      "deployed": "Sur un serveur avec un nom de domaine, renseigne APP_PUBLIC_URL dans la configuration : elle est alors proposée en premier."
+      "deployed": "Sur un serveur avec un nom de domaine, renseigne APP_PUBLIC_URL dans la configuration : elle est alors proposée en premier.",
+      "publicConfigured": "Cette instance est configurée avec une adresse publique ({{url}}) : utilise-la, c’est celle que les participants atteignent de partout.",
+      "lanKnown": "Les adresses listées sont celles de cette machine sur le réseau local : choisis celle du réseau où sont les participants (Wi‑Fi, filaire).",
+      "lanHidden": "Cette instance tourne dans un conteneur qui ne voit pas le réseau de la machine (Docker Desktop, réseau bridge) : aucune adresse locale n’a pu être détectée. Saisis-la, ou renseigne HOST_LAN_IPS dans la configuration pour qu’elle soit listée ici.",
+      "https": "Cette page est servie en HTTPS : une adresse locale en http:// affichera un avertissement sur les téléphones — une adresse publique avec certificat est la voie propre."
     }
   },
   "screen": {

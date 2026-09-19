@@ -5,6 +5,7 @@
  * API REST du builder de quiz et des restitutions
  * OpenAPI spec version: 0.1.0
  */
+import type { JoinAddressesDtoLanSource } from './joinAddressesDtoLanSource';
 
 export interface JoinAddressesDto {
   /**
@@ -12,6 +13,8 @@ export interface JoinAddressesDto {
      * @nullable
      */
   publicUrl: string | null;
-  /** LAN addresses of this machine (scheme and port of the request), for local instances. */
-  lan: string[];
+  /** LAN IPv4 addresses of the machine (bare IPs; the browser adds its own scheme and port). From HOST_LAN_IPS when set, else detected. */
+  lanIps: string[];
+  /** How the LAN addresses were obtained: "configured" (HOST_LAN_IPS), "detected" (host interfaces), or "hidden" (the process only sees a container bridge — Docker Desktop, bridge network). */
+  lanSource: JoinAddressesDtoLanSource;
 }

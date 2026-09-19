@@ -23,6 +23,28 @@ infrastructure — for operators and integrators (not contributors).
 - Published images on Docker Hub: [`fchaussin/quizdock`](https://hub.docker.com/r/fchaussin/quizdock)
   (`:latest` app image · `:standalone` all-in-one).
 
+## Where participants connect (the invitation address)
+
+Participants' phones open the address on the QR code / join link. The host
+picks it in the console lobby (**Invitation address**); this table says what to
+expect in each setup and what to configure so the right address is offered.
+
+| Setup | What the console offers | Configure |
+| --- | --- | --- |
+| **Server with a domain** (reverse proxy, TLS) | The public address first | `APP_PUBLIC_URL=https://quiz.example.org` |
+| **Linux server on the LAN**, no domain (compose or standalone) | The machine's LAN IPs, detected (`network_mode: host` or the standalone image see the host's interfaces) | nothing — or `HOST_LAN_IPS` to pin one |
+| **Docker on Linux, bridge network** | Nothing detected (the container only sees `172.x`) | `HOST_LAN_IPS=192.168.1.20` |
+| **Docker Desktop (macOS / Windows)** | Nothing detected (the VM hides the host's interfaces) | `HOST_LAN_IPS=<your Mac/PC IP>` — the console explains where to find it |
+| **Dev stack** (`docker compose up`, Vite on :15173) | As above, with the port of the page you are on | `HOST_LAN_IPS` in `.env` |
+| **Console opened on `localhost`** | "This page" is useless for phones: the console opens the help by itself and pre-selects a LAN address when one is known | — |
+
+In every case the host can type any address (`Other address…`); it is kept on
+the session (console, projection and share link agree), frozen once the
+session starts, and remembered by the browser for the next one. Phones must be
+on the same network as the machine, and its firewall must let the port through.
+Over HTTPS, an `http://` LAN address triggers a warning on phones: a public
+address with a certificate is the clean way.
+
 ## Upgrading
 
 With the [CLI](cli.md): `./quizdock upgrade <tag>` does all of the below (backup,

@@ -98,7 +98,11 @@
       "windows": "Windows: «ipconfig» en un símbolo del sistema — la dirección IPv4 del adaptador activo.",
       "linux": "Linux: «ip a» — la dirección inet de la interfaz activa.",
       "sameNetwork": "Los teléfonos deben estar en la misma Wi‑Fi / red que este ordenador, y su cortafuegos debe dejar pasar el puerto.",
-      "deployed": "En un servidor con nombre de dominio, define APP_PUBLIC_URL en la configuración: se ofrecerá primero."
+      "deployed": "En un servidor con nombre de dominio, define APP_PUBLIC_URL en la configuración: se ofrecerá primero.",
+      "publicConfigured": "Esta instancia tiene una dirección pública configurada ({{url}}): úsala, es la que los participantes alcanzan desde cualquier sitio.",
+      "lanKnown": "Las direcciones listadas son las de esta máquina en la red local: elige la de la red donde están los participantes (Wi‑Fi, cable).",
+      "lanHidden": "Esta instancia corre en un contenedor que no ve la red de la máquina (Docker Desktop, red bridge): no se pudo detectar ninguna dirección local. Escríbela, o define HOST_LAN_IPS en la configuración para que aparezca aquí.",
+      "https": "Esta página se sirve por HTTPS: una dirección local en http:// mostrará un aviso en los teléfonos — una dirección pública con certificado es la vía limpia."
     }
   },
   "screen": {

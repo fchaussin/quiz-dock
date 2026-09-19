@@ -25,15 +25,20 @@ describe('JoinAddressPicker', () => {
       {
         method: 'GET',
         path: '/games/join-addresses',
-        body: { publicUrl: null, lan: ['http://192.168.1.103:15173'] },
+        body: { publicUrl: null, lanIps: ['192.168.1.103'], lanSource: 'detected' },
       },
     ]);
     const onChange = renderPicker(window.location.origin);
     // jsdom's origin is http://localhost → the LAN address is proposed automatically.
-    await waitFor(() => expect(onChange).toHaveBeenCalledWith('http://192.168.1.103:15173'));
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith(
+        `http://192.168.1.103${window.location.port ? `:${window.location.port}` : ''}`,
+      ),
+    );
     const select = (await screen.findByLabelText('Adresse pour rejoindre')) as HTMLSelectElement;
+    const port = window.location.port ? `:${window.location.port}` : '';
     expect([...select.options].map((o) => o.value)).toEqual([
-      'http://192.168.1.103:15173',
+      `http://192.168.1.103${port}`,
       window.location.origin,
       '__custom__',
     ]);

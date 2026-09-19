@@ -1,5 +1,4 @@
-import { Controller, Get, HttpCode, Param, Post, Req } from '@nestjs/common';
-import type { Request } from 'express';
+import { Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { networkInterfaces } from 'node:os';
 import { ApiBearerAuth, ApiNoContentResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { User } from '@prisma/client';
@@ -33,35 +32,37 @@ export class GameController {
 
   /**
    * Addresses the invitations may point at: `APP_PUBLIC_URL` when configured
-   * (a real deployment), then the machine's LAN IPv4 addresses (or `HOST_LAN_IPS`
-   * when the container cannot see the host's interfaces) with the scheme and
-   * port of this request. The client adds its own origin and a free field.
+   * (a real deployment), and the machine's LAN IPv4 addresses — `HOST_LAN_IPS`
+   * when set, else the host's interfaces. Bare IPs: the browser knows the
+   * scheme and port it reached the app through (a proxy or Vite rewrites the
+   * Host header, so this side cannot). `lanSource: hidden` tells the console
+   * the process only sees a container bridge (Docker Desktop, bridge network).
    */
   @Get('join-addresses')
   @ApiOkResponse({ type: JoinAddressesDto })
-  joinAddresses(@Req() req: Request): JoinAddressesDto {
+  joinAddresses(): JoinAddressesDto {
     const publicUrl = (process.env.APP_PUBLIC_URL ?? '').trim().replace(/\/+$/, '');
-    const proto =
-      (req.headers['x-forwarded-proto'] as string | undefined)?.split(',')[0] || req.protocol;
-    const hostHeader =
-      (req.headers['x-forwarded-host'] as string | undefined) || req.headers.host || '';
-    const port = hostHeader.includes(':') ? hostHeader.split(':').pop() : '';
-    const withPort = (ip: string) => `${proto}://${ip}${port ? `:${port}` : ''}`;
     const configured = (process.env.HOST_LAN_IPS ?? '')
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
-    const detected = configured.length
-      ? configured
-      : Object.values(networkInterfaces())
-          .flat()
-          .filter((i): i is NonNullable<typeof i> => Boolean(i))
-          // Docker's default bridge pools (172.17–172.31) are not a LAN anyone can reach.
-          .filter((i) => i.family === 'IPv4' && !i.internal && !DOCKER_BRIDGE.test(i.address))
-          .map((i) => i.address);
+    if (configured.length) {
+      return {
+        publicUrl: publicUrl || null,
+        lanIps: [...new Set(configured)],
+        lanSource: 'configured',
+      };
+    }
+    const detected = Object.values(networkInterfaces())
+      .flat()
+      .filter((i): i is NonNullable<typeof i> => Boolean(i))
+      // Docker's default bridge pools (172.17–172.31) are not a LAN anyone can reach.
+      .filter((i) => i.family === 'IPv4' && !i.internal && !DOCKER_BRIDGE.test(i.address))
+      .map((i) => i.address);
     return {
       publicUrl: publicUrl || null,
-      lan: [...new Set(detected)].map(withPort),
+      lanIps: [...new Set(detected)],
+      lanSource: detected.length ? 'detected' : 'hidden',
     };
   }
 

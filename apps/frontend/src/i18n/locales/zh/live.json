@@ -98,7 +98,11 @@
       "windows": "Windows：在命令提示符运行“ipconfig”——当前网卡的 IPv4 地址。",
       "linux": "Linux：“ip a”——当前接口的 inet 地址。",
       "sameNetwork": "手机必须与这台电脑在同一 Wi‑Fi / 网络，且电脑防火墙需放行该端口。",
-      "deployed": "在有域名的服务器上，请在配置中设置 APP_PUBLIC_URL：它会被优先推荐。"
+      "deployed": "在有域名的服务器上，请在配置中设置 APP_PUBLIC_URL：它会被优先推荐。",
+      "publicConfigured": "此实例已配置公开地址（{{url}}）：请使用它，参与者可从任何地方访问。",
+      "lanKnown": "列出的是这台电脑在局域网中的地址：选择参与者所在网络（Wi‑Fi、有线）的那个。",
+      "lanHidden": "此实例运行在看不到电脑网络的容器中（Docker Desktop、bridge 网络），无法检测本地地址。请手动输入，或在配置中设置 HOST_LAN_IPS 以便在此列出。",
+      "https": "本页通过 HTTPS 提供：http:// 的本地地址会在手机上显示警告——带证书的公开地址才是正解。"
     }
   },
   "screen": {

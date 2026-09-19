@@ -26,15 +26,21 @@ export function JoinAddressPicker({
   const { t } = useTranslation('live');
   const { data } = useGameControllerJoinAddresses();
   const origin = window.location.origin;
+  const port = window.location.port ? `:${window.location.port}` : '';
+  const secure = window.location.protocol === 'https:';
+  // LAN candidates take this page's scheme and port: that is how the app is reached.
+  const lan = useMemo(
+    () => (data?.data.lanIps ?? []).map((ip) => `${window.location.protocol}//${ip}${port}`),
+    [data, port],
+  );
   const candidates = useMemo(() => {
-    const list = [data?.data.publicUrl, ...(data?.data.lan ?? []), origin].filter(
-      (x): x is string => Boolean(x),
-    );
+    const list = [data?.data.publicUrl, ...lan, origin].filter((x): x is string => Boolean(x));
     return [...new Set(list)];
-  }, [data, origin]);
+  }, [data, lan, origin]);
+  const onLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|$)/.test(origin);
+  const lanSource = data?.data.lanSource;
   const [custom, setCustom] = useState('');
   const [help, setHelp] = useState(false);
-  const port = window.location.port ? `:${window.location.port}` : '';
   const isCustom = !candidates.includes(current);
 
   // First time on this session: apply the remembered choice, else the best candidate
@@ -49,11 +55,10 @@ export function JoinAddressPicker({
     } catch {
       /* storage unavailable */
     }
-    const localhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:|$)/.test(origin);
     const preferred =
-      remembered ?? data.data.publicUrl ?? (localhost ? data.data.lan[0] : undefined) ?? null;
+      remembered ?? data.data.publicUrl ?? (onLocalhost ? lan[0] : undefined) ?? null;
     if (preferred && preferred !== current) onChange(preferred);
-  }, [data, initialised, current, origin, onChange]);
+  }, [data, initialised, current, onLocalhost, lan, onChange]);
 
   const choose = (baseUrl: string) => onChange(baseUrl);
   // Remember what the session settled on (normalised by the server) for the next one.
@@ -123,22 +128,37 @@ export function JoinAddressPicker({
           <CircleHelp className="size-4" />
         </Button>
       </div>
-      {help ? (
-        // Why the address matters and where to find it: the one thing that goes wrong
-        // with a local instance is inviting phones to "localhost".
+      {help || (onLocalhost && lanSource === 'hidden' && !data?.data.publicUrl) ? (
+        // Why the address matters and where to find it — worded for the situation
+        // this instance runs in (the one thing that goes wrong locally is inviting
+        // phones to "localhost"). Opens by itself when that is exactly the case.
         <div className="bg-muted/50 text-muted-foreground flex flex-col gap-2 rounded-md border px-3 py-2 text-xs leading-relaxed">
           <p>{t('control.joinAddressHelp.why')}</p>
-          <p>
-            <strong className="text-foreground">{t('control.joinAddressHelp.whereTitle')}</strong>{' '}
-            {t('control.joinAddressHelp.where', { port })}
-          </p>
-          <ul className="list-disc pl-4">
-            <li>{t('control.joinAddressHelp.mac')}</li>
-            <li>{t('control.joinAddressHelp.windows')}</li>
-            <li>{t('control.joinAddressHelp.linux')}</li>
-          </ul>
+          {data?.data.publicUrl ? (
+            <p>{t('control.joinAddressHelp.publicConfigured', { url: data.data.publicUrl })}</p>
+          ) : null}
+          {lanSource === 'detected' || lanSource === 'configured' ? (
+            <p>{t('control.joinAddressHelp.lanKnown')}</p>
+          ) : null}
+          {lanSource === 'hidden' ? (
+            <>
+              <p>{t('control.joinAddressHelp.lanHidden')}</p>
+              <p>
+                <strong className="text-foreground">
+                  {t('control.joinAddressHelp.whereTitle')}
+                </strong>{' '}
+                {t('control.joinAddressHelp.where', { port })}
+              </p>
+              <ul className="list-disc pl-4">
+                <li>{t('control.joinAddressHelp.mac')}</li>
+                <li>{t('control.joinAddressHelp.windows')}</li>
+                <li>{t('control.joinAddressHelp.linux')}</li>
+              </ul>
+            </>
+          ) : null}
           <p>{t('control.joinAddressHelp.sameNetwork')}</p>
-          <p>{t('control.joinAddressHelp.deployed')}</p>
+          {secure ? <p>{t('control.joinAddressHelp.https')}</p> : null}
+          {!data?.data.publicUrl ? <p>{t('control.joinAddressHelp.deployed')}</p> : null}
         </div>
       ) : null}
     </div>
