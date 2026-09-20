@@ -86,7 +86,8 @@ your phone to play.
 - 📤 **CSV export** — export overall results and per-player answer sheets.
 - 📦 **Quiz import / export** — a quiz travels as a [portable bundle](docs/quiz-bundle.md) (`quiz.json` + `media/`, zipped): back it up, move it between instances, share it — from the app or the operator CLI.
 - 🌍 **Multilingual** — interface in English, French, Spanish, Simplified Chinese and Traditional Chinese (one language per instance); a [glossary](apps/frontend/src/i18n/GLOSSARY.md) keeps the wording consistent.
-- 🏠 **Self-hosted & private** — runs on your own infra with Docker; no SaaS, no tracking, no ads; players need no account, hosts can plug in any OpenID Connect provider.
+- 🏠 **Self-hosted & private** — runs on your own infra with Docker; no SaaS, no tracking, no ads; players never need an account.
+- 🔑 **Two ways to let people host** — *local mode* (`AUTH_MODE=none`, the default): zero configuration, a host signs in with just a name and takes the single **host seat**; made for a classroom, a meeting room or a trusted network. *OIDC mode* (`AUTH_MODE=oidc`): hosts sign in through your identity provider (Keycloak, Authentik, Entra ID, Google… any OpenID Connect provider); as many hosts as you like, each with their own quizzes, and the `host` role granted from the IdP — for an organisation. Same image either way; see [configuration → auth](docs/self-hosting/configuration.md#3-oidc-authentication).
 - 🎨 **White-label** — rebrand name, logo and CSS via env + a mounted folder, no rebuild.
 
 ## 📸 Screenshots
@@ -130,7 +131,9 @@ PostgreSQL and Redis run alongside, and a one-shot `migrate` service applies mig
 
 ### Easiest — one container (great for a first try / Docker Desktop)
 
-App **and** database in a single image — nothing else to install:
+App **and** database in a single image — nothing else to install. This is a
+_deployment_ shortcut: it runs in local mode by default and takes the same `AUTH_MODE`
+switch as the multi-service setup.
 
 ```bash
 docker run -p 18080:3000 -v quizdock:/data fchaussin/quizdock:standalone
