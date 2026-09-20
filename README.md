@@ -56,6 +56,17 @@ the results never leave your servers.
 
 🌐 **Website:** https://quizdock.github.io
 
+## 🎮 Try it online
+
+**https://quizdock-standalone.onrender.com** — a public instance in demo mode: enter a
+name, take the host seat and present one of the sample quizzes; open the join link on
+your phone to play.
+
+- It sleeps when idle: the **first load can take about a minute**.
+- Shared with strangers: **everything is wiped every hour**, the host seat lasts
+  **5 minutes** at a time (renewable), media uploads are off. Don't put anything you
+  care about in it.
+
 ## ✨ Features
 
 - ⚡ **Real-time multiplayer** — Socket.IO engine with authoritative server timing; players join by 6-digit PIN or QR code.
