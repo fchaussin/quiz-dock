@@ -32,6 +32,10 @@ speed and correctness — feed a live leaderboard projected on the big screen. E
 runs on **your** infrastructure as a single Docker image; the questions, the answers and
 the results never leave your servers.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/quizdock/quiz-dock/main/docs/screenshots/demo.gif" width="800" alt="A session on the big screen: players join with the PIN, a question with its timer, the reveal with the leaderboard, the podium" />
+</p>
+
 ## 🎮 Try it online
 
 **https://quizdock-standalone.onrender.com** — a public instance in demo mode: enter a
