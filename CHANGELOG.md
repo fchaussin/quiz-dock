@@ -4,6 +4,71 @@ All notable changes to QuizDock are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com); versions follow
 [Semantic Versioning](https://semver.org). Generated from conventional commits.
 
+## [0.5.0] - 2026-09-20
+
+### Bug Fixes
+
+- The admin CLI boots again — its context imports RedisModule *(cli)*
+- Cap a seat taken before the guard at startup; local-mode hint no longer says demo *(demo)*
+- A server install keeps the proxy-resolved origin as invitation address; remembered and LAN candidates only apply on localhost *(control)*
+- Option removal confirmation checks the text only *(editor)*
+- A quiz in play cannot be deleted; a session whose quiz vanished still ends; polls show no verdict *(live)*
+- Screens attaching at a reveal get the question; option tiles pair up (container query on the wrapper); projection timer on one line; Resume vs Back to live *(live)*
+- Help state declared before use *(control)*
+- Sessions survive a server restart — timers re-armed from Redis, sockets re-attach on reconnect *(live)*
+- One avatar everywhere — the server's seed once the game runs, podium rows keep it on reconnect *(live)*
+- Accepted answers joined with a translated separator, not a hard-coded French 'ou' *(live)*
+- Slides stretch to their container, halo is the design default *(live)*
+- Resolve zh-TW straight to en, never through zh *(i18n)*
+- Never provision an anonymous local identity, serve /config.js publicly *(auth)*
+- Keep the OIDC session alive and log out at the provider *(auth)*
+
+### Documentation
+
+- Fix the Keycloak realm link; index and README mention the CLI quiz export / import
+- Local mode and demo mode are two different things *(demo)*
+- Phone views composed into landscape images — one format for every shot *(screenshots)*
+- Editor after the status-bar rework *(screenshots)*
+- Features, screenshots in journey order, scoring and live-session notes, config knobs
+- Credit the zh-TW contributor in the glossary *(i18n)*
+- Glossary — every interface term in the five locales, and the wording decisions *(i18n)*
+
+### Features
+
+- Quiz:list, quiz:export and quiz:import on the same services as the API (#20) *(cli)*
+- The manifest carries the store fields (slug, revision, tags, license…) *(bundle)*
+- The SPA learns of the demo from GET /auth/config, not config.js *(demo)*
+- Public instance guards — 5-minute host seat, no uploads, hourly reset *(demo)*
+- Running sessions of the quiz replace the single-session bar; options are removed with a trash icon and a confirmation *(editor)*
+- Invitation address anticipates the runtime — bare LAN IPs composed with the page's scheme/port, environment-aware help, setups table in the docs *(control)*
+- Help on the invitation address — why it matters and where to find the machine's IP *(control)*
+- The host picks the invitation address (public URL, LAN IP, this page, or any address) *(live)*
+- Show the project version (release tag) instead of the wire contract's *(frontend)*
+- The reveal shows the answers with the participant's own pick (or typed / ordered answer) *(player)*
+- URLs read like the interface; Tab cycles the console views; join fields autofocus *(routes)*
+- Extend the host seat for a chosen duration, or release it, from the user menu *(auth)*
+- Console / Projection / Participant tabs replace the breadcrumb *(control)*
+- Ordering answers by drag and drop (pointer, touch, keyboard), arrows kept as fallback *(player)*
+- Per-type scoring variants and a fixed points mode *(scoring)*
+- Host seat countdown and renewal in the topbar *(auth)*
+- Form edits follow the editor in a running session, substance stays frozen *(live)*
+- Host navigates back over played steps (question reveals, slides) and resumes *(live)*
+- Answer rules shown with the question on the projection and the phone *(live)*
+- Text outline on by default for slides and questions
+- Import a bundle from the dashboard, export from the editor *(frontend)*
+- Portable bundle export / import (quiz.json + media/, zipped) *(quizzes)*
+- Qd command inside both images *(cli)*
+- Quizdock operator script (init, up, backup, restore, upgrade) + guide *(cli)*
+- Admin CLI shipped in the image (doctor, seat, users, samples, purge) *(cli)*
+- Make the local host seat an intentional, expiring claim *(auth)*
+- Resolve the JWKS through OIDC discovery and stick to the standards *(auth)*
+- Enforce the host role and add a zero-config local host seat *(auth)*
+
+### Contributors
+
+- Francois Chaussin
+- fchaussin
+
 ## [0.4.2] - 2026-09-16
 
 ### Bug Fixes
